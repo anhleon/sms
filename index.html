@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>OTP Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: sans-serif; background: #ffffff; color: #000; padding: 10px; max-width: 480px; margin: auto; }
+    h2 { font-size: 18px; margin-bottom: 10px; color: #000; }
+    textarea, input[type="text"] {
+      width: 100%; padding: 10px; margin: 5px 0;
+      font-size: 15px; background: #fff; color: #000;
+      border: 1px solid #ccc; border-radius: 6px;
+    }
+    textarea { height: 70px; resize: none; }
+    button {
+      width: 100%; padding: 10px; margin: 5px 0;
+      font-size: 16px; background: #007bff; color: #fff;
+      border: none; border-radius: 6px; cursor: pointer;
+    }
+    .row { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
+    .row input { flex: 1; }
+    .copy-btn { width: 110px; font-size: 16px; padding: 12px; background: #6c757d; }
+    .otp-row { display: flex; gap: 10px; margin-top: 10px; }
+    .otp-label { font-weight: bold; margin-top: 10px; }
+    .otp {
+      flex: 1; font-size: 20px; text-align: center;
+      font-weight: bold; padding: 12px;
+      background: #fffbe6; color: #000;
+      border: 1px solid #aaa; border-radius: 6px;
+    }
+    .popup {
+      position: fixed; bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: #333; color: #fff;
+      padding: 10px 20px; border-radius: 10px;
+      display: none; z-index: 1000;
+    }
+    .phone-actions { display: flex; justify-content: space-between; gap: 10px; margin: 10px 0; }
+    .phone-actions button { flex: 1; }
+    .price-badge{
+      display:inline-block; padding:6px 10px; background:#ffe9a8;
+      border:1px solid #d8b556; border-radius:6px; font-weight:600; white-space:nowrap;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Nhận OTP tự động</h2>
+
+<textarea id="apiLink" placeholder="Dán link API getNumber tại đây"></textarea>
+<div class="phone-actions">
+  <button onclick="getNumber()">Lấy số <span id="loading" style="display:none;">⏳</span></button>
+  <button onclick="cancelOrder()" style="display:none;" id="cancelBtn">Hủy số</button>
+</div>
+
+<div id="phoneSection" style="display:none;">
+  <div class="row" style="align-items:stretch;">
+    <input id="number" readonly />
+    <span id="priceBadge" class="price-badge" style="display:none;">Giá: —</span>
+    <button class="copy-btn" onclick="copyText('number')">Sao chép</button>
+  </div>
+</div>
+
+<div id="otpSection" style="display:none;">
+  <div class="otp-label">OTP 1: <img id="otp1-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:16px; vertical-align:middle; display:none;" /></div>
+  <div class="otp-row"><div id="otp1" class="otp">______</div></div>
+
+  <div class="otp-label">OTP 2: <img id="otp2-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:16px; vertical-align:middle; display:none;" /></div>
+  <div class="otp-row"><div id="otp2" class="otp">______</div></div>
+
+  <div class="otp-label">OTP 3: <img id="otp3-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:16px; vertical-align:middle; display:none;" /></div>
+  <div class="otp-row"><div id="otp3" class="otp">______</div></div>
+
+  <div class="otp-label">OTP 4: <img id="otp4-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:16px; vertical-align:middle; display:none;" /></div>
+  <div class="otp-row"><div id="otp4" class="otp">______</div></div>
+
+  <div class="otp-label">OTP 5: <img id="otp5-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:16px; vertical-align:middle; display:none;" /></div>
+  <div class="otp-row"><div id="otp5" class="otp">______</div></div>
+
+  <div id="status" style="margin-top: 10px; font-size: 14px;">Đang chờ mã...</div>
+</div>
+
+<div id="popup" class="popup"></div>
+
+<script>
+/* 🔴 SỬA DUY NHẤT CHỖ NÀY */
+const PROXY_URL = "https://sms-proxy.sms-proxy.workers.dev";
+/* ======================= */
+
+let currentId = "", baseURL = "", apiKey = "";
+let otpCodes = ["","","","",""];
+let checkInterval = null;
+let price = "";
+
+function showPopup(msg) {
+  const popup = document.getElementById("popup");
+  popup.innerText = msg;
+  popup.style.display = "block";
+  setTimeout(() => popup.style.display = "none", 2000);
+}
+
+function copyText(id) {
+  const input = document.getElementById(id);
+  input.select();
+  document.execCommand("copy");
+  showPopup("Đã sao chép số!");
+}
+
+async function getNumber() {
+  document.getElementById("loading").style.display = "inline";
+  const link = document.getElementById("apiLink").value.trim();
+  if (!link.includes("getNumber")) {
+    document.getElementById("loading").style.display = "none";
+    return alert("Link không hợp lệ.");
+  }
+
+  resetAll();
+  const parsed = new URL(link);
+  baseURL = parsed.origin + parsed.pathname;
+  apiKey = parsed.searchParams.get("api_key");
+
+  try {
+    const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(link));
+    const text = await res.text();
+
+    let id = "", number = "";
+    price = "";
+    const raw = text.trim();
+
+    if (raw.startsWith("ACCESS_NUMBER") || raw.startsWith("ACCESS_READY")) {
+      const parts = raw.split(":");
+      id = parts[1] || "";
+      number = parts[2] || "";
+      if (parts[3]) price = parts[3];
+    }
+
+    if (id && number) {
+      currentId = id;
+      document.getElementById("number").value = number;
+      document.getElementById("phoneSection").style.display = "block";
+      document.getElementById("otpSection").style.display = "block";
+      document.getElementById("cancelBtn").style.display = "inline-block";
+      document.getElementById("otp1-loading").style.display = "inline";
+
+      if (price) {
+        document.getElementById("priceBadge").textContent = "Giá: " + price;
+        document.getElementById("priceBadge").style.display = "inline-block";
+      }
+
+      startOTPCheck();
+    } else {
+      alert("Không lấy được số.\n" + text);
+    }
+  } catch (e) {
+    alert("Lỗi: " + e.message);
+  }
+
+  document.getElementById("loading").style.display = "none";
+}
+
+async function checkOTP() {
+  if (!currentId) return;
+  const url = `${baseURL}?api_key=${apiKey}&action=getStatus&id=${currentId}&nocache=${Math.random()}`;
+
+  const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
+  const text = await res.text();
+
+  if (text.startsWith("STATUS_OK")) {
+    const code = text.split(":")[1];
+    let idx = otpCodes.findIndex(v => !v);
+    if (idx === -1) return;
+
+    if (idx > 0 && code === otpCodes[idx - 1]) {
+      await requestNextOTP(idx + 1);
+      return;
+    }
+
+    otpCodes[idx] = code;
+    document.getElementById("otp" + (idx + 1)).innerText = code;
+    document.getElementById("otp" + (idx + 1) + "-loading").style.display = "none";
+
+    if (idx < 4) {
+      document.getElementById("otp" + (idx + 2) + "-loading").style.display = "inline";
+      await requestNextOTP(idx + 2);
+    }
+  }
+}
+
+async function requestNextOTP(n) {
+  const url = `${baseURL}?api_key=${apiKey}&action=setStatus&id=${currentId}&status=3`;
+  await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
+}
+
+function startOTPCheck() {
+  clearInterval(checkInterval);
+  checkInterval = setInterval(checkOTP, 5000);
+}
+
+async function cancelOrder() {
+  const url = `${baseURL}?api_key=${apiKey}&action=setStatus&id=${currentId}&status=8`;
+  await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
+  showPopup("Đã hủy số!");
+  resetAll();
+}
+
+function resetAll() {
+  clearInterval(checkInterval);
+  otpCodes = ["","","","",""];
+  currentId = ""; baseURL = ""; apiKey = ""; price = "";
+  document.getElementById("number").value = "";
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById("otp" + i).innerText = "______";
+    document.getElementById("otp" + i + "-loading").style.display = "none";
+  }
+  document.getElementById("priceBadge").style.display = "none";
+  document.getElementById("phoneSection").style.display = "none";
+  document.getElementById("otpSection").style.display = "none";
+  document.getElementById("cancelBtn").style.display = "none";
+}
+</script>
+
+</body>
+</html>
