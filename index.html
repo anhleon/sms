@@ -7,14 +7,14 @@
   <style>
     body { font-family: sans-serif; background: #ffffff; color: #000; padding: 10px; max-width: 480px; margin: auto; }
     
+    /* Hộp chứa API và các nút chức năng nhỏ */
     .api-container { position: relative; margin-bottom: 5px; margin-top: 0; }
     textarea {
-      width: 100%; padding: 10px; padding-bottom: 35px; margin: 0;
-      font-size: 15px; font-family: monospace; background: #fff; color: #000;
+      width: 100%; padding: 10px; padding-bottom: 30px; margin: 0;
+      font-size: 15px; background: #fff; color: #000;
       border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
-      height: 90px; resize: none; display: block;
+      height: 75px; resize: none; display: block;
     }
-    
     .api-actions { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 5px; }
     .api-actions button {
       width: auto; padding: 3px 8px; margin: 0; font-size: 11px;
@@ -23,34 +23,48 @@
     }
     .api-actions button:hover { background: #d0d0d0; }
 
-    .api-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; margin-bottom: 5px; min-height: 20px; }
-    .param-tag { font-size: 12px; padding: 3px 8px; background: #ff4d4d; color: #fff; border-radius: 4px; font-weight: bold; }
-
     button {
       width: 100%; padding: 10px; margin: 5px 0;
       font-size: 16px; background: #007bff; color: #fff;
       border: none; border-radius: 6px; cursor: pointer;
     }
     
+    /* Sửa hàng số điện thoại và nút sao chép cân đối tuyệt đối */
     .row { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
     .row input {
-      flex: 1; height: 42px; padding: 0 10px; font-size: 16px;
-      box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px;
+      flex: 1;
+      height: 42px;
+      padding: 0 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
     .copy-btn {
-      width: 110px; height: 42px; padding: 0; margin: 0; font-size: 16px;
-      background: #6c757d; display: flex; align-items: center; justify-content: center;
+      width: 110px;
+      height: 42px;
+      padding: 0;
+      margin: 0;
+      font-size: 16px;
+      background: #6c757d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .otp-row { display: flex; gap: 10px; margin-top: 10px; }
     .otp-label { font-weight: bold; margin-top: 10px; }
     .otp {
-      flex: 1; font-size: 20px; text-align: center; font-weight: bold; padding: 12px;
-      background: #fffbe6; color: #000; border: 1px solid #aaa; border-radius: 6px;
+      flex: 1; font-size: 20px; text-align: center;
+      font-weight: bold; padding: 12px;
+      background: #fffbe6; color: #000;
+      border: 1px solid #aaa; border-radius: 6px;
     }
     .popup {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      background: #333; color: #fff; padding: 10px 20px; border-radius: 10px;
+      position: fixed; bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: #333; color: #fff;
+      padding: 10px 20px; border-radius: 10px;
       display: none; z-index: 1000;
     }
     .phone-actions { display: flex; justify-content: space-between; gap: 10px; margin: 10px 0; }
@@ -64,14 +78,12 @@
 <body>
 
 <div class="api-container">
-  <textarea id="apiLink" placeholder="Dán link API getNumber tại đây" oninput="cleanAndParse()"></textarea>
+  <textarea id="apiLink" placeholder="Dán link API getNumber tại đây"></textarea>
   <div class="api-actions">
     <button onclick="pasteAPI()">Dán</button>
     <button onclick="clearAPI()">Xóa</button>
   </div>
 </div>
-
-<div id="apiTags" class="api-tags"></div>
 
 <div class="phone-actions">
   <button onclick="getNumber()">Lấy số <span id="loading" style="display:none;">⏳</span></button>
@@ -126,55 +138,11 @@ let otpCodes = ["","","","","","","",""];
 let checkInterval = null;
 let price = "";
 
-// Lưu lại domain gốc khi người dùng dán link vào lần đầu
-let savedBaseURL = "https://hero-sms.com/stubs/handler_api.php"; 
-
-function cleanAndParse() {
-  let textarea = document.getElementById("apiLink");
-  let val = textarea.value.trim();
-  
-  if (!val) {
-    document.getElementById("apiTags").innerHTML = "";
-    return;
-  }
-
-  // Nếu người dùng dán link đầy đủ có http/https
-  if (val.startsWith("http://") || val.startsWith("https://")) {
-    try {
-      const parsed = new URL(val);
-      savedBaseURL = parsed.origin + parsed.pathname; // Lưu lại: https://hero-sms.com/stubs/handler_api.php
-      
-      // Cắt bỏ phần đầu, chỉ giữ lại chuỗi tham số bắt đầu từ api_key hoặc service...
-      let searchStr = parsed.search;
-      if (searchStr.startsWith("?")) {
-        searchStr = searchStr.substring(1);
-      }
-      textarea.value = searchStr;
-      val = searchStr;
-    } catch(e) {}
-  }
-
-  // Hiển thị tag thông số nhanh phía dưới cho trực quan
-  const tagsContainer = document.getElementById("apiTags");
-  tagsContainer.innerHTML = "";
-  const keys = ["country", "service", "operator", "id"];
-  keys.forEach(key => {
-    const regex = new RegExp(`(?:^|&)${key}=([^&]+)`, "i");
-    const match = val.match(regex);
-    if (match) {
-      const span = document.createElement("span");
-      span.className = "param-tag";
-      span.innerText = `${key}: ${decodeURIComponent(match[1])}`;
-      tagsContainer.appendChild(span);
-    }
-  });
-}
-
+// Hàm bổ sung cho nút Dán và Xóa API
 async function pasteAPI() {
   try {
     const text = await navigator.clipboard.readText();
     document.getElementById("apiLink").value = text;
-    cleanAndParse();
   } catch (err) {
     showPopup("Không thể truy cập bộ nhớ tạm!");
   }
@@ -182,7 +150,6 @@ async function pasteAPI() {
 
 function clearAPI() {
   document.getElementById("apiLink").value = "";
-  cleanAndParse();
 }
 
 function showPopup(msg) {
@@ -201,27 +168,21 @@ function copyText(id) {
 
 async function getNumber() {
   document.getElementById("loading").style.display = "inline";
-  const currentParams = document.getElementById("apiLink").value.trim();
-  
-  if (!currentParams) {
+  const link = document.getElementById("apiLink").value.trim();
+  if (!link.includes("getNumber")) {
     document.getElementById("loading").style.display = "none";
-    return alert("Vui lòng nhập thông số API.");
+    return alert("Link không hợp lệ.");
   }
 
   resetAll();
   clearInterval(checkInterval);
   otpCodes = ["","","","","","","",""];
-
-  // Tự động lắp ráp lại link hoàn chỉnh để gửi request
-  baseURL = savedBaseURL;
-  const fullLink = baseURL + "?" + currentParams;
-
-  // Lấy api_key ra để dùng cho các bước getStatus sau đó
-  const matchKey = currentParams.match(/(?:^|&)api_key=([^&]+)/i);
-  apiKey = matchKey ? matchKey[1] : "";
+  const parsed = new URL(link);
+  baseURL = parsed.origin + parsed.pathname;
+  apiKey = parsed.searchParams.get("api_key");
 
   try {
-    const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(fullLink));
+    const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(link));
     const text = await res.text();
 
     let id = "", number = "";
@@ -307,14 +268,13 @@ async function cancelOrder() {
 function resetAll() {
   clearInterval(checkInterval);
   otpCodes = ["","","","","","","",""];
-  currentId = ""; price = "";
+  currentId = ""; baseURL = ""; apiKey = ""; price = "";
   document.getElementById("number").value = "";
   for (let i = 1; i <= 8; i++) {
     document.getElementById("otp" + i).innerText = "______";
     document.getElementById("otp" + i + "-loading").style.display = "none";
   }
   document.getElementById("priceBadge").style.display = "none";
-  document.getElementById("phoneSection").style.none = "none";
   document.getElementById("phoneSection").style.display = "none";
   document.getElementById("otpSection").style.display = "none";
   document.getElementById("cancelBtn").style.display = "none";
