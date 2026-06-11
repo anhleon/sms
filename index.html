@@ -7,41 +7,24 @@
   <style>
     body { font-family: sans-serif; background: #ffffff; color: #000; padding: 10px; max-width: 480px; margin: auto; }
     
-    /* Hộp chứa API cải tiến để highlight thông số */
     .api-container { position: relative; margin-bottom: 5px; margin-top: 0; }
-    
-    /* Khung giả lập để tạo màu chữ phía sau */
-    .backdrop {
-      position: absolute; top: 0; left: 0; width: 100%; height: 90px;
-      padding: 10px; font-size: 15px; font-family: monospace;
-      border: 1px solid transparent; box-sizing: border-box;
-      white-space: pre-wrap; word-wrap: break-word;
-      color: transparent; overflow: hidden; pointer-events: none; z-index: 1;
-    }
-    /* Màu sắc nổi bật cho các thông số cần sửa */
-    .highlight {
-      background-color: #ffcccb; 
-      color: #ff0000; 
-      font-weight: bold;
-      padding: 0 2px;
-      border-radius: 3px;
-    }
-
     textarea {
       width: 100%; padding: 10px; padding-bottom: 35px; margin: 0;
-      font-size: 15px; font-family: monospace; background: transparent; color: #000;
+      font-size: 15px; font-family: monospace; background: #fff; color: #000;
       border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
       height: 90px; resize: none; display: block;
-      position: relative; z-index: 2; caret-color: #000;
     }
     
-    .api-actions { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 5px; z-index: 3; }
+    .api-actions { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 5px; }
     .api-actions button {
       width: auto; padding: 3px 8px; margin: 0; font-size: 11px;
       background: #e0e0e0; color: #333; border: 1px solid #ccc;
       border-radius: 4px; cursor: pointer;
     }
     .api-actions button:hover { background: #d0d0d0; }
+
+    .api-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; margin-bottom: 5px; min-height: 20px; }
+    .param-tag { font-size: 12px; padding: 3px 8px; background: #ff4d4d; color: #fff; border-radius: 4px; font-weight: bold; }
 
     button {
       width: 100%; padding: 10px; margin: 5px 0;
@@ -81,13 +64,14 @@
 <body>
 
 <div class="api-container">
-  <div id="backdrop" class="backdrop"></div>
-  <textarea id="apiLink" placeholder="Dán link API getNumber tại đây" oninput="handleInput()"></textarea>
+  <textarea id="apiLink" placeholder="Dán link API getNumber tại đây" oninput="cleanAndParse()"></textarea>
   <div class="api-actions">
     <button onclick="pasteAPI()">Dán</button>
     <button onclick="clearAPI()">Xóa</button>
   </div>
 </div>
+
+<div id="apiTags" class="api-tags"></div>
 
 <div class="phone-actions">
   <button onclick="getNumber()">Lấy số <span id="loading" style="display:none;">⏳</span></button>
@@ -142,32 +126,55 @@ let otpCodes = ["","","","","","","",""];
 let checkInterval = null;
 let price = "";
 
-// Hàm tự động tô màu các thông số quan trọng
-function applyHighlights(text) {
-  // Tìm các từ khóa country, service, operator, id kèm theo dấu bằng và giá trị của nó
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/(country=[^&]+|service=[^&]+|operator=[^&]+|id=[^&]+)/gi, '<span class="highlight">$1</span>');
-}
+// Lưu lại domain gốc khi người dùng dán link vào lần đầu
+let savedBaseURL = "https://hero-sms.com/stubs/handler_api.php"; 
 
-function handleInput() {
-  const textarea = document.getElementById("apiLink");
-  const backdrop = document.getElementById("backdrop");
-  backdrop.innerHTML = applyHighlights(textarea.value) + "\n";
-  backdrop.scrollTop = textarea.scrollTop;
-}
+function cleanAndParse() {
+  let textarea = document.getElementById("apiLink");
+  let val = textarea.value.trim();
+  
+  if (!val) {
+    document.getElementById("apiTags").innerHTML = "";
+    return;
+  }
 
-// Đồng bộ cuộn màn hình giữa 2 lớp
-document.getElementById("apiLink").addEventListener("scroll", function() {
-  document.getElementById("backdrop").scrollTop = this.scrollTop;
-});
+  // Nếu người dùng dán link đầy đủ có http/https
+  if (val.startsWith("http://") || val.startsWith("https://")) {
+    try {
+      const parsed = new URL(val);
+      savedBaseURL = parsed.origin + parsed.pathname; // Lưu lại: https://hero-sms.com/stubs/handler_api.php
+      
+      // Cắt bỏ phần đầu, chỉ giữ lại chuỗi tham số bắt đầu từ api_key hoặc service...
+      let searchStr = parsed.search;
+      if (searchStr.startsWith("?")) {
+        searchStr = searchStr.substring(1);
+      }
+      textarea.value = searchStr;
+      val = searchStr;
+    } catch(e) {}
+  }
+
+  // Hiển thị tag thông số nhanh phía dưới cho trực quan
+  const tagsContainer = document.getElementById("apiTags");
+  tagsContainer.innerHTML = "";
+  const keys = ["country", "service", "operator", "id"];
+  keys.forEach(key => {
+    const regex = new RegExp(`(?:^|&)${key}=([^&]+)`, "i");
+    const match = val.match(regex);
+    if (match) {
+      const span = document.createElement("span");
+      span.className = "param-tag";
+      span.innerText = `${key}: ${decodeURIComponent(match[1])}`;
+      tagsContainer.appendChild(span);
+    }
+  });
+}
 
 async function pasteAPI() {
   try {
     const text = await navigator.clipboard.readText();
     document.getElementById("apiLink").value = text;
-    handleInput();
+    cleanAndParse();
   } catch (err) {
     showPopup("Không thể truy cập bộ nhớ tạm!");
   }
@@ -175,7 +182,7 @@ async function pasteAPI() {
 
 function clearAPI() {
   document.getElementById("apiLink").value = "";
-  handleInput();
+  cleanAndParse();
 }
 
 function showPopup(msg) {
@@ -194,21 +201,27 @@ function copyText(id) {
 
 async function getNumber() {
   document.getElementById("loading").style.display = "inline";
-  const link = document.getElementById("apiLink").value.trim();
-  if (!link.includes("getNumber")) {
+  const currentParams = document.getElementById("apiLink").value.trim();
+  
+  if (!currentParams) {
     document.getElementById("loading").style.display = "none";
-    return alert("Link không hợp lệ.");
+    return alert("Vui lòng nhập thông số API.");
   }
 
   resetAll();
   clearInterval(checkInterval);
   otpCodes = ["","","","","","","",""];
-  const parsed = new URL(link);
-  baseURL = parsed.origin + parsed.pathname;
-  apiKey = parsed.searchParams.get("api_key");
+
+  // Tự động lắp ráp lại link hoàn chỉnh để gửi request
+  baseURL = savedBaseURL;
+  const fullLink = baseURL + "?" + currentParams;
+
+  // Lấy api_key ra để dùng cho các bước getStatus sau đó
+  const matchKey = currentParams.match(/(?:^|&)api_key=([^&]+)/i);
+  apiKey = matchKey ? matchKey[1] : "";
 
   try {
-    const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(link));
+    const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(fullLink));
     const text = await res.text();
 
     let id = "", number = "";
@@ -294,13 +307,14 @@ async function cancelOrder() {
 function resetAll() {
   clearInterval(checkInterval);
   otpCodes = ["","","","","","","",""];
-  currentId = ""; baseURL = ""; apiKey = ""; price = "";
+  currentId = ""; price = "";
   document.getElementById("number").value = "";
   for (let i = 1; i <= 8; i++) {
     document.getElementById("otp" + i).innerText = "______";
     document.getElementById("otp" + i + "-loading").style.display = "none";
   }
   document.getElementById("priceBadge").style.display = "none";
+  document.getElementById("phoneSection").style.none = "none";
   document.getElementById("phoneSection").style.display = "none";
   document.getElementById("otpSection").style.display = "none";
   document.getElementById("cancelBtn").style.display = "none";
