@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>OTP Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: sans-serif; background: #ffffff; color: #000; padding: 10px; max-width: 480px; margin: auto; }
+    
+    /* Hộp chứa API và các nút chức năng nhỏ */
+    .api-container { position: relative; margin-bottom: 5px; margin-top: 0; }
+    textarea {
+      width: 100%; padding: 10px; padding-bottom: 30px; margin: 0;
+      font-size: 15px; background: #fff; color: #000;
+      border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+      height: 75px; resize: none; display: block;
+    }
+    .api-actions { position: absolute; bottom: 8px; right: 8px; display: flex; gap: 5px; }
+    .api-actions button {
+      width: auto; padding: 3px 8px; margin: 0; font-size: 11px;
+      background: #e0e0e0; color: #333; border: 1px solid #ccc;
+      border-radius: 4px; cursor: pointer;
+    }
+    .api-actions button:hover { background: #d0d0d0; }
+
+    button {
+      width: 100%; padding: 10px; margin: 5px 0;
+      font-size: 16px; background: #007bff; color: #fff;
+      border: none; border-radius: 6px; cursor: pointer;
+    }
+    
+    /* Sửa hàng số điện thoại và nút sao chép cân đối tuyệt đối */
+    .row { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
+    .row input {
+      flex: 1;
+      height: 42px;
+      padding: 0 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .copy-btn {
+      width: 110px;
+      height: 42px;
+      padding: 0;
+      margin: 0;
+      font-size: 16px;
+      background: #6c757d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .otp-row { display: flex; gap: 10px; margin-top: 10px; }
+    .otp-label { font-weight: bold; margin-top: 10px; }
+    .otp {
+      flex: 1; font-size: 20px; text-align: center;
+      font-weight: bold; padding: 12px;
+      background: #fffbe6; color: #000;
+      border: 1px solid #aaa; border-radius: 6px;
+    }
+    .popup {
+      position: fixed; bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: #333; color: #fff;
+      padding: 10px 20px; border-radius: 10px;
+      display: none; z-index: 1000;
+    }
+    .phone-actions { display: flex; justify-content: space-between; gap: 10px; margin: 10px 0; }
+    .phone-actions button { flex: 1; }
+    .price-badge{
+      display:inline-flex; align-items:center; padding:0 10px; height:42px; background:#ffe9a8;
+      border:1px solid #d8b556; border-radius:6px; font-weight:600; white-space:nowrap; box-sizing:border-box;
+    }
+
+    /* -------------------------------------------------------------------- */
+    /* CSS THÊM Ở CUỐI TRANG - KHÔNG ẢNH HƯỞNG ĐẾN GIAO DIỆN TRÊN */
+    .addon-divider { margin: 25px 0 15px 0; border: 0; border-top: 1px solid #eee; }
+    .addon-section-title { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; }
+    
+    .favorite-box { border: 1px dashed #007bff; padding: 10px; border-radius: 6px; background: #f8f9fa; margin-bottom: 15px; }
+    .fav-input-group { display: flex; gap: 5px; margin-bottom: 8px; }
+    .fav-input-group input { flex: 1; padding: 6px 10px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .fav-input-group button { width: auto; padding: 0 12px; font-size: 13px; background: #007bff; margin: 0; height: 34px; border-radius: 4px; }
+    .fav-items-list { display: flex; flex-wrap: wrap; gap: 5px; }
+    .fav-tag { font-size: 11px; padding: 4px 8px; background: #e7f1ff; color: #0056b3; border: 1px solid #b8daff; border-radius: 4px; cursor: pointer; position: relative; padding-right: 32px; white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+    .fav-tag:hover { background: #b8daff; }
+    .fav-success-count { background: #28a745; color: #fff; padding: 1px 4px; border-radius: 3px; font-size: 9px; font-weight: bold; margin-left: 4px; margin-right: -4px; vertical-align: middle; }
+    .fav-tag-del { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); font-weight: bold; color: #dc3545; padding: 0 4px; font-size: 13px; }
+
+    .history-box { border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; background: #fffdf5; }
+    .history-items-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .history-number-btn { font-size: 12px; padding: 5px 10px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .history-number-btn:hover { background: #ffeeba; }
+    /* -------------------------------------------------------------------- */
+  </style>
+</head>
+<body>
+
+<div class="api-container">
+  <textarea id="apiLink" placeholder="Dán link API getNumber tại đây"></textarea>
+  <div class="api-actions">
+    <button onclick="pasteAPI()">Dán</button>
+    <button onclick="clearAPI()">Xóa</button>
+  </div>
+</div>
+
+<div class="phone-actions">
+  <button onclick="getNumber()">Lấy số <span id="loading" style="display:none;">⏳</span></button>
+  <button onclick="cancelOrder()" style="display:none;" id="cancelBtn">Hủy số</button>
+</div>
+
+<div id="phoneSection" style="display:none;">
+  <div class="row" style="align-items:stretch;">
+    <input id="number" readonly />
+    <span id="priceBadge" class="price-badge" style="display:none;">Giá: —</span>
+    <button class="copy-btn" onclick="copyText('number')">Sao chép</button>
+  </div>
+</div>
+
+<div id="otpSection" style="display:none;">
+  <div class="otp-label">OTP 1: <img id="otp1-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:16px; vertical-align:middle; display:none;" /></div>
+  <div class="otp-row"><div id="otp1" class="otp">______</div></div>
+
+  <div class="otp-label">OTP 2: <img id="otp2-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:16px; vertical-align:middle; display:none;" /></div>
+  <div class="otp-row"><div id="otp2" class="otp">______</div></div>
+
+  <div class="otp-label">OTP 3: <img id="otp3-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:16px; vertical-align:middle; display:none;" /></div>
+  <div class="otp-row"><div id="otp3" class="otp">______</div></div>
+
+  <div class="otp-label">OTP 4: <img id="otp4-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:16px; vertical-align:middle; display:none;" /></div>
+  <div class="otp-row"><div id="otp4" class="otp">______</div></div>
+
+  <div class="otp-label">OTP 5: <img id="otp5-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:16px; vertical-align:middle; display:none;" /></div>
+  <div class="otp-row"><div id="otp5" class="otp">______</div></div>
+  
+  <div class="otp-label">OTP 6: <img id="otp6-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:16px; vertical-align:middle; display:none;" /></div>
+  <div class="otp-row"><div id="otp6" class="otp">______</div></div>
+
+  <div class="otp-label">OTP 7: <img id="otp7-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:16px; vertical-align:middle; display:none;" /></div>
+  <div class="otp-row"><div id="otp7" class="otp">______</div></div>
+
+  <div class="otp-label">OTP 8: <img id="otp8-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:16px; vertical-align:middle; display:none;" /></div>
+  <div class="otp-row"><div id="otp8" class="otp">______</div></div>
+
+  <div id="status" style="margin-top: 10px; font-size: 14px;">Đang chờ mã...</div>
+</div>
+
+<div id="popup" class="popup"></div>
+
+
+<hr class="addon-divider">
+
+<div class="favorite-box">
+  <div class="addon-section-title">Bảng xếp hạng Link hay dùng (Lấy được nhiều số xếp trước):</div>
+  <div class="fav-input-group">
+    <input type="text" id="favUrlInput" placeholder="Dán link API getNumber vào đây để lưu..." />
+    <button onclick="saveToFavorites()">Thêm link</button>
+  </div>
+  <div class="fav-items-list" id="favUrlsList"></div>
+</div>
+
+<div class="history-box" id="recentPhonesBox" style="display: none;">
+  <div class="addon-section-title">5 số vừa lấy gần đây (Bấm để lấy lại):</div>
+  <div class="history-items-list" id="recentPhonesList"></div>
+</div>
+<script>
+/* 🔴 SỬA DUY NHẤT CHỖ NÀY */
+const PROXY_URL = "https://sms-proxy.sms-proxy.workers.dev";
+/* ======================= */
+
+let currentId = "", baseURL = "", apiKey = "";
+let otpCodes = ["","","","","","","",""];
+let checkInterval = null;
+let price = "";
+
+// Biến lưu trữ lịch sử số điện thoại tạm thời (giữ lại trong bộ nhớ không reload trang)
+let localPhonesCache = [];
+
+// Khởi chạy khi trang tải xong nhằm khôi phục danh sách Link đã lưu
+document.addEventListener("DOMContentLoaded", () => {
+  renderFavoritesList();
+});
+
+// Hàm bổ sung cho nút Dán và Xóa API
+async function pasteAPI() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById("apiLink").value = text;
+  } catch (err) {
+    showPopup("Không thể truy cập bộ nhớ tạm!");
+  }
+}
+
+function clearAPI() {
+  document.getElementById("apiLink").value = "";
+}
+
+function showPopup(msg) {
+  const popup = document.getElementById("popup");
+  popup.innerText = msg;
+  popup.style.display = "block";
+  setTimeout(() => popup.style.display = "none", 2000);
+}
+
+function copyText(id) {
+  const input = document.getElementById(id);
+  input.select();
+  document.execCommand("copy");
+  showPopup("Đã sao chép số!");
+}
+
+async function getNumber() {
+  document.getElementById("loading").style.display = "inline";
+  const link = document.getElementById("apiLink").value.trim();
+  if (!link.includes("getNumber")) {
+    document.getElementById("loading").style.display = "none";
+    return alert("Link không hợp lệ.");
+  }
+
+  resetAll();
+  clearInterval(checkInterval);
+  otpCodes = ["","","","","","","",""];
+  const parsed = new URL(link);
+  baseURL = parsed.origin + parsed.pathname;
+  apiKey = parsed.searchParams.get("api_key");
+
+  try {
+    const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(link));
+    const text = await res.text();
+
+    let id = "", number = "";
+    price = "";
+    const raw = text.trim();
+
+    if (raw.startsWith("ACCESS_NUMBER") || raw.startsWith("ACCESS_READY")) {
+      const parts = raw.split(":");
+      id = parts[1] || "";
+      number = parts[2] || "";
+      if (parts[3]) price = parts[3];
+    }
+
+    if (id && number) {
+      currentId = id;
+      document.getElementById("number").value = number;
+      document.getElementById("phoneSection").style.display = "block";
+      document.getElementById("otpSection").style.display = "block";
+      document.getElementById("cancelBtn").style.display = "inline-block";
+      document.getElementById("otp1-loading").style.display = "inline";
+
+      if (price) {
+        document.getElementById("priceBadge").textContent = "Giá: " + price;
+        document.getElementById("priceBadge").style.display = "inline-block";
+      }
+
+      // --- TÍNH NĂNG TỰ ĐỘNG SAO CHÉP KHI LẤY SỐ THÀNH CÔNG ---
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(number).then(() => {
+          showPopup("Đã tự động sao chép số!");
+        }).catch(() => {
+          const input = document.getElementById("number");
+          input.select();
+          document.execCommand("copy");
+          showPopup("Đã tự động sao chép số!");
+        });
+      } else {
+        const input = document.getElementById("number");
+        input.select();
+        document.execCommand("copy");
+        showPopup("Đã tự động sao chép số!");
+      }
+
+      // --- CẬP NHẬT LỊCH SỬ THỐNG KÊ LINK LẤY THÀNH CÔNG ---
+      trackLinkSuccess(link);
+
+      // --- CẬP NHẬT LỊCH SỬ SỐ ĐIỆN THOẠI (TỐI ĐA 5 SỐ) VÀO KHU VỰC CUỐI TRANG ---
+      updateRecentPhonesCache(number, id, baseURL, apiKey, price);
+
+      startOTPCheck();
+    } else {
+      alert("Không lấy được số.\n" + text);
+    }
+  } catch (e) {
+    alert("Lỗi: " + e.message);
+  }
+
+  document.getElementById("loading").style.display = "none";
+}
+
+async function checkOTP() {
+  if (!currentId) return;
+  const url = `${baseURL}?api_key=${apiKey}&action=getStatus&id=${currentId}&nocache=${Math.random()}`;
+
+  const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
+  const text = await res.text();
+
+  if (text.startsWith("STATUS_OK")) {
+    const code = text.split(":")[1];
+    let idx = otpCodes.findIndex(v => !v);
+    if (idx === -1) return;
+
+    if (idx > 0 && code === otpCodes[idx - 1]) {
+      await requestNextOTP(idx + 1);
+      return;
+    }
+
+    otpCodes[idx] = code;
+    document.getElementById("otp" + (idx + 1)).innerText = code;
+    document.getElementById("otp" + (idx + 1) + "-loading").style.display = "none";
+
+    if (idx < 7) {
+      document.getElementById("otp" + (idx + 2) + "-loading").style.display = "inline";
+      await requestNextOTP(idx + 2);
+    }
+  }
+}
+
+async function requestNextOTP(n) {
+  const url = `${baseURL}?api_key=${apiKey}&action=setStatus&id=${currentId}&status=3`;
+  await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
+}
+
+function startOTPCheck() {
+  clearInterval(checkInterval);
+  checkInterval = setInterval(checkOTP, 5000);
+}
+
+async function cancelOrder() {
+  const url = `${baseURL}?api_key=${apiKey}&action=setStatus&id=${currentId}&status=8`;
+  await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
+  showPopup("Đã hủy số!");
+  resetAll();
+}
+
+function resetAll() {
+  clearInterval(checkInterval);
+  otpCodes = ["","","","","","","",""];
+  currentId = ""; baseURL = ""; apiKey = ""; price = "";
+  document.getElementById("number").value = "";
+  for (let i = 1; i <= 8; i++) {
+    document.getElementById("otp" + i).innerText = "______";
+    document.getElementById("otp" + i + "-loading").style.display = "none";
+  }
+  document.getElementById("priceBadge").style.display = "none";
+  document.getElementById("phoneSection").style.display = "none";
+  document.getElementById("otpSection").style.display = "none";
+  document.getElementById("cancelBtn").style.display = "none";
+}
+
+
+/* ==================================================================== */
+/* LOGIC CHỨC NĂNG BỔ SUNG Ở CUỐI TRANG (KHÔNG LÀM THAY ĐỔI LOGIC GỐC) */
+
+// 1. Quản lý lưu trữ Link hay dùng & Thống kê Tự động xếp hạng
+function saveToFavorites() {
+  const urlInput = document.getElementById("favUrlInput").value.trim();
+  if (!urlInput) return alert("Vui lòng nhập hoặc dán link trước khi lưu!");
+  
+  let favorites = JSON.parse(localStorage.getItem("otp_saved_favorites_v2") || "[]");
+  
+  // Kiểm tra xem link này đã tồn tại trong danh sách chưa
+  const exists = favorites.some(item => item.url === urlInput);
+  if (!exists) {
+    // Lưu cấu trúc dạng Object để lưu trữ kèm số lần thành công (count)
+    favorites.push({ url: urlInput, count: 0 });
+    localStorage.setItem("otp_saved_favorites_v2", JSON.stringify(favorites));
+    renderFavoritesList();
+  }
+  document.getElementById("favUrlInput").value = "";
+}
+
+function trackLinkSuccess(currentLink) {
+  let favorites = JSON.parse(localStorage.getItem("otp_saved_favorites_v2") || "[]");
+  
+  // Tìm xem link đang chạy có nằm trong list hay dùng không để cộng điểm
+  let found = false;
+  favorites = favorites.map(item => {
+    if (item.url === currentLink) {
+      item.count = (item.count || 0) + 1;
+      found = true;
+    }
+    return item;
+  });
+  
+  // Nếu là một link mới hoàn toàn chưa được lưu thủ công, tự động lưu và tính điểm luôn
+  if (!found) {
+    favorites.push({ url: currentLink, count: 1 });
+  }
+  
+  localStorage.setItem("otp_saved_favorites_v2", JSON.stringify(favorites));
+  renderFavoritesList();
+}
+
+function removeFavoriteItem(e, targetLink) {
+  e.stopPropagation(); // Ngăn hành động click kích hoạt điền link
+  let favorites = JSON.parse(localStorage.getItem("otp_saved_favorites_v2") || "[]");
+  favorites = favorites.filter(item => item.url !== targetLink);
+  localStorage.setItem("otp_saved_favorites_v2", JSON.stringify(favorites));
+  renderFavoritesList();
+}
+
+function renderFavoritesList() {
+  const listContainer = document.getElementById("favUrlsList");
+  let favorites = JSON.parse(localStorage.getItem("otp_saved_favorites_v2") || "[]");
+  listContainer.innerHTML = "";
+  
+  // 🌟 THUẬT TOÁN SẮP XẾP: Thằng nào có count (số lần thành công) lớn nhất xếp lên trước
+  favorites.sort((a, b) => (b.count || 0) - (a.count || 0));
+  
+  favorites.forEach((item, idx) => {
+    const link = item.url;
+    const successCount = item.count || 0;
+    
+    const tag = document.createElement("div");
+    tag.className = "fav-tag";
+    
+    // Tách param (service, operator) để hiển thị nhãn ngắn gọn, nếu không có thì cắt bớt link làm nhãn
+    let tagsText = [];
+    ["service", "operator", "country"].forEach(p => {
+      const match = link.match(new RegExp(`[?&]${p}=([^&]+)`, "i"));
+      if (match) tagsText.push(`${p}=${match[1]}`);
+    });
+    
+    let displayLabel = tagsText.length > 0 ? tagsText.join("&") : `Mẫu ${idx + 1}`;
+    tag.innerText = displayLabel;
+    tag.title = link;
+    
+    // Hiển thị huy hiệu số lần thành công nếu số lần lớn hơn 0
+    if (successCount > 0) {
+      const badge = document.createElement("span");
+      badge.className = "fav-success-count";
+      badge.innerText = `✔️${successCount}`;
+      tag.appendChild(badge);
+    }
+    
+    // Click vào tag để đưa link lên ô nhập chính phía trên
+    tag.onclick = () => {
+      document.getElementById("apiLink").value = link;
+      showPopup("Đã chọn mẫu link!");
+    };
+    
+    // Tạo nút dấu X nhỏ để xóa link hay dùng
+    const delBtn = document.createElement("span");
+    delBtn.className = "fav-tag-del";
+    delBtn.innerText = "×";
+    delBtn.onclick = (e) => removeFavoriteItem(e, link);
+    
+    tag.appendChild(delBtn);
+    listContainer.appendChild(tag);
+  });
+}
+
+// 2. Quản lý Lịch sử 5 Số vừa lấy (Không load lại trang khi chọn lại)
+function updateRecentPhonesCache(number, id, bUrl, aKey, prc) {
+  // Lọc bỏ số trùng lặp cũ
+  localPhonesCache = localPhonesCache.filter(item => item.number !== number);
+  
+  // Thêm số mới lên đầu mảng
+  localPhonesCache.unshift({ number, id, bUrl, aKey, prc });
+  
+  // Chỉ lưu tối đa 5 số gần nhất
+  if (localPhonesCache.length > 5) localPhonesCache.pop();
+  
+  renderRecentPhones();
+}
+
+function renderRecentPhones() {
+  const boxContainer = document.getElementById("recentPhonesBox");
+  const listContainer = document.getElementById("recentPhonesList");
+  listContainer.innerHTML = "";
+  
+  if (localPhonesCache.length === 0) {
+    boxContainer.style.display = "none";
+    return;
+  }
+  
+  boxContainer.style.display = "block";
+  localPhonesCache.forEach(item => {
+    const btn = document.createElement("div");
+    btn.className = "history-number-btn";
+    btn.innerText = item.number;
+    
+    // Khi chọn lại một số điện thoại cũ (KHÔNG LOAD LẠI TRANG)
+    btn.onclick = () => {
+      clearInterval(checkInterval);
+      
+      // Thiết lập lại toàn bộ cấu hình gốc của số điện thoại cũ được chọn
+      currentId = item.id;
+      baseURL = item.bUrl;
+      apiKey = item.aKey;
+      price = item.prc;
+      
+      // Hiển thị ngược thông tin lên form phía trên
+      document.getElementById("number").value = item.number;
+      document.getElementById("phoneSection").style.display = "block";
+      document.getElementById("otpSection").style.display = "block";
+      document.getElementById("cancelBtn").style.display = "inline-block";
+      
+      if (price) {
+        document.getElementById("priceBadge").textContent = "Giá: " + price;
+        document.getElementById("priceBadge").style.display = "inline-block";
+      } else {
+        document.getElementById("priceBadge").style.display = "none";
+      }
+      
+      // Trả các ô OTP về giao diện chờ
+      for (let i = 1; i <= 8; i++) {
+        document.getElementById("otp" + i).innerText = "______";
+        document.getElementById("otp" + i + "-loading").style.display = "none";
+      }
+      document.getElementById("otp1-loading").style.display = "inline";
+      otpCodes = ["","","","","","","",""];
+      
+      // Kích hoạt lại vòng lặp check OTP cho số cũ vừa khôi phục
+      startOTPCheck();
+      showPopup("Đã khôi phục số: " + item.number);
+    };
+    
+    listContainer.appendChild(btn);
+  });
+}
+/* ==================================================================== */
+</script>
+
+</body>
+</html>
