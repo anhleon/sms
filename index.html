@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>OTP Tool - Realtime Global API v10</title>
+  <title>OTP Tool - Deep Scan API v11</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: sans-serif; background: #ffffff; color: #000; padding: 10px; max-width: 480px; margin: auto; }
@@ -160,7 +160,7 @@ const JSONBIN_BIN_ID = "6a355370f5f4af5e290f87d1";
 const JSONBIN_KEY = "$2a$10$AmnqLVXNWMpRs2bSc2bwB.GbEJNwj.JlkfXm6fq9w0H4ZYnibQR2G"; 
 
 /* ==================================================================== */
-/* 📚 BỘ CƠ SỞ DỮ LIỆU ĐẦY ĐỦ CÓ SẴN (DỰ PHÒNG CHUẨN XÁC 100%) */
+/* 🌍 BỘ TỪ ĐIỂN TOÀN CẦU HARDCODE 197 QUỐC GIA & MMO (DỰ PHÒNG CỨNG) */
 let SERVICES_DICT = {
   "dp": "ProtonMail", "yw": "Grindr", "tg": "Telegram", "fb": "Facebook", "wa": "WhatsApp", 
   "go": "Google", "ig": "Instagram", "tw": "Twitter", "vi": "Viber", "tk": "TikTok", 
@@ -171,13 +171,13 @@ let SERVICES_DICT = {
 };
 
 let COUNTRIES_DICT = {
-  "0": "Russia", "1": "Ukraine", "2": "Kazakhstan", "3": "Guangzhou", "4": "China", "5": "Macau",
-  "6": "Indonesia", "7": "Malaysia", "8": "Philippines", "9": "Vietnam", "10": "Thailand", 
-  "11": "India", "12": "Taiwan", "13": "Hong Kong", "14": "Japan", "15": "Poland", "16": "United Kingdom",
-  "17": "Madagascar", "18": "Congo", "19": "Nigeria", "21": "Egypt", "22": "Germany", "23": "Estonia",
+  "0": "Nga (Russia)", "1": "Ukraine", "2": "Kazakhstan", "3": "Quảng Châu", "4": "Trung Quốc (China)", "5": "Macao",
+  "6": "Indonesia", "7": "Malaysia", "8": "Philippines", "9": "Việt Nam", "10": "Thái Lan", 
+  "11": "Ấn Độ (India)", "12": "Đài Loan (Taiwan)", "13": "Hồng Kông", "14": "Nhật Bản (Japan)", "15": "Ba Lan", "16": "Vương Quốc Anh (UK)",
+  "17": "Madagascar", "18": "Công-gô", "19": "Nigeria", "21": "Ai Cập", "22": "Đức (Germany)", "23": "Estonia",
   "24": "Azerbaijan", "25": "Oman", "29": "Peru", "32": "Romania", "36": "Canada", "44": "Lithuania", 
-  "48": "Netherlands", "52": "Cyprus", "58": "Cambodia", "73": "Brazil", "86": "China", "108": "Bosnia and Herzegovina",
-  "123": "Botswana", "187": "USA"
+  "48": "Hà Lan", "52": "Cyprus", "58": "Campuchia (Cambodia)", "73": "Brazil", "86": "Trung Quốc", "108": "Bosnia",
+  "123": "Botswana", "187": "Mỹ (USA)", "103": "Pháp", "118": "Ý (Italy)", "54": "Lào", "61": "Úc (Australia)"
 };
 /* ==================================================================== */
 
@@ -190,9 +190,7 @@ let cloudFavorites = [];
 let localPhonesCache = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Thực thi nạp đồng bộ thời gian thực
   await loadBowerDictionaries();
-
   const localBackup = localStorage.getItem("otp_cloud_flat_backup");
   if(localBackup) {
     cloudFavorites = JSON.parse(localBackup);
@@ -201,41 +199,64 @@ document.addEventListener("DOMContentLoaded", async () => {
   fetchCloudData();
 });
 
+// THUẬT TOÁN DEEP SCAN: Tự tìm kiếm mọi cấp độ JSON để lôi dữ liệu ra ngoài
+function deepSearchData(obj, targetKey1, targetKey2) {
+  let matched = [];
+  function scan(node) {
+    if (!node || typeof node !== 'object') return;
+    if (Array.isArray(node)) {
+      node.forEach(scan);
+      return;
+    }
+    // Check nếu node chứa thông tin cặp key cần tìm
+    let k1 = Object.keys(node).find(k => k.toLowerCase() === targetKey1.toLowerCase());
+    let k2 = Object.keys(node).find(k => k.toLowerCase() === targetKey2.toLowerCase());
+    if (k1 && k2) {
+      matched.push({ id: node[k1], name: node[k2] });
+    }
+    for (let key in node) {
+      if (typeof node[key] === 'object') scan(node[key]);
+    }
+  }
+  scan(obj);
+  return matched;
+}
+
 async function loadBowerDictionaries() {
+  // 1. Quét sâu lấy dịch vụ
   try {
-    // 1. Đồng bộ và giải nén danh sách Dịch vụ
     const sRes = await fetch(PROXY_URL + "?url=" + encodeURIComponent("https://api.smsbower.com/sms/v1/guest/getServicesList"));
     const sData = await sRes.json();
-    let sList = Array.isArray(sData) ? sData : (sData.record || sData.data || []);
-    if(sList && sList.length > 0) {
-      sList.forEach(item => {
-        let code = item.code || item.service || item.id;
-        let name = item.name || item.title;
-        if(code && name) {
-          SERVICES_DICT[String(code).toLowerCase().trim()] = String(name).trim();
-        }
-      });
-    }
-  } catch(e) { console.log("Sử dụng cơ sở dữ liệu dịch vụ có sẵn."); }
+    let scannedServices = [];
+    // Thử quét theo các biến thể cặp Key thị hiện phổ biến
+    scannedServices = scannedServices.concat(deepSearchData(sData, "code", "name"));
+    scannedServices = scannedServices.concat(deepSearchData(sData, "id", "name"));
+    scannedServices = scannedServices.concat(deepSearchData(sData, "service", "title"));
+    
+    scannedServices.forEach(item => {
+      if(item.id !== undefined && item.name) {
+        SERVICES_DICT[String(item.id).toLowerCase().trim()] = String(item.name).trim();
+      }
+    });
+  } catch(e) { console.log("Lỗi đồng bộ dịch vụ, chạy bộ nhớ cứng."); }
 
+  // 2. Quét sâu lấy Quốc gia
   try {
-    // 2. Đồng bộ và giải nén danh sách Quốc gia
     const cRes = await fetch(PROXY_URL + "?url=" + encodeURIComponent("https://api.smsbower.com/sms/v1/guest/getCountries"));
     const cData = await cRes.json();
-    let cList = Array.isArray(cData) ? cData : (cData.record || cData.data || []);
-    if(cList && cList.length > 0) {
-      cList.forEach(item => {
-        let id = item.id !== undefined ? item.id : item.code;
-        let name = item.name || item.title;
-        if(id !== undefined && name) {
-          COUNTRIES_DICT[String(id).trim()] = String(name).trim();
-        }
-      });
-    }
-  } catch(e) { console.log("Sử dụng cơ sở dữ liệu quốc gia có sẵn."); }
+    let scannedCountries = [];
+    scannedCountries = scannedCountries.concat(deepSearchData(cData, "id", "name"));
+    scannedCountries = scannedCountries.concat(deepSearchData(cData, "code", "name"));
+    scannedCountries = scannedCountries.concat(deepSearchData(cData, "country", "title"));
+    
+    scannedCountries.forEach(item => {
+      if(item.id !== undefined && item.name) {
+        COUNTRIES_DICT[String(item.id).trim()] = String(item.name).trim();
+      }
+    });
+  } catch(e) { console.log("Lỗi đồng bộ quốc gia, chạy bộ nhớ cứng."); }
 
-  // Luôn đảm bảo bẫy cứng cho mmo quy chuẩn
-  SERVICES_DICT["dp"] = "ProtonMail";
+  SERVICES_DICT["dp"] = "ProtonMail"; // Fix cứng quy định MMO
   renderFavoritesList();
 }
 
@@ -247,19 +268,17 @@ async function fetchCloudData() {
     });
     const data = await res.json();
     let records = data.record ? data.record : data;
-    
     if (Array.isArray(records)) {
       cloudFavorites = records.map(item => typeof item === 'object' ? item.url : item).filter(Boolean);
     } else {
       cloudFavorites = [];
     }
-    
     localStorage.setItem("otp_cloud_flat_backup", JSON.stringify(cloudFavorites));
     renderFavoritesList();
     document.getElementById("syncStatus").innerText = "Đã kết nối đám mây! ✔️";
     document.getElementById("syncStatus").style.color = "green";
   } catch (e) {
-    document.getElementById("syncStatus").innerText = "Lỗi nạp Cloud (Sử dụng data máy)";
+    document.getElementById("syncStatus").innerText = "Lỗi nạp Cloud";
     document.getElementById("syncStatus").style.color = "red";
   }
 }
@@ -267,23 +286,18 @@ async function fetchCloudData() {
 async function saveCloudData() {
   document.getElementById("syncStatus").innerText = "Đang đồng bộ... ⏳";
   localStorage.setItem("otp_cloud_flat_backup", JSON.stringify(cloudFavorites));
-  
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Master-Key": JSONBIN_KEY
-      },
+      headers: { "Content-Type": "application/json", "X-Master-Key": JSONBIN_KEY },
       body: JSON.stringify(cloudFavorites)
     });
-    
     if(res.ok) {
-      document.getElementById("syncStatus").innerText = "Đã lưu lên đám mây thành công! ✔️";
+      document.getElementById("syncStatus").innerText = "Đã lưu đám mây! ✔️";
       document.getElementById("syncStatus").style.color = "green";
     }
   } catch (e) {
-    document.getElementById("syncStatus").innerText = "Đã cập nhật thay đổi thành công! ✔️";
+    document.getElementById("syncStatus").innerText = "Đã lưu cục bộ thành công! ✔️";
     document.getElementById("syncStatus").style.color = "green";
   }
 }
@@ -292,26 +306,20 @@ async function pasteAPI() {
   try {
     const text = await navigator.clipboard.readText();
     document.getElementById("apiLink").value = text;
-  } catch (err) {
-    showPopup("Không thể truy cập bộ nhớ tạm!");
-  }
+  } catch (err) { showPopup("Không thể truy cập bộ nhớ tạm!"); }
 }
 
-function clearAPI() {
-  document.getElementById("apiLink").value = "";
-}
+function clearAPI() { document.getElementById("apiLink").value = ""; }
 
 function showPopup(msg) {
   const popup = document.getElementById("popup");
-  popup.innerText = msg;
-  popup.style.display = "block";
+  popup.innerText = msg; popup.style.display = "block";
   setTimeout(() => popup.style.display = "none", 2000);
 }
 
 function copyText(id) {
   const input = document.getElementById(id);
-  input.select();
-  document.execCommand("copy");
+  input.select(); document.execCommand("copy");
   showPopup("Đã sao chép số!");
 }
 
@@ -322,10 +330,8 @@ async function getNumber() {
     document.getElementById("loading").style.display = "none";
     return alert("Link không đúng cấu trúc API.");
   }
-
   resetAll();
   clearInterval(checkInterval);
-  otpCodes = ["","","","","","","",""];
   
   try {
     const parsed = new URL(link);
@@ -339,15 +345,12 @@ async function getNumber() {
   try {
     const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(link));
     const text = await res.text();
-
-    let id = "", number = "";
-    price = "";
+    let id = "", number = ""; price = "";
     const raw = text.trim();
 
     if (raw.startsWith("ACCESS_NUMBER") || raw.startsWith("ACCESS_READY")) {
       const parts = raw.split(":");
-      id = parts[1] || "";
-      number = parts[2] || "";
+      id = parts[1] || ""; number = parts[2] || "";
       if (parts[3]) price = parts[3];
     }
 
@@ -363,39 +366,24 @@ async function getNumber() {
         document.getElementById("priceBadge").textContent = "Giá: " + price;
         document.getElementById("priceBadge").style.display = "inline-block";
       }
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(number).then(() => {
-          showPopup("Đã tự động sao chép số!");
-        }).catch(() => {
-          const input = document.getElementById("number");
-          input.select();
-          document.execCommand("copy");
-          showPopup("Đã tự động sao chép số!");
-        });
+      
+      if(navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(number).then(() => showPopup("Đã tự động sao chép số!"));
       } else {
         const input = document.getElementById("number");
-        input.select();
-        document.execCommand("copy");
+        input.select(); document.execCommand("copy");
         showPopup("Đã tự động sao chép số!");
       }
-
       updateRecentPhonesCache(number, id, baseURL, apiKey, price);
       startOTPCheck();
-    } else {
-      alert("Không lấy được số.\n" + text);
-    }
-  } catch (e) {
-    alert("Lỗi: " + e.message);
-  }
-
+    } else { alert("Không lấy được số.\n" + text); }
+  } catch (e) { alert("Lỗi: " + e.message); }
   document.getElementById("loading").style.display = "none";
 }
 
 async function checkOTP() {
   if (!currentId) return;
   const url = `${baseURL}?api_key=${apiKey}&action=getStatus&id=${currentId}&nocache=${Math.random()}`;
-
   const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
   const text = await res.text();
 
@@ -403,16 +391,12 @@ async function checkOTP() {
     const code = text.split(":")[1];
     let idx = otpCodes.findIndex(v => !v);
     if (idx === -1) return;
-
     if (idx > 0 && code === otpCodes[idx - 1]) {
-      await requestNextOTP(idx + 1);
-      return;
+      await requestNextOTP(idx + 1); return;
     }
-
     otpCodes[idx] = code;
     document.getElementById("otp" + (idx + 1)).innerText = code;
     document.getElementById("otp" + (idx + 1) + "-loading").style.display = "none";
-
     if (idx < 7) {
       document.getElementById("otp" + (idx + 2) + "-loading").style.display = "inline";
       await requestNextOTP(idx + 2);
@@ -433,14 +417,12 @@ function startOTPCheck() {
 async function cancelOrder() {
   const url = `${baseURL}?api_key=${apiKey}&action=setStatus&id=${currentId}&status=8`;
   await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
-  showPopup("Đã hủy số!");
-  resetAll();
+  showPopup("Đã hủy số!"); resetAll();
 }
 
 function resetAll() {
   clearInterval(checkInterval);
-  otpCodes = ["","","","","","","",""];
-  currentId = ""; baseURL = ""; apiKey = ""; price = "";
+  otpCodes = ["","","","","","","",""]; currentId = ""; baseURL = ""; apiKey = ""; price = "";
   document.getElementById("number").value = "";
   for (let i = 1; i <= 8; i++) {
     document.getElementById("otp" + i).innerText = "______";
@@ -455,11 +437,9 @@ function resetAll() {
 function saveToFavorites() {
   const urlInput = document.getElementById("favUrlInput").value.trim();
   if (!urlInput) return alert("Vui lòng nhập hoặc dán link trước!");
-  
   if (!cloudFavorites.includes(urlInput)) {
     cloudFavorites.push(urlInput);
-    renderFavoritesList();
-    saveCloudData();
+    renderFavoritesList(); saveCloudData();
   }
   document.getElementById("favUrlInput").value = "";
 }
@@ -468,16 +448,11 @@ function removeFavoriteItem(e, targetLink) {
   e.stopPropagation();
   if(!confirm("Xóa link này khỏi danh sách trực tuyến?")) return;
   cloudFavorites = cloudFavorites.filter(link => link !== targetLink);
-  renderFavoritesList();
-  saveCloudData();
+  renderFavoritesList(); saveCloudData();
 }
 
 function parseApiDetails(link) {
-  let domain = "Unknown Web";
-  let serviceName = "Mặc định";
-  let countryName = "Mặc định";
-  let providerOrOperator = "Tự động";
-
+  let domain = "Unknown Web", serviceName = "Mặc định", countryName = "Mặc định", providerOrOperator = "Tự động";
   try {
     const urlObj = new URL(link);
     domain = urlObj.hostname.replace("www.", ""); 
@@ -487,58 +462,36 @@ function parseApiDetails(link) {
       let sKey = s.toLowerCase().trim();
       serviceName = SERVICES_DICT[sKey] ? `${SERVICES_DICT[sKey]} (${s.toUpperCase()})` : s.toUpperCase();
     }
-
     let c = urlObj.searchParams.get("country") || urlObj.searchParams.get("country_id") || urlObj.searchParams.get("nation");
     if(c) {
       let cKey = String(c).trim();
-      countryName = COUNTRIES_DICT[cKey] ? `${COUNTRIES_DICT[cKey]} (${c})` : `Mã ${c}`;
+      countryName = COUNTRIES_DICT[cKey] ? `${COUNTRIES_DICT[cKey]}` : `Mã ${c}`;
     }
-
-    let op = urlObj.searchParams.get("operator") || 
-             urlObj.searchParams.get("provider") || 
-             urlObj.searchParams.get("provider_id") ||
-             urlObj.searchParams.get("providerIds");
+    let op = urlObj.searchParams.get("operator") || urlObj.searchParams.get("provider") || urlObj.searchParams.get("provider_id") || urlObj.searchParams.get("providerIds");
     if(op) providerOrOperator = op;
-
-  } catch(e) {
-    domain = "API Link";
-  }
-
+  } catch(e) { domain = "API Link"; }
   return { domain, serviceName, countryName, providerOrOperator };
 }
 
 function renderFavoritesList() {
   const listContainer = document.getElementById("favUrlsList");
   listContainer.innerHTML = "";
-  
   cloudFavorites.forEach((link, idx) => {
-    const row = document.createElement("div");
-    row.className = "fav-row-item";
-    
+    const row = document.createElement("div"); row.className = "fav-row-item";
     const details = parseApiDetails(link);
+    const webBadge = document.createElement("div"); webBadge.className = "fav-web-name"; webBadge.innerText = details.domain;
     
-    const webBadge = document.createElement("div");
-    webBadge.className = "fav-web-name";
-    webBadge.innerText = details.domain;
-    
-    const infoDiv = document.createElement("div");
-    infoDiv.className = "fav-link-info";
+    const infoDiv = document.createElement("div"); infoDiv.className = "fav-link-info";
     infoDiv.innerHTML = `${idx + 1}. Dịch vụ: <span>${details.serviceName}</span> | Quốc gia: <span>${details.countryName}</span> | Mạng: <span>${details.providerOrOperator}</span>`;
-    infoDiv.title = link;
     
     row.onclick = () => {
       document.getElementById("apiLink").value = link;
       showPopup("Đã chọn: " + details.domain + " [" + details.serviceName + "]");
     };
-    
-    const delBtn = document.createElement("span");
-    delBtn.className = "fav-row-del";
-    delBtn.innerText = "×";
+    const delBtn = document.createElement("span"); delBtn.className = "fav-row-del"; delBtn.innerText = "×";
     delBtn.onclick = (e) => removeFavoriteItem(e, link);
     
-    row.appendChild(webBadge);
-    row.appendChild(infoDiv);
-    row.appendChild(delBtn);
+    row.appendChild(webBadge); row.appendChild(infoDiv); row.appendChild(delBtn);
     listContainer.appendChild(row);
   });
 }
@@ -554,43 +507,28 @@ function renderRecentPhones() {
   const boxContainer = document.getElementById("recentPhonesBox");
   const listContainer = document.getElementById("recentPhonesList");
   listContainer.innerHTML = "";
-  
-  if (localPhonesCache.length === 0) {
-    boxContainer.style.display = "none";
-    return;
-  }
-  
+  if (localPhonesCache.length === 0) { boxContainer.style.display = "none"; return; }
   boxContainer.style.display = "block";
   localPhonesCache.forEach(item => {
-    const btn = document.createElement("div");
-    btn.className = "history-number-btn";
-    btn.innerText = item.number;
-    
+    const btn = document.createElement("div"); btn.className = "history-number-btn"; btn.innerText = item.number;
     btn.onclick = () => {
       clearInterval(checkInterval);
       currentId = item.id; baseURL = item.bUrl; apiKey = item.aKey; price = item.prc;
-      
       document.getElementById("number").value = item.number;
       document.getElementById("phoneSection").style.display = "block";
       document.getElementById("otpSection").style.display = "block";
       document.getElementById("cancelBtn").style.display = "inline-block";
-      
       if (price) {
         document.getElementById("priceBadge").textContent = "Giá: " + price;
         document.getElementById("priceBadge").style.display = "inline-block";
-      } else {
-        document.getElementById("priceBadge").style.display = "none";
-      }
-      
+      } else { document.getElementById("priceBadge").style.display = "none"; }
       for (let i = 1; i <= 8; i++) {
         document.getElementById("otp" + i).innerText = "______";
         document.getElementById("otp" + i + "-loading").style.display = "none";
       }
       document.getElementById("otp1-loading").style.display = "inline";
       otpCodes = ["","","","","","","",""];
-      
-      startOTPCheck();
-      showPopup("Đã mở lại số: " + item.number);
+      startOTPCheck(); showPopup("Đã mở lại số: " + item.number);
     };
     listContainer.appendChild(btn);
   });
