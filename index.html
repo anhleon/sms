@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>OTP Tool - Auto Detect API</title>
+  <title>OTP Tool - Super Auto Detect API</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: sans-serif; background: #ffffff; color: #000; padding: 10px; max-width: 480px; margin: auto; }
@@ -71,7 +71,7 @@
     .fav-row-item { display: flex; flex-direction: column; background: #e7f1ff; border: 1px solid #b8daff; padding: 8px 10px; border-radius: 6px; cursor: pointer; transition: background 0.2s; position: relative; }
     .fav-row-item:hover { background: #d0e3ff; }
     .fav-web-name { font-size: 11px; font-weight: bold; color: #fff; background: #007bff; padding: 1px 5px; border-radius: 3px; display: inline-block; margin-bottom: 4px; width: fit-content; }
-    .fav-link-info { font-size: 13px; color: #222; font-weight: bold; line-height: 1.4; padding-right: 25px; }
+    .fav-link-info { font-size: 13px; color: #222; font-weight: 500; line-height: 1.5; padding-right: 25px; }
     .fav-link-info span { color: #ff5722; font-weight: bold; }
     .fav-row-del { font-weight: bold; color: #dc3545; font-size: 20px; cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); padding: 5px; }
     .fav-row-del:hover { color: #bd2130; }
@@ -143,7 +143,7 @@
     <span class="sync-status" id="syncStatus">Đang tải Cloud... ⏳</span>
   </div>
   <div class="fav-input-group">
-    <input type="text" id="favUrlInput" placeholder="Dán link API getNumber bất kỳ trang nào vào đây..." />
+    <input type="text" id="favUrlInput" placeholder="Dán link API getNumber vào đây..." />
     <button onclick="saveToFavorites()">Thêm và lưu Cloud</button>
   </div>
   <div class="fav-items-list" id="favUrlsList"></div>
@@ -158,6 +158,21 @@
 const PROXY_URL = "https://sms-proxy.sms-proxy.workers.dev";
 const JSONBIN_BIN_ID = "6a355370f5f4af5e290f87d1"; 
 const JSONBIN_KEY = "$2a$10$AmnqLVXNWMpRs2bSc2bwB.GbEJNwj.JlkfXm6fq9w0H4ZYnibQR2G"; 
+
+/* ==================================================================== */
+/* 🌐 BỘ TỪ ĐIỂN DỊCH MÃ API SANG TIẾNG ANH / TIẾNG VIỆT CHUẨN XÁC */
+const SERVICES_DICT = {
+  "yw": "Grindr", "tg": "Telegram", "fb": "Facebook", "wa": "WhatsApp", 
+  "go": "Google", "ig": "Instagram", "tw": "Twitter", "vi": "Viber", 
+  "tk": "TikTok", "dp": "Dịch vụ DP", "lf": "TikTok Lite", "qq": "Tencent QQ"
+};
+
+const COUNTRIES_DICT = {
+  "16": "United Kingdom", "73": "Vietnam", "0": "Russia", "1": "Ukraine", 
+  "2": "Kazakhstan", "6": "Indonesia", "7": "Malaysia", "15": "Poland", 
+  "22": "Germany", "36": "Canada", "187": "USA", "86": "China"
+};
+/* ==================================================================== */
 
 let currentId = "", baseURL = "", apiKey = "";
 let otpCodes = ["","","","","","","",""];
@@ -267,8 +282,6 @@ async function getNumber() {
   try {
     const parsed = new URL(link);
     baseURL = parsed.origin + parsed.pathname;
-    
-    // Tìm API Key linh hoạt ở mọi tham số phổ biến
     apiKey = parsed.searchParams.get("api_key") || parsed.searchParams.get("apikey") || parsed.searchParams.get("token");
   } catch(e) {
     document.getElementById("loading").style.display = "none";
@@ -333,7 +346,6 @@ async function getNumber() {
 
 async function checkOTP() {
   if (!currentId) return;
-  // Hỗ trợ cả cấu hình action truyền thống lẫn linh hoạt tương thích ngược
   const url = `${baseURL}?api_key=${apiKey}&action=getStatus&id=${currentId}&nocache=${Math.random()}`;
 
   const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
@@ -413,35 +425,42 @@ function removeFavoriteItem(e, targetLink) {
 }
 
 /* ==================================================================== */
-/* 🛠️ THUẬT TOÁN ĐỌC & TỰ ĐỘNG BÓC TÁCH MỌI LOẠI THAM SỐ API */
+/* 🛠️ THUẬT TOÁN ĐỌC, ĐỐI CHIẾU TỪ ĐIỂN VÀ DỊCH TOÀN BỘ THAM SỐ API CHUẨN XÁC */
 function parseApiDetails(link) {
   let domain = "Unknown Web";
-  let service = "Mặc định";
-  let country = "Gốc (0)";
+  let serviceName = "Mặc định";
+  let countryName = "Gốc (0)";
   let providerOrOperator = "Tự động";
 
   try {
     const urlObj = new URL(link);
-    domain = urlObj.hostname.replace("www.", ""); // Lấy tên web ngắn gọn
+    domain = urlObj.hostname.replace("www.", ""); 
     
-    // 1. Quét tìm Dịch Vụ (Service)
+    // 1. Đọc và dịch Dịch Vụ (Service)
     let s = urlObj.searchParams.get("service") || urlObj.searchParams.get("name") || urlObj.searchParams.get("service_id");
-    if(s) service = s.toUpperCase();
+    if(s) {
+      let codeLower = s.toLowerCase();
+      serviceName = SERVICES_DICT[codeLower] ? SERVICES_DICT[codeLower] : s.toUpperCase();
+    }
 
-    // 2. Quét tìm Quốc Gia (Country)
+    // 2. Đọc và dịch Quốc Gia (Country)
     let c = urlObj.searchParams.get("country") || urlObj.searchParams.get("country_id") || urlObj.searchParams.get("nation");
-    if(c) country = "Mã: " + c;
+    if(c) {
+      countryName = COUNTRIES_DICT[c] ? COUNTRIES_DICT[c] : "Mã: " + c;
+    }
 
-    // 3. Quét tìm Nhà Mạng / Nhà Cung Cấp (Đọc cả operator, provider và đặc biệt là provider_id của smsbower)
-    let op = urlObj.searchParams.get("operator") || urlObj.searchParams.get("provider") || urlObj.searchParams.get("provider_id");
+    // 3. Đọc linh hoạt Nhà mạng (operator) HOẶC Provider ID / providerIds (Smsbower)
+    let op = urlObj.searchParams.get("operator") || 
+             urlObj.searchParams.get("provider") || 
+             urlObj.searchParams.get("provider_id") ||
+             urlObj.searchParams.get("providerIds");
     if(op) providerOrOperator = op;
 
   } catch(e) {
-    // Dự phòng nếu link thiếu định dạng chuẩn URL
     domain = "API Link";
   }
 
-  return { domain, service, country, providerOrOperator };
+  return { domain, serviceName, countryName, providerOrOperator };
 }
 /* ==================================================================== */
 
@@ -453,23 +472,21 @@ function renderFavoritesList() {
     const row = document.createElement("div");
     row.className = "fav-row-item";
     
-    // Gọi bộ bóc tách thông minh
+    // Gọi bộ bóc tách và dịch thông minh
     const details = parseApiDetails(link);
     
-    // Giao diện hiển thị nhãn tên Web tách biệt
     const webBadge = document.createElement("div");
     webBadge.className = "fav-web-name";
     webBadge.innerText = details.domain;
     
-    // Nội dung phân tích cấu hình link rõ ràng
     const infoDiv = document.createElement("div");
     infoDiv.className = "fav-link-info";
-    infoDiv.innerHTML = `${idx + 1}. Dịch vụ: <span>${details.service}</span> | Quốc gia: <span>${details.country}</span> | Cung cấp/Mạng: <span>${details.providerOrOperator}</span>`;
+    infoDiv.innerHTML = `${idx + 1}. Dịch vụ: <span>${details.serviceName}</span> | Quốc gia: <span>${details.countryName}</span> | Mạng/Provider: <span>${details.providerOrOperator}</span>`;
     infoDiv.title = link;
     
     row.onclick = () => {
       document.getElementById("apiLink").value = link;
-      showPopup("Đã chọn: " + details.domain + " [" + details.service + "]");
+      showPopup("Đã chọn: " + details.domain + " [" + details.serviceName + "]");
     };
     
     const delBtn = document.createElement("span");
