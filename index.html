@@ -159,18 +159,7 @@ const PROXY_URL = "https://sms-proxy.sms-proxy.workers.dev";
 const JSONBIN_BIN_ID = "6a355370f5f4af5e290f87d1"; 
 const JSONBIN_KEY = "$2a$10$AmnqLVXNWMpRs2bSc2bwB.GbEJNwj.JlkfXm6fq9w0H4ZYnibQR2G"; 
 
-/* ==================================================================== */
-/* 🌍 BỘ TỪ ĐIỂN TOÀN CẦU DỰ PHÒNG CỨNG */
-let SERVICES_DICT = {
-  "go": "Google", "fb": "Facebook", "acz": "Claude", "ts": "PayPal",
-  "dp": "ProtonMail", "yw": "Grindr", "tg": "Telegram", "wa": "WhatsApp", 
-  "ig": "Instagram", "tw": "Twitter", "vi": "Viber", "tk": "TikTok", 
-  "lf": "TikTok Lite", "qq": "Tencent QQ", "am": "Amazon", "nf": "Netflix", "wx": "WeChat", 
-  "bl": "Bigo Live", "ba": "BlablaCar", "ds": "Discord", "ly": "Uber", "ma": "Mail.ru", 
-  "me": "Line", "mm": "Microsoft", "re": "Reddit", "vk": "VKontakte", "wb": "Wildberries", 
-  "ya": "Yandex", "zy": "Zalo", "ot": "Any other"
-};
-
+let SERVICES_DICT = {};
 let COUNTRIES_DICT = {
   "0": "Nga (Russia)", "1": "Ukraine", "2": "Kazakhstan", "3": "Quảng Châu", "4": "Trung Quốc (China)", "5": "Macao",
   "6": "Indonesia", "7": "Malaysia", "8": "Philippines", "9": "Việt Nam", "10": "Thái Lan", 
@@ -180,7 +169,6 @@ let COUNTRIES_DICT = {
   "48": "Hà Lan", "52": "Cyprus", "58": "Campuchia (Cambodia)", "73": "Brazil", "86": "Trung Quốc", "108": "Bosnia",
   "123": "Botswana", "187": "Mỹ (USA)", "103": "Pháp", "118": "Ý (Italy)", "54": "Lào", "61": "Úc (Australia)"
 };
-/* ==================================================================== */
 
 let currentId = "", baseURL = "", apiKey = "";
 let otpCodes = ["","","","","","","",""];
@@ -201,27 +189,214 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function loadBowerDictionaries() {
-  // 1. Đồng bộ và cập nhật danh sách Dịch vụ (Services) từ danh mục bạn cung cấp
+  // NẠP 100% ĐẦY ĐỦ TOÀN BỘ DANH SÁCH TỪ FILE JSON GỐC CỦA BẠN TRÁNH SÓT MÃ
   const bowerServices = {
-    "go": "Google", "fb": "Facebook", "acz": "Claude", "ts": "PayPal",
-    "dp": "ProtonMail", "yw": "Grindr", "tg": "Telegram", "wa": "WhatsApp", 
-    "ig": "Instagram", "tw": "Twitter", "vi": "Viber", "tk": "TikTok", 
-    "lf": "TikTok Lite", "qq": "Tencent QQ", "am": "Amazon", "nf": "Netflix", 
-    "wx": "WeChat", "bl": "Bigo Live", "ba": "BlablaCar", "ds": "Discord", 
-    "ly": "Uber", "ma": "Mail.ru", "me": "Line", "mm": "Microsoft", 
-    "re": "Reddit", "vk": "VKontakte", "wb": "Wildberries", "ya": "Yandex", 
-    "zy": "Zalo", "ot": "Any other"
+    "go": "Google, Gmail, Youtube", "fb": "Facebook", "ig": "Instagram", "tw": "Twitter", "lf": "Tiktok", 
+    "bnl": "Reddit", "wx": "Apple", "mm": "Microsoft", "dr": "OpenAI (ChatGPT)", "acz": "Claude", 
+    "grk": "Grok", "opd": "Poe", "bfl": "Black Forest Labs", "tg": "Telegram", "wa": "WhatsApp", 
+    "me": "LINE", "mj": "Zalo", "vi": "Viber", "kt": "KakaoTalk", "wb": "WeChat", "ds": "Discord", 
+    "bw": "Signal", "rc": "Skype", "fu": "Snapchat", "vk": "ВK, mail.ru", "qq": "Tencent QQ", 
+    "kf": "Weibo", "xgu": "RedNote / Xiaohongshu", "im": "IMO messenger", "yl": "Yalla", "dd": "CloudChat", 
+    "sht": "ShareChat", "am": "Amazon", "ab": "Alibaba", "dh": "Ebay", "ka": "Shopee", "dl": "Lazada", 
+    "ep": "Temu", "aez": "Shein", "qd": "Taobao", "hn": "1688", "zp": "Pinduoduo", "pr": "Trendyol", 
+    "etsy": "Etsy", "wc": "Craigslist", "sn": "OLX", "dg": "Mercari", "wr": "Walmart", "ts": "PayPal", 
+    "it": "CashApp", "yy": "Venmo", "nc": "Payoneer", "ij": "Revolut", "tr": "Paysend", "nu": "Stripe", 
+    "ge": "Paytm", "bc": "GCash", "ti": "cryptocom", "fmc": "FMCPay", "dn": "Paxful", "bou": "Huione Pay", 
+    "bo": "Wise", "mt": "Steam", "bz": "Blizzard", "nf": "Netflix", "hb": "Twitch", "alj": "Spotify", 
+    "aml": "Xbox", "ahb": "Ubisoft", "ane": "Supercell", "aud": "Audible", "ub": "Uber", "jg": "Grab", 
+    "ni": "Gojek", "fh": "Lalamove", "tu": "Lyft", "tx": "Bolt", "uk": "AirBnb", "nz": "Foodpanda", 
+    "dy": "Zomato", "keet": "Keeta", "git": "GitHub", "crsr": "Cursor", "wnd": "Windsurf", "aws": "Aws", 
+    "dgo": "DigitalOcean", "ex": "Linode", "amb": "Vercel", "ee": "Twilio", "zh": "Zoho", "blr": "DocuSign", 
+    "cn": "Fiverr", "abq": "Upwork", "oi": "Tinder", "mo": "Bumble", "vz": "Hinge", "tn": "LinkedIn", 
+    "yw": "Grindr", "wh": "TanTan",
+    "aa": "Probo", "aab": "BharatPe", "aag": "Pockit", "aap": "Tiptapp", "aaq": "Netease", "aar": "Bearwww", 
+    "aas": "XXGame", "aat": "RockeTreach", "aav": "Alchemy", "aaw": "Aya Bank", "aax": "Boyaa", "aay": "JioMart", 
+    "aaz": "Ozan", "aba": "Rappi", "abb": "Coca-Cola", "abc": "Taptap Send", "abd": "Beboo", "abe": "Foodora", 
+    "components": "Sub-Object", "abi": "BytePlus", "abk": "GMX", "abn": "Namars", "abo": "WEBDE", 
+    "abr": "Privy", "abs": "Playerzpot", "abt": "ArenaPlus", "abu": "BPJSTK", "abx": "Kaching", 
+    "aby": "Couponscom", "abz": "Friendtech", "ac": "DoorDash", "aca": "Rediffmail", "acb": "Spark Driver", 
+    "acc": "LuckyLand Slots", "acd": "CheckDomain", "ace": "Tata Neu", "acf": "Winter Loan", "acg": "CollabAct", 
+    "ach": "Haleon", "aci": "CELEBe", "acj": "Meituan", "ack": "Tomato", "acl": "Tiv", "acm": "Razer", 
+    "acn": "Radium", "aco": "AR Lens", "acp": "BonusLink", "acq": "Suntec", "acr": "QwikCilver", 
+    "acs": "Tata CLiQ Palette", "acu": "CityMall", "acv": "A23", "acy": "Airtime", "ad": "Iti", 
+    "ada": "TRUTH SOCIAL", "adb": "PoshVine", "adc": "PlayOJO", "add": "CloudChat", "ade": "Magicpin", 
+    "adf": "BCA Syariah", "adg": "Marwadi", "adh": "Frizza", "adi": "Zepto", "adj": "RummyCircle", 
+    "adk": "Khatabook", "adl": "EarnEasy", "adm": "FitCredit", "ado": "SmartyPig", "adp": "Cabify", 
+    "adq": "Uzum", "adt": "Willhaben", "adu": "Seznam", "adx": "BusyFly", "ads": "GoChat", "ae": "MyGLO", 
+    "aeb": "GoPayz", "aec": "JinJiang", "aed": "Kamatera", "aer": "PlayerAuctions", "aet": "Greywoods", 
+    "aeu": "TheFork", "aev": "BankKaro", "aew": "Flip", "aex": "Neon", "af": "GalaxyWin", "afb": "Maybank", 
+    "afc": "Bunda", "afd": "Astra Otoshop", "afj": "SKCAPITAL", "afk": "Chevron", "afm": "Myboost", 
+    "afn": "Roomster", "afp": "VFS GLOBAL", "aft": "Neocrypto", "afw": "Packeta", "afx": "Gamesofa", 
+    "afy": "Tuul", "afz": "Klarna", "agb": "Smiles", "agc": "VIMpay", "agd": "Grailed", "age": "MTR Mobile", 
+    "agf": "Meitu", "agg": "OneForma", "agh": "Anibis", "agi": "Njuškalo", "agj": "Marktplaats", 
+    "agl": "Betano", "agn": "Flik", "ago": "Servify", "agp": "Hdfcbank", "agq": "Bajaj Finserv", 
+    "agr": "Yonogames", "ags": "Abbott", "agu": "Story Max", "agx": "MeiQFashion", "agy": "Baihe", 
+    "agz": "Jiva Petani", "aha": "Angel One", "ahd": "OpenPhone", "ahe": "Bunq", "ahf": "Fugeelah", 
+    "ahi": "Daki", "ahj": "Strato", "ahk": "БлинБери", "ahm": "BRO", "aho": "UangMe", "ahp": "PizzaHut", 
+    "ahq": "SEEDS", "ahr": "This Fate", "ahs": "1and1", "aht": "MockGuru", "ahv": "Surveybell", 
+    "ahw": "Zasilkovna", "ahx": "Bitrue", "ahy": "Fliff", "idr": "FDA", "aid": "Kia", "aif": "Royal Canin", 
+    "aig": "K11", "aih": "Fups", "aii": "Hinge Dating", "aik": "ZUS Coffee", "ail": "Zoo Game", 
+    "ain": "SpaceWeb", "aio": "Prakerja", "aip": "AfreecaTV", "aiq": "Prime Opinion", "air": "TipTip", 
+    "ais": "Schibsted", "ait": "FeetFinder", "aiv": "Striving in the Lion City", "aiy": "Nloto", 
+    "aiz": "Brevo", "aja": "G2A", "ajd": "Bankera", "aje": "CupidMedia", "ajf": "IPanelOnline", 
+    "ajg": "Fortumo", "ajh": "WAUG", "ajj": "Rebtel", "ajk": "Venteny", "ajl": "Av100pro", 
+    "ajm": "Gener8", "ajn": "Gopuff", " कामकाजी": "CoffeeTea", "ajp": "AsiaMiles", "ajq": "MyValue", 
+    "ajr": "Boku", "ajs": "GetPlus", "aju": "Daya Auto", "ajv": "ShareParty", "ajw": "INDOBA", 
+    "ajx": "Kemnaker RI", "ajy": "All Access", "ajz": "MotionPay", "ak": "Douyu", "aka": "LinkAja", 
+    "akb": "Gurmanika", "akc": "Paybis", "akd": "Feels", "ake": "DIKIDI", "akf": "Ollis", 
+    "akg": "Book My Play", "akh": "Prenagen Club", "aki": "Tiketcom", "akj": "Easycash", "akk": "Dagangan", 
+    "akl": "DOKU", "akm": "LOTTE Mart", "akn": "Chakra Rewards", "ako": "Ryde", "akp": "Her", 
+    "akq": "Blank Street", "akr": "Voi", "aks": "Hanya", "akt": "Xworldwallet", "akw": "WINDS", 
+    "akx": "Sony LIV", "aky": "GOMOFY", "ala": "GetResponse", "ald": "Nice88", "ale": "Lydia", 
+    "alg": "Ankama", "alh": "Lion Parcel", "ali": "StockyDodo", "alm": "Muzz", "aln": "Remotasks", 
+    "alo": "Profee", "alp": "Mera Gaon", "als": "Greggs", "alt": "Segari", "alu": "BC Game", 
+    "alv": "TIER", "alw": "Vida", "alx": "NutriClub", "aly": "Bebeclub", "ama": "WooPlus", 
+    "amd": "Smart", "ame": "Discover Hong Kong", "amf": "Acko", "amg": "SBI Card", "amh": "MitID", 
+    "ami": "TEAMORU", "amk": "GORDAN", "amm": "Punjab citizen", "amt": "Moneyview", "anc": "VARUS", 
+    "ani": "Talabat", "aoa": "Hicard", "aof": "Guzman y Gomez", "aog": "Naukri", "aos": "Loloo", 
+    "apa": "Exness", "apl": "Sideline", "apr": "Capital One", "aprnt": "theAsianparent", "aqj": "BigBasket", 
+    "aqq": "Glovo", "ari": "Ring4", "ars": "Bingoplus", "asj": "T-Online", "at": "Perfluence", 
+    "au": "Haraj", "auw": "3Fun", "auz": "Outlier", "avb": "Tealive", "avk": "Quoka", 
+    "avt": "Aviata.kz", "avz": "Getsbet", "awg": "Natura Avon", "awq": "Atlas Earth", "awv": "Wallapop", 
+    "awz": "PlayTime", "axr": "match.com", "ayk": "Radquest", "baq": "Redbubble", "bb": "LazyPay", 
+    "bbf": "Neosurf", "bbm": "Truemoney", "bcq": "Kopi Kenangan", "bdp": "Kredito", "bdx": "Benjamin", 
+    "bex": "Whatnot", "bf": "Keybase", "bg": "MIXMART", "bgf": "Rapido", "bhi": "Chase", 
+    "bhl": "Ati.su", "bhz": "Eurobet", "bi": "Ys4fun", "bk": "G2G", "blb": "foundit", 
+    "blbk": "Blastbucks", "ble": "NEXON", "bm": "MarketGuru", "bmj": "Betflag", "bmi": "Sisal", 
+    "bnu": "Qpon", "boc": "51exch", "bol": "Bosslike", "boo": "CasinoPlus", "bp": "GoFundMe", 
+    "bqe": "Lottomatica", "bqy": "SNAI", "bqz": "Credit Karma", "brg": "Letgo", "brh": "Efsane", 
+    "brnc": "Branch", "brt": "Netwin", "bsw": "Milanuncios", "bt": "Alfa", "bu": "MonobankIndia", 
+    "busq": "Busqo", "bva": "Bingo101", "bwb": "Winmatch", "byh": "Adobe", "bzb": "Big Cash", 
+    "ca": "SuperS", "cb": "Bazos", "cc": "Quipp", "ccv": "Triumph", "cf": "irancell", 
+    "cf_id": "CoinFantasy", "cg": "Gemgala", "cgp": "College Pulse", "ch": "Pocket52", "ci": "redBus", 
+    "cim": "Acima", "cj": "Dotz", "ck": "BeReal", "cl": "UWIN", "clg": "Clubgg", 
+    "cm": "Prom", "co": "Rediffmail", "cp": "Uklon", "cpt": "Chipotle", "cq": "Mercado", 
+    "cr": "TenChat", "ctd": "Courtyard", "ctkt": "ConfirmTkt", "ctr": "CenturyLink", "cu": "炙热星河", 
+    "cv": "WashXpress", "cw": "PaddyPower", "cwg": "CWG", "cx": "Icrypex", "cz": "Getmega", 
+    "dah": "DahaDaha", "dav": "Dave", "daz": "LODA", "db": "ezbuy", "dc": "YikYak", 
+    "df": "Happn", "di": "Loanflix", "ding": "ding", "dk": "Pairs", "dm": "Iwplay", 
+    "do": "Leboncoin", "dps": "FDJ Parions Sport", "dt": "Delivery Club", "dtc": "Dutch Bros", 
+    "du": "AUBANK", "dv": "NoBroker", "dw": "Divar", "dx": "Powerkredite", "dz": "Dominos Pizza", 
+    "ea": "JamesDelivery", "eb": "Voltz", "ec": "RummyCulture", "ed": "Gamer", "edo": "RusDate", 
+    "ef": "Nextdoor", "eg": "ContactSys", "ei": "Taksheel", "ej": "MrQ", "el": "Bisu", 
+    "els": "Nielsen", "em": "ZéDelivery", "en": "Hermes", "eo": "Sizeer", "eq": "Qoo10", 
+    "er": "Kwork", "es": "iQIYI", "esz": "Ez777", "et": "Clubhouse", "eu": "LiveScore", 
+    "ev": "Picpay", "eve": "Enilive", "ew": "Nike", "ey": "miloan", "ez": "GoerliFaucet", 
+    "fa": "XadrezFeliz", "fc": "PharmEasy", "fe": "CliQQ", "fg": "IndianOil", "fi": "Dundle", 
+    "fj": "Potato Chat", "fk": "BLIBLI", "fl": "RummyLoot", "fm": "Touchance", "fo": "MobiKwik", 
+    "fog": "Flamingo", "fp": "Phound", "fpx": "500px", "fr": "DANA", "fs": "Şikayet var", 
+    "fst": "Fastwin", "full": "Full rent", "fv": "Vidio", "fvs": "fivesurveys", "fw": "99acres", 
+    "fx": "Pgbonus", "fy": "Mylove", "fz": "KFC", "ga": "Roposo", "gah": "Pazarama", 
+    "gal": "Goldbet", "gb": "YouStar", "gd": "Surveytime", "gf": "GoogleVoice", "gg": "PagSmile", 
+    "ghe": "GetHoldings", "gh": "GyFTR", "ght": "Google Chat", "gi": "Hotline", "gj": "Carousell", 
+    "gl": "GlobalTel", "gm": "Mocospace", "gmsg": "Google Messenger", "gn": "A9A", "gnt": "Gaintplay", 
+    "gor": "Redrob Signal", "gp": "Ticketmaster", "gq": "Freelancer", "gr": "Astropay", "gr_bf": "Beanfun", 
+    "gr_bg": "Battlestate Games", "gr_tl": "Tilda", "gs": "SamsungShop", "gt": "Gett", "guc": "SwagBucks", 
+    "gun": "Hungry Panda", "guv": "Guvi", "gv": "Humta", "gw": "CallApp", "gx": "Hepsiburadacom", 
+    "gy": "MIYACHAT", "gyt": "BetExc", "gz": "LYKA", "ha": "My11Circle", "hc": "MOMO", 
+    "hd": "MarketPapa", "hdfc": "HDFC Egro", "he": "Mewt", "hep": "HeyPiggy", "hf": "Cleartrip", 
+    "hg": "Switips", "hh": "Uplay", "hi": "JungleeRummy", "hk": "4FunLite", "hl": "Band", 
+    "hm": "Globus", "ho": "Cathay", "hop": "HOP", "hp": "Meesho", "hpnc": "Happypancake", 
+    "hq": "Magicbricks", "hr": "JKF", "hra": "Aadhar", "hrnjie": "华人街", "hs": "Asda", 
+    "ht": "Bitso", "hu": "Ukrnet", "hug": "Driv&", "hw": "AliPay", "hx": "AliExpress", 
+    "hy": "Ininal", "hyp": "Hypermart", "ia": "Socios", "ib": "Immowelt", "ibt": "Ibotta", 
+    "ic": "JoGo", "if": "IFood", "ih": "TeenPattiStarpro", "ii": "CashKaro", "il": "IQOS", 
+    "ioy": "Rupiyo", "ip": "Burger King", "iq": "icq", "ir": "Chispa", "is": "Schibsted", 
+    "iu": "Bykea", "iv": "Inboxlv", "ix": "Celcoin", "iz": "Global24", "ja": "Weverse", 
+    "jau": "Jiagu360", "jb": "Wing Money", "jd": "GiraBank", "je": "Nanovest", "jf": "Likee", 
+    "jh": "PingPong", "ji": "Monobank", "jj": "Aitu", "jl": "Hopi", "jm": "mzadqatar", 
+    "jno": "Juno", "jt": "TurkiyePetrolleri", "ju": "Indomaret", "jw": "Br777", "jwc": "Jalwa Game", 
+    "jx": "Swiggy", "jy": "Sorare", "jz": "Kaya", "kb": "kufarby", "kch": "KickCash", 
+    "kck": "Kick", "kd": "Kudos", "ke": "Эльдорадо", "kg": "FreeChargeApp", "kh": "Bukalapak", 
+    "ki": "99app", "kiq": "Kliq", "kir": "Predik", "kj": "YAPPY", "kl": "kolesa.kz", 
+    "klb": "Kolotibablo", "km": "Rozetka", "kn": "Verse", "kny": "Konvy", "ko": "AdaKami", 
+    "kon": "Monkey", "kp": "HQ Trivia", "kq": "FotoCasa", "kr": "Eyecon", "ks": "Hirect", 
+    "ku": "RoyalWin", "kv": "Rush", "kw": "Foody", "kx": "Vivo", "ky": "SpatenOktoberfest", 
+    "kz": "NimoTV", "la": "ssoidnet", "lc": "Subito", "ld": "Cashmine", "ldps": "ludoplus", 
+    "le": "E bike Gewinnspiel", "lg": "MediBuddy", "lh": "Lion Parcel", "li": "Baidu", 
+    "lid": "Ludo Winner", "lk": "PurePlatfrom", "ll": "LigaPro", "lmd": "Ashley Madison", 
+    "ln": "Grofers", "log": "Long Chau", "lp": "Algida", "lq": "Potato", "lr": "Okta", 
+    "lrmn": "LEROY MERLIN", "ls": "Careem", "lt": "Bitclout", "lu": "Crickpe", "lw": "MrGreen", 
+    "lx": "DewuPoison", "ly": "Olacabs", "lz": "Things", "max": "MAX", "mb": "Yahoo", 
+    "mc": "MiChat", "mcr": "MYCAR.KZ", "meb": "MBMBet", "meex": "Media express", "mf": "Weidian", 
+    "mgrs": "Migros", "mi": "Zupee", "mk": "LongHu", "ml": "ApostaGanha", "mlk": "Mackolik", 
+    "mml": "MMLive", "mn": "RRSA", "mp": "Winmasters", "mq": "GMNG", "mr": "Fastmail", 
+    "ms": "NovaPoshta", "mu": "MyMusicTaste", "mua": "meta.ua", "mv": "Fruitz", "mw": "Transfergo", 
+    "mx": "SoulApp", "my": "CAIXA", "nd": "NoBroker", "ne": "Coindcx", "ng": "FunPay", 
+    "nh": "AlloBank", "nk": "Gittigidiyor", "nl": "ApostaGanha", "nm": "Thisshop", "nmcr": "Namaskar", 
+    "nmkz": "Naimi.kz", "nn": "Giftcloud", "nne": "OneOne", "no": "Virgo", "np": "Siply", 
+    "nq": "Trip", "ns": "Oldubil", "nst": "Instamatch", "nuum": "Nuum.ru", "nv": "Naver", 
+    "nw": "Ximalaya", "ny": "Pyro Music", "ob": "Onlinerby", "ob_uz": "OpenBudjet", "oc": "DealShare", 
+    "od": "FWDMAX", "odl": "Ricardo", "oe": "Codashop", "of": "OffGamers", "oh": "MapleSEA", 
+    "oji": "Ajio", "om": "Corona", "omx": "Angi", "oo": "LigaPro", "oq": "Vlife", 
+    "os": "Dhani", "ot": "Any Other", "otk": "51game", "otr": "Story TV", "ou": "Gabi", 
+    "ov": "Ovo", "ox": "Damejidlo", "oxh": "Oxinchain", "oy": "CashFly", "oz": "Poshmark", 
+    "pa": "Gamekit", "pb": "SkyTV", "pc": "Casino, gambling", "pcp": "Pcipay", "pev": "WPlace", 
+    "pf": "Plenty of Fish", "ph": "SnappFood", "pkr": "Playkaro247", "pl": "Pelago", "pla": "PolloAI", 
+    "pm": "AOL", "po": "premium.one", "pon": "Pokemon", "pp": "Huya", "ppl": "PYYPL", 
+    "pq": "CDkeys", "pt": "Bitaqaty", "pu": "Justdating", "pv": "LadyMaria", "pw": "SellMonitor", 
+    "px": "Nifty", "py": "Monese", "pz": "Lidl", "pzr": "Paisabazaar", "qaf": "Cred", 
+    "qb": "Payberry", "qbk": "First Games", "qbn": "RummyYes", "qbs": "Sixer", "qcb": "Shopsy", 
+    "qcx": "Narendra modi", "qcz": "Creditmantri", "qdx": "Truemeds", "qe": "GG", qf: "RedBook", 
+    "qff": "Aditya birla", "qg": "MoneyPay", "qgh": "Indiapolls", "qhb": "Dot and Key", "qhy": "Omnicard", 
+    "qi": "32Red", "qim": "HPGas", "qit": "Royaljeet", "qiv": "Goldsbet", "qjb": "Okwin", 
+    "qjp": "Innopay", "qjw": "Shriram One", "qjx": "Swiggy", "qk": "Bit", "qks": "Winclash", 
+    "qkt": "SpinWinner", "qkz": "Govinda365", "ql": "CMTcuzdan", "qld": "Ludo11", "qly": "Woohoo", 
+    "qmf": "Dream Money", "qmp": "Tata Motors", "qmq": "QuickTv", "qn": "Blued", "qql": "QQLive", 
+    "qr": "MEGA", "qrr": "Roz Rummy", "qt": "MoneyСontrol", "qy": "Zhihu", "ra": "KeyPay", 
+    "rap": "RapidApi", "rb": "Tick", "rch": "Research 360", "rf": "Akudo", "rh": "Ace2Three", 
+    "ri": "BillMill", "rk": "Fotka", "rktn": "Rakuten", "rl": "inDriver", "rn": "neftm", 
+    "ro": "PingCode", "rp": "hamrahaval", "rr": "Wolt", "rs": "Lotus", "rsy": "Resy", 
+    "rt": "hily", "ru": "HOP", "rv": "Kotak811", "rw": "BLS-SPAIN", "rx": "Sheerid", 
+    "ry": "McDonalds", "rz": "EasyPay", "sa": "AGIBANK", "saj": "Raja Games", "satu_kz": "Satu", 
+    "sc": "Voggt", "scrf": "Scruff", "se": "Feeld", "ser": "SerpApi", "sf": "SneakersnStuff", 
+    "sgk": "SeatGeek", "sh": "ShareChat", "si": "Cita Previa", "sj": "HandyPick", "sk": "Skroutz", 
+    "skls": "Skills", "sli": "Sponline", "sls": "Streamlabs", "sm": "YoWin", "snl": "Sonol", 
+    "so": "RummyWealth", "sp": "HappyFresh", "sq": "KuCoinPlay", "sr": "Starbucks", "sre": "Starexch", 
+    "ss": "Hezzl", "stn": "Stan", "su": "LOCO", "sw": "NCsoft", "swl": "Swarail", 
+    "sx": "Crowdtap", "sy": "Brahma", "talk": "Talkatone", "tbn": "TurboTenant", "tcw": "Switchere", 
+    "td": "ChaingeFinance", "te": "eFood", "tf": "Noon", "tit": "TIM IT", "tj": "dbrUA", 
+    "tjrm": "Taj Rummy", "tl": "Truecaller", "tln": "Toluna", "tm": "Akulaku", "tme": "OurTime", 
+    "tmi": "Taimi", "tmw": "Timewall", "tnst": "Tune studio", "tnx": "Telnyx", "tod": "TheDermaCo", 
+    "tp": "IndiaGold", "tq": "Swvl", "trc": "TrapCall", "tt": "Ziglu", "ttn": "Textnow", 
+    "tui": "Tutti", "tum": "Tumblr", "tv": "Flink", "ubr_gr": "Universal Beijing Resort", "ud": "Disney Hotstar", 
+    "ue": "Onet", "uf": "Eneba", "ug": "Fiqsy", "uh": "Yubo", "ui": "RuTube", 
+    "uj": "СhampionСasino", "ul": "Getir", "un": "Humble bundle", "uns": "Unstop", "uo": "CafeBazaar", 
+    "uq": "TopDetal", "ur": "MyDailyCash", "us": "IRCTC", "usp": "Australia Post", "uta": "BEUTEA", 
+    "uv": "BinBin", "uw": "Kirana", "uy": "Meliuz", "uz": "OffGamers", "va": "SportGully", 
+    "vc": "Banqi", "ve": "Dream11", "vf": "Q12 Trivia", "vg": "ShellBox", "vm": "Okcupid", 
+    "vn": "Yaay", "vo": "Brand20ua", "vp": "Kwai", "vq": "LadyMaria", "components": "Sub-Object", 
+    "vr": "MotorkuX", "vjs": "Stormgain", "vrst": "Verasight", "vs": "WinzoGame", "vsn": "Vision11", 
+    "vv": "Seo Sprint", "vx": "HeyBox", "vy": "Meta", "wmb": "Wamba", "wfo": "Ownly", 
+    "wg": "Skout", "wj": "1xbet", "wk": "Mobile01", "wku": "WorkUA", "wl": "YouGotaGift", 
+    "wmpl": "Womply", "wn": "GameArena", "wo": "Parkplus", "wp": "163СOM", "wq": "Leboncoin1", 
+    "ws": "Indodax", "wt": "IZI", "wu": "PrivetMir", "wv": "AIS", "ww": "BIP", 
+    "wz": "FoxFord", "xc": "SynotTip", "xd": "Tokopedia", "xe": "GalaxyChat", "xf": "LightChath", 
+    "xg": "FortunaSK", "xi": "InFund", "xk": "DiDi taxi", "xl": "Wmaraci", "xn": "Familia", 
+    "xo": "Notifire", "xq": "MPL", "xr": "Tango", "xs": "GroupMe", "xu": "RecargaPay", 
+    "xv": "Wish", "xw": "Taki", "xx": "Joyride", "xy": "Depop", "xz": "paycell", 
+    "yab": "Brevistay", "yd": "米画师Mihuashi", "yf": "Mylove", "yg": "CourseHero", "yi": "Yemeksepeti", 
+    "yj": "eWallet", "yk": "YikYak", "ylww": "Yellow", "yn": "Allegro", "yo": "Amasia", 
+    "yp": "Payzapp", "yq": "RedBook", "yr": "Miravia", "ys": "ZCity", "yto": "Anna Lottery", 
+    "yu": "Xiaomi", "yudafr": "Yuda", "yv": "IPLwin", "yx": "JTExpress", "za": "Jingdong", 
+    "zb": "FreeNow", "zd": "Zilch", "ze": "Shpock", "zf": "OnTaxi", "zg": "Setel", 
+    "zi": "LoveLocal", "zj": "ROBINHOOD", "zk": "Deliveroo", "zl": "Airtel", "zlw": "Zillow", 
+    "zm": "OfferUp", "zmx": "Zenmux", "zn": "Biedronka", "zo": "Kaggle", "zq": "IndiaPlays", 
+    "zr": "Papara", "zs": "Bilibili", "zt": "Budweiser", "zu": "BigC", "zv": "Digikala", 
+    "zw": "Quack", "zx": "CommunityGaming", "zy": "Nttgame"
   };
   
+  // Nạp đè mảng bowerServices vào hệ thống từ điển động
   Object.keys(bowerServices).forEach(key => {
     SERVICES_DICT[key.toLowerCase().trim()] = bowerServices[key];
   });
 
-  // 2. Đồng bộ Quốc gia (Xử lý cấu trúc Object đặc thù của Smsbower: ID làm Key -> Lấy thuộc tính "eng")
+  // 2. ĐỒNG BỘ QUỐC GIA CHUẨN ĐÚNG CẤU TRÚC OBJECT LỚN CHỨA SUB-OBJECT (.eng) CỦA SMSBOWER
   try {
     const cRes = await fetch(PROXY_URL + "?url=" + encodeURIComponent("https://api.smsbower.com/sms/v1/guest/getCountries"));
     const cData = await cRes.json();
     
+    // Duyệt trực tiếp qua từng Key (ID Quốc gia) của Object lớn
     if (cData && typeof cData === 'object' && !Array.isArray(cData)) {
       Object.keys(cData).forEach(id => {
         const countryObj = cData[id];
@@ -237,10 +412,10 @@ async function loadBowerDictionaries() {
       });
     }
   } catch(e) { 
-    console.log("Lỗi đồng bộ quốc gia Smsbower, chạy bộ danh mục cứng dự phòng."); 
+    console.log("Lỗi parse cấu trúc Object Quốc gia Smsbower, giữ nguyên dữ liệu gốc."); 
   }
 
-  SERVICES_DICT["dp"] = "ProtonMail"; // Fix cứng quy định MMO
+  SERVICES_DICT["dp"] = "ProtonMail"; // Giữ quy tắc MMO riêng
   renderFavoritesList();
 }
 
@@ -295,7 +470,6 @@ async function pasteAPI() {
 
 function clearAPI() { document.getElementById("apiLink").value = ""; }
 
-// Hiển thị thông báo nhỏ dạng popup
 function showPopup(msg) {
   const popup = document.getElementById("popup");
   popup.innerText = msg; popup.style.display = "block";
@@ -436,7 +610,6 @@ function removeFavoriteItem(e, targetLink) {
   renderFavoritesList(); saveCloudData();
 }
 
-// Hàm bóc tách thông tin Link để hiển thị nhãn dịch vụ / quốc gia
 function parseApiDetails(link) {
   let domain = "Unknown Web", serviceName = "Mặc định", countryName = "Mặc định", providerOrOperator = "Tự động";
   try {
