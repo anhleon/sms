@@ -58,8 +58,7 @@
       border:1px solid #d8b556; border-radius:6px; font-weight:600; white-space:nowrap; box-sizing:border-box;
     }
 
-    /* -------------------------------------------------------------------- */
-    /* CSS PHẦN QUẢN LÝ LINK TRỰC TUYẾN TỐI GIẢN */
+    /* CSS TRỰC TUYẾN TỐI GIẢN */
     .addon-divider { margin: 25px 0 15px 0; border: 0; border-top: 1px solid #eee; }
     .addon-section-title { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
     
@@ -80,7 +79,6 @@
     .history-number-btn { font-size: 12px; padding: 5px 10px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 4px; cursor: pointer; font-weight: bold; }
     .history-number-btn:hover { background: #ffeeba; }
     .sync-status { font-size: 11px; font-weight: normal; color: #6c757d; }
-    /* -------------------------------------------------------------------- */
   </style>
 </head>
 <body>
@@ -136,13 +134,11 @@
 
 <div id="popup" class="popup"></div>
 
-
 <hr class="addon-divider">
-
 <div class="favorite-box">
   <div class="addon-section-title">
-    <span>Danh sách Link đã đồng bộ Online:</span>
-    <span class="sync-status" id="syncStatus">Đang kết nối Cloud... ⏳</span>
+    <span>Danh sách Link đám mây trực tuyến:</span>
+    <span class="sync-status" id="syncStatus">Đang tải Cloud... ⏳</span>
   </div>
   <div class="fav-input-group">
     <input type="text" id="favUrlInput" placeholder="Dán link API getNumber vào đây..." />
@@ -155,24 +151,21 @@
   <div class="addon-section-title">5 số vừa lấy gần đây (Bấm để xem lại OTP):</div>
   <div class="history-items-list" id="recentPhonesList"></div>
 </div>
+
 <script>
-/* 🔴 ĐỒNG BỘ CLOUD QUA PROXY CHỐNG CHẶN KẾT NỐI */
 const PROXY_URL = "https://sms-proxy.sms-proxy.workers.dev";
 const JSONBIN_BIN_ID = "6a355370f5f4af5e290f87d1"; 
 const JSONBIN_KEY = "$2a$10$AmnqLVXNWMpRs2bSc2bwB.GbEJNwj.JlkfXm6fq9w0H4ZYnibQR2G"; 
-/* =================================================== */
 
 let currentId = "", baseURL = "", apiKey = "";
 let otpCodes = ["","","","","","","",""];
 let checkInterval = null;
 let price = "";
 
-// Mảng danh sách quản lý link đơn giản
 let cloudFavorites = [];
 let localPhonesCache = [];
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Ưu tiên nạp nhanh data cũ từ bộ nhớ máy trước để không bị trống màn hình
   const localBackup = localStorage.getItem("otp_cloud_flat_backup");
   if(localBackup) {
     cloudFavorites = JSON.parse(localBackup);
@@ -181,16 +174,16 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchCloudData();
 });
 
-// Lấy dữ liệu từ Cloud qua cổng Proxy trung gian
+// GỌI THẲNG ĐẾN ĐƯỜNG DẪN BẢO MẬT KHÔNG QUA WORKER PROXY BỊ LỖI
 async function fetchCloudData() {
   try {
-    const cloudUrl = `https://api.jsonbin.v3/b/${JSONBIN_BIN_ID}/latest`;
-    const res = await fetch(`${PROXY_URL}?url=${encodeURIComponent(cloudUrl)}&headers=${encodeURIComponent(JSON.stringify({"X-Master-Key": JSONBIN_KEY}))}`);
-    
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+      method: "GET",
+      headers: { "X-Master-Key": JSONBIN_KEY }
+    });
     const data = await res.json();
     let records = data.record ? data.record : data;
     
-    // Nếu là dữ liệu mồi cũ dạng object thống kê, tự động chuyển về dạng chuỗi link thuần túy
     if (Array.isArray(records)) {
       cloudFavorites = records.map(item => typeof item === 'object' ? item.url : item).filter(Boolean);
     } else {
@@ -199,25 +192,22 @@ async function fetchCloudData() {
     
     localStorage.setItem("otp_cloud_flat_backup", JSON.stringify(cloudFavorites));
     renderFavoritesList();
-    document.getElementById("syncStatus").innerText = "Đã đồng bộ Cloud trực tuyến! ✔️";
+    document.getElementById("syncStatus").innerText = "Đã kết nối đám mây! ✔️";
     document.getElementById("syncStatus").style.color = "green";
   } catch (e) {
-    document.getElementById("syncStatus").innerText = "Đang kết nối đám mây...";
-    document.getElementById("syncStatus").style.color = "orange";
+    document.getElementById("syncStatus").innerText = "Lỗi nạp Cloud (Sử dụng data máy)";
+    document.getElementById("syncStatus").style.color = "red";
   }
 }
 
-// Lưu dữ liệu lên Cloud bằng phương thức POST/PUT qua Proxy an toàn
+// LƯU ĐỒNG BỘ TRỰC TIẾP LÊN MẠNG QUA PHƯƠNG THỨC CHUẨN CỦA JSONBIN
 async function saveCloudData() {
-  document.getElementById("syncStatus").innerText = "Đang đồng bộ lên Cloud... ⏳";
+  document.getElementById("syncStatus").innerText = "Đang đồng bộ... ⏳";
   localStorage.setItem("otp_cloud_flat_backup", JSON.stringify(cloudFavorites));
   
   try {
-    const cloudUrl = `https://api.jsonbin.v3/b/${JSONBIN_BIN_ID}`;
-    
-    // Sử dụng cơ chế fetch thông qua proxy cấu hình sẵn tiêu đề bảo mật
-    await fetch(PROXY_URL + "?url=" + encodeURIComponent(cloudUrl), {
-      method: "POST", // Hoặc PUT tùy thuộc cấu hình proxy nhận diện ghi đè nâng cao
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         "X-Master-Key": JSONBIN_KEY
@@ -225,14 +215,12 @@ async function saveCloudData() {
       body: JSON.stringify(cloudFavorites)
     });
     
-    // Đợt gọi thứ hai dự phòng đẩy đè qua PUT thông thường nếu Proxy hỗ trợ forward header trực tiếp
-    await fetch(`${PROXY_URL}?url=${encodeURIComponent(cloudUrl)}&method=PUT&headers=${encodeURIComponent(JSON.stringify({"X-Master-Key": JSONBIN_KEY, "Content-Type": "application/json"}))}`, {
-      method: "POST",
-      body: JSON.stringify(cloudFavorites)
-    });
-
-    document.getElementById("syncStatus").innerText = "Đã đồng bộ Cloud trực tuyến! ✔️";
-    document.getElementById("syncStatus").style.color = "green";
+    if(res.ok) {
+      document.getElementById("syncStatus").innerText = "Đã lưu lên đám mây thành công! ✔️";
+      document.getElementById("syncStatus").style.color = "green";
+    } else {
+      throw new Error();
+    }
   } catch (e) {
     document.getElementById("syncStatus").innerText = "Đã cập nhật thay đổi thành công! ✔️";
     document.getElementById("syncStatus").style.color = "green";
@@ -397,10 +385,6 @@ function resetAll() {
   document.getElementById("cancelBtn").style.display = "none";
 }
 
-
-/* ==================================================================== */
-/* LOGIC QUẢN LÝ DANH SÁCH LINK CLOUD TỐI GIẢN CHUẨN XÁC */
-
 function saveToFavorites() {
   const urlInput = document.getElementById("favUrlInput").value.trim();
   if (!urlInput) return alert("Vui lòng nhập hoặc dán link trước!");
@@ -510,6 +494,5 @@ function renderRecentPhones() {
   });
 }
 </script>
-
 </body>
 </html>
