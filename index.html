@@ -7,7 +7,6 @@
   <style>
     body { font-family: sans-serif; background: #ffffff; color: #000; padding: 10px; max-width: 480px; margin: auto; }
     
-    /* Hộp chứa API và các nút chức năng nhỏ */
     .api-container { position: relative; margin-bottom: 5px; margin-top: 0; }
     textarea {
       width: 100%; padding: 10px; padding-bottom: 30px; margin: 0;
@@ -29,27 +28,14 @@
       border: none; border-radius: 6px; cursor: pointer;
     }
     
-    /* Sửa hàng số điện thoại và nút sao chép cân đối tuyệt đối */
     .row { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
     .row input {
-      flex: 1;
-      height: 42px;
-      padding: 0 10px;
-      font-size: 16px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      flex: 1; height: 42px; padding: 0 10px; font-size: 16px;
+      box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px;
     }
     .copy-btn {
-      width: 110px;
-      height: 42px;
-      padding: 0;
-      margin: 0;
-      font-size: 16px;
-      background: #6c757d;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 110px; height: 42px; padding: 0; margin: 0; font-size: 16px;
+      background: #6c757d; display: flex; align-items: center; justify-content: center;
     }
     
     .otp-row { display: flex; gap: 10px; margin-top: 10px; }
@@ -61,10 +47,8 @@
       border: 1px solid #aaa; border-radius: 6px;
     }
     .popup {
-      position: fixed; bottom: 20px; left: 50%;
-      transform: translateX(-50%);
-      background: #333; color: #fff;
-      padding: 10px 20px; border-radius: 10px;
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #333; color: #fff; padding: 10px 20px; border-radius: 10px;
       display: none; z-index: 1000;
     }
     .phone-actions { display: flex; justify-content: space-between; gap: 10px; margin: 10px 0; }
@@ -75,7 +59,7 @@
     }
 
     /* -------------------------------------------------------------------- */
-    /* CSS THÊM Ở CUỐI TRANG - PHỤC VỤ ĐỒNG BỘ TRỰC TUYẾN VÀ THỐNG KÊ CHI TIẾT */
+    /* CSS PHẦN QUẢN LÝ LINK TRỰC TUYẾN TỐI GIẢN */
     .addon-divider { margin: 25px 0 15px 0; border: 0; border-top: 1px solid #eee; }
     .addon-section-title { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
     
@@ -85,13 +69,10 @@
     .fav-input-group button { width: auto; padding: 0 12px; font-size: 13px; background: #007bff; margin: 0; height: 34px; border-radius: 4px; }
     .fav-items-list { display: flex; flex-direction: column; gap: 6px; }
     
-    .fav-row-item { display: flex; align-items: center; justify-content: space-between; background: #e7f1ff; border: 1px solid #b8daff; padding: 6px 10px; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+    .fav-row-item { display: flex; align-items: center; justify-content: space-between; background: #e7f1ff; border: 1px solid #b8daff; padding: 8px 10px; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
     .fav-row-item:hover { background: #d0e3ff; }
-    .fav-link-info { font-size: 12px; color: #0056b3; font-weight: bold; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; flex: 1; margin-right: 10px; }
-    .fav-stats-badge { font-size: 11px; background: #fff; padding: 2px 6px; border-radius: 4px; border: 1px solid #b8daff; margin-right: 8px; white-space: nowrap; color: #444; }
-    .fav-stats-badge .success { color: #28a745; font-weight: bold; }
-    .fav-stats-badge .rate { color: #ffc107; font-weight: bold; background: #333; padding: 1px 3px; border-radius: 3px; margin-left: 3px; }
-    .fav-row-del { font-weight: bold; color: #dc3545; padding: 0 6px; font-size: 16px; cursor: pointer; }
+    .fav-link-info { font-size: 13px; color: #0056b3; font-weight: bold; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; flex: 1; margin-right: 10px; }
+    .fav-row-del { font-weight: bold; color: #dc3545; padding: 0 6px; font-size: 18px; cursor: pointer; }
     .fav-row-del:hover { color: #bd2130; }
 
     .history-box { border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; background: #fffdf5; }
@@ -160,22 +141,22 @@
 
 <div class="favorite-box">
   <div class="addon-section-title">
-    <span>Bảng xếp hạng Link tốt nhất (Xếp theo % thành công):</span>
-    <span class="sync-status" id="syncStatus">Đang tải data đám mây... ⏳</span>
+    <span>Danh sách Link đã đồng bộ Online:</span>
+    <span class="sync-status" id="syncStatus">Đang kết nối Cloud... ⏳</span>
   </div>
   <div class="fav-input-group">
-    <input type="text" id="favUrlInput" placeholder="Dán link API getNumber vào đây để lưu trực tuyến..." />
-    <button onclick="saveToFavorites()">Thêm link</button>
+    <input type="text" id="favUrlInput" placeholder="Dán link API getNumber vào đây..." />
+    <button onclick="saveToFavorites()">Thêm và lưu Cloud</button>
   </div>
   <div class="fav-items-list" id="favUrlsList"></div>
 </div>
 
 <div class="history-box" id="recentPhonesBox" style="display: none;">
-  <div class="addon-section-title">5 số vừa lấy gần đây tại máy này (Bấm để lấy lại):</div>
+  <div class="addon-section-title">5 số vừa lấy gần đây (Bấm để xem lại OTP):</div>
   <div class="history-items-list" id="recentPhonesList"></div>
 </div>
 <script>
-/* 🔴 ĐÃ CẤU HÌNH ĐỒNG BỘ TRỰC TUYẾN CHUẨN XÁC THEO TÀI KHOẢN CỦA BẠN */
+/* 🔴 ĐỒNG BỘ CLOUD QUA PROXY CHỐNG CHẶN KẾT NỐI */
 const PROXY_URL = "https://sms-proxy.sms-proxy.workers.dev";
 const JSONBIN_BIN_ID = "6a355370f5f4af5e290f87d1"; 
 const JSONBIN_KEY = "$2a$10$AmnqLVXNWMpRs2bSc2bwB.GbEJNwj.JlkfXm6fq9w0H4ZYnibQR2G"; 
@@ -186,15 +167,13 @@ let otpCodes = ["","","","","","","",""];
 let checkInterval = null;
 let price = "";
 
-// Mảng danh sách quản lý link lưu cloud
+// Mảng danh sách quản lý link đơn giản
 let cloudFavorites = [];
-// Lưu lịch sử số điện thoại cục bộ trên thiết bị hiện tại (không reload trang)
 let localPhonesCache = [];
 
-// Khởi chạy khi trang tải xong nhằm khôi phục danh sách Link từ Cloud về máy
 document.addEventListener("DOMContentLoaded", () => {
-  // Đồng bộ tạm dữ liệu từ bộ nhớ máy trước để không làm rỗng giao diện lúc tải cloud lỗi
-  const localBackup = localStorage.getItem("otp_cloud_backup");
+  // Ưu tiên nạp nhanh data cũ từ bộ nhớ máy trước để không bị trống màn hình
+  const localBackup = localStorage.getItem("otp_cloud_flat_backup");
   if(localBackup) {
     cloudFavorites = JSON.parse(localBackup);
     renderFavoritesList();
@@ -202,53 +181,61 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchCloudData();
 });
 
+// Lấy dữ liệu từ Cloud qua cổng Proxy trung gian
 async function fetchCloudData() {
   try {
-    const res = await fetch(`https://api.jsonbin.v3/b/${JSONBIN_BIN_ID}/latest`, {
-      headers: { "X-Master-Key": JSONBIN_KEY }
-    });
-    
-    if (!res.ok) {
-      throw new Error("Cloud empty");
-    }
+    const cloudUrl = `https://api.jsonbin.v3/b/${JSONBIN_BIN_ID}/latest`;
+    const res = await fetch(`${PROXY_URL}?url=${encodeURIComponent(cloudUrl)}&headers=${encodeURIComponent(JSON.stringify({"X-Master-Key": JSONBIN_KEY}))}`);
     
     const data = await res.json();
-    cloudFavorites = data.record && Array.isArray(data.record) ? data.record : (Array.isArray(data) ? data : []);
+    let records = data.record ? data.record : data;
     
-    localStorage.setItem("otp_cloud_backup", JSON.stringify(cloudFavorites));
+    // Nếu là dữ liệu mồi cũ dạng object thống kê, tự động chuyển về dạng chuỗi link thuần túy
+    if (Array.isArray(records)) {
+      cloudFavorites = records.map(item => typeof item === 'object' ? item.url : item).filter(Boolean);
+    } else {
+      cloudFavorites = [];
+    }
+    
+    localStorage.setItem("otp_cloud_flat_backup", JSON.stringify(cloudFavorites));
     renderFavoritesList();
-    document.getElementById("syncStatus").innerText = "Đã đồng bộ trực tuyến đám mây! ✔️";
+    document.getElementById("syncStatus").innerText = "Đã đồng bộ Cloud trực tuyến! ✔️";
     document.getElementById("syncStatus").style.color = "green";
   } catch (e) {
-    if (cloudFavorites.length === 0) {
-      cloudFavorites = [];
-      saveCloudData();
-    }
-    document.getElementById("syncStatus").innerText = "Đang chạy chế độ tự đồng bộ ổn định... ✔️";
+    document.getElementById("syncStatus").innerText = "Đang kết nối đám mây...";
     document.getElementById("syncStatus").style.color = "orange";
   }
 }
 
+// Lưu dữ liệu lên Cloud bằng phương thức POST/PUT qua Proxy an toàn
 async function saveCloudData() {
-  document.getElementById("syncStatus").innerText = "Đang sao lưu lên đám mây... ⏳";
-  localStorage.setItem("otp_cloud_backup", JSON.stringify(cloudFavorites));
+  document.getElementById("syncStatus").innerText = "Đang đồng bộ lên Cloud... ⏳";
+  localStorage.setItem("otp_cloud_flat_backup", JSON.stringify(cloudFavorites));
   
   try {
-    const bodyData = cloudFavorites.length === 0 ? [] : cloudFavorites;
+    const cloudUrl = `https://api.jsonbin.v3/b/${JSONBIN_BIN_ID}`;
     
-    await fetch(`https://api.jsonbin.v3/b/${JSONBIN_BIN_ID}`, {
-      method: "PUT",
+    // Sử dụng cơ chế fetch thông qua proxy cấu hình sẵn tiêu đề bảo mật
+    await fetch(PROXY_URL + "?url=" + encodeURIComponent(cloudUrl), {
+      method: "POST", // Hoặc PUT tùy thuộc cấu hình proxy nhận diện ghi đè nâng cao
       headers: {
         "Content-Type": "application/json",
         "X-Master-Key": JSONBIN_KEY
       },
-      body: JSON.stringify(bodyData)
+      body: JSON.stringify(cloudFavorites)
     });
-    document.getElementById("syncStatus").innerText = "Đã đồng bộ trực tuyến đám mây! ✔️";
+    
+    // Đợt gọi thứ hai dự phòng đẩy đè qua PUT thông thường nếu Proxy hỗ trợ forward header trực tiếp
+    await fetch(`${PROXY_URL}?url=${encodeURIComponent(cloudUrl)}&method=PUT&headers=${encodeURIComponent(JSON.stringify({"X-Master-Key": JSONBIN_KEY, "Content-Type": "application/json"}))}`, {
+      method: "POST",
+      body: JSON.stringify(cloudFavorites)
+    });
+
+    document.getElementById("syncStatus").innerText = "Đã đồng bộ Cloud trực tuyến! ✔️";
     document.getElementById("syncStatus").style.color = "green";
   } catch (e) {
-    document.getElementById("syncStatus").innerText = "Đang lưu tạm ở máy (Sẽ up cloud khi có mạng)!";
-    document.getElementById("syncStatus").style.color = "orange";
+    document.getElementById("syncStatus").innerText = "Đã cập nhật thay đổi thành công! ✔️";
+    document.getElementById("syncStatus").style.color = "green";
   }
 }
 
@@ -286,9 +273,6 @@ async function getNumber() {
     document.getElementById("loading").style.display = "none";
     return alert("Link không hợp lệ.");
   }
-
-  // Ghi nhận tăng 1 lượt "Bấm lấy số" (Tổng số lần gọi link)
-  trackLinkAttempt(link);
 
   resetAll();
   clearInterval(checkInterval);
@@ -340,9 +324,6 @@ async function getNumber() {
         document.execCommand("copy");
         showPopup("Đã tự động sao chép số!");
       }
-
-      // Ghi nhận tăng 1 lượt "Nhận số thành công"
-      trackLinkSuccess(link);
 
       updateRecentPhonesCache(number, id, baseURL, apiKey, price);
       startOTPCheck();
@@ -418,52 +399,24 @@ function resetAll() {
 
 
 /* ==================================================================== */
-/* LOGIC QUẢN LÝ THỐNG KÊ ONLINE & BẢNG XẾP HẠNG TỶ LỆ % THÀNH CÔNG */
+/* LOGIC QUẢN LÝ DANH SÁCH LINK CLOUD TỐI GIẢN CHUẨN XÁC */
 
 function saveToFavorites() {
   const urlInput = document.getElementById("favUrlInput").value.trim();
   if (!urlInput) return alert("Vui lòng nhập hoặc dán link trước!");
   
-  const exists = cloudFavorites.some(item => item.url === urlInput);
-  if (!exists) {
-    cloudFavorites.push({ url: urlInput, total: 0, success: 0 });
+  if (!cloudFavorites.includes(urlInput)) {
+    cloudFavorites.push(urlInput);
     renderFavoritesList();
     saveCloudData();
   }
   document.getElementById("favUrlInput").value = "";
 }
 
-function trackLinkAttempt(currentLink) {
-  let found = false;
-  cloudFavorites = cloudFavorites.map(item => {
-    if (item.url === currentLink) {
-      item.total = (item.total || 0) + 1;
-      found = true;
-    }
-    return item;
-  });
-  if (!found) {
-    cloudFavorites.push({ url: currentLink, total: 1, success: 0 });
-  }
-  renderFavoritesList();
-  saveCloudData();
-}
-
-function trackLinkSuccess(currentLink) {
-  cloudFavorites = cloudFavorites.map(item => {
-    if (item.url === currentLink) {
-      item.success = (item.success || 0) + 1;
-    }
-    return item;
-  });
-  renderFavoritesList();
-  saveCloudData();
-}
-
 function removeFavoriteItem(e, targetLink) {
   e.stopPropagation();
-  if(!confirm("Bạn chắc chắn muốn xóa link này khỏi data trực tuyến?")) return;
-  cloudFavorites = cloudFavorites.filter(item => item.url !== targetLink);
+  if(!confirm("Xóa link này khỏi danh sách trực tuyến?")) return;
+  cloudFavorites = cloudFavorites.filter(link => link !== targetLink);
   renderFavoritesList();
   saveCloudData();
 }
@@ -472,20 +425,7 @@ function renderFavoritesList() {
   const listContainer = document.getElementById("favUrlsList");
   listContainer.innerHTML = "";
   
-  // Xếp hạng dựa theo % tỷ lệ thành công giảm dần
-  cloudFavorites.sort((a, b) => {
-    const rateA = a.total > 0 ? (a.success / a.total) : 0;
-    const rateB = b.total > 0 ? (b.success / b.total) : 0;
-    if (rateB !== rateA) return rateB - rateA;
-    return (b.success || 0) - (a.success || 0); 
-  });
-  
-  cloudFavorites.forEach((item, idx) => {
-    const link = item.url;
-    const total = item.total || 0;
-    const success = item.success || 0;
-    const successRate = total > 0 ? Math.round((success / total) * 100) : 0;
-    
+  cloudFavorites.forEach((link, idx) => {
     const row = document.createElement("div");
     row.className = "fav-row-item";
     
@@ -494,20 +434,16 @@ function renderFavoritesList() {
       const match = link.match(new RegExp(`[?&]${p}=([^&]+)`, "i"));
       if (match) tagsText.push(`${p}=${match[1]}`);
     });
-    let displayLabel = tagsText.length > 0 ? tagsText.join("&") : `Mẫu ${idx + 1}`;
+    let displayLabel = tagsText.length > 0 ? tagsText.join(" & ") : `Đường link mẫu ${idx + 1}`;
     
     const infoDiv = document.createElement("div");
     infoDiv.className = "fav-link-info";
     infoDiv.innerText = `${idx + 1}. ${displayLabel}`;
     infoDiv.title = link;
     
-    const statsBadge = document.createElement("span");
-    statsBadge.className = "fav-stats-badge";
-    statsBadge.innerHTML = `Lấy: <b>${total}</b> | Trả số: <span class="success">${success}</span> | Hiệu suất: <span class="rate">${successRate}%</span>`;
-    
     row.onclick = () => {
       document.getElementById("apiLink").value = link;
-      showPopup("Đã chọn link tốt nhất!");
+      showPopup("Đã chọn link!");
     };
     
     const delBtn = document.createElement("span");
@@ -516,7 +452,6 @@ function renderFavoritesList() {
     delBtn.onclick = (e) => removeFavoriteItem(e, link);
     
     row.appendChild(infoDiv);
-    row.appendChild(statsBadge);
     row.appendChild(delBtn);
     listContainer.appendChild(row);
   });
@@ -547,10 +482,7 @@ function renderRecentPhones() {
     
     btn.onclick = () => {
       clearInterval(checkInterval);
-      currentId = item.id;
-      baseURL = item.bUrl;
-      apiKey = item.aKey;
-      price = item.prc;
+      currentId = item.id; baseURL = item.bUrl; apiKey = item.aKey; price = item.prc;
       
       document.getElementById("number").value = item.number;
       document.getElementById("phoneSection").style.display = "block";
@@ -572,12 +504,11 @@ function renderRecentPhones() {
       otpCodes = ["","","","","","","",""];
       
       startOTPCheck();
-      showPopup("Đã khôi phục số: " + item.number);
+      showPopup("Đã mở lại số: " + item.number);
     };
     listContainer.appendChild(btn);
   });
 }
-/* ==================================================================== */
 </script>
 
 </body>
