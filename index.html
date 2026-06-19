@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>OTP Tool - Realtime Global API v9</title>
+  <title>OTP Tool - Realtime Global API v10</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: sans-serif; background: #ffffff; color: #000; padding: 10px; max-width: 480px; margin: auto; }
@@ -159,9 +159,27 @@ const PROXY_URL = "https://sms-proxy.sms-proxy.workers.dev";
 const JSONBIN_BIN_ID = "6a355370f5f4af5e290f87d1"; 
 const JSONBIN_KEY = "$2a$10$AmnqLVXNWMpRs2bSc2bwB.GbEJNwj.JlkfXm6fq9w0H4ZYnibQR2G"; 
 
-// Bộ từ điển trống ban đầu, sẽ được nạp tự động qua API
-let SERVICES_DICT = {};
-let COUNTRIES_DICT = {};
+/* ==================================================================== */
+/* 📚 BỘ CƠ SỞ DỮ LIỆU ĐẦY ĐỦ CÓ SẴN (DỰ PHÒNG CHUẨN XÁC 100%) */
+let SERVICES_DICT = {
+  "dp": "ProtonMail", "yw": "Grindr", "tg": "Telegram", "fb": "Facebook", "wa": "WhatsApp", 
+  "go": "Google", "ig": "Instagram", "tw": "Twitter", "vi": "Viber", "tk": "TikTok", 
+  "lf": "TikTok Lite", "qq": "Tencent QQ", "am": "Amazon", "nf": "Netflix", "wx": "WeChat", 
+  "bl": "Bigo Live", "ba": "BlablaCar", "ds": "Discord", "ly": "Uber", "ma": "Mail.ru", 
+  "me": "Line", "mm": "Microsoft", "re": "Reddit", "vk": "VKontakte", "wb": "Wildberries", 
+  "ya": "Yandex", "zy": "Zalo", "ot": "Any other"
+};
+
+let COUNTRIES_DICT = {
+  "0": "Russia", "1": "Ukraine", "2": "Kazakhstan", "3": "Guangzhou", "4": "China", "5": "Macau",
+  "6": "Indonesia", "7": "Malaysia", "8": "Philippines", "9": "Vietnam", "10": "Thailand", 
+  "11": "India", "12": "Taiwan", "13": "Hong Kong", "14": "Japan", "15": "Poland", "16": "United Kingdom",
+  "17": "Madagascar", "18": "Congo", "19": "Nigeria", "21": "Egypt", "22": "Germany", "23": "Estonia",
+  "24": "Azerbaijan", "25": "Oman", "29": "Peru", "32": "Romania", "36": "Canada", "44": "Lithuania", 
+  "48": "Netherlands", "52": "Cyprus", "58": "Cambodia", "73": "Brazil", "86": "China", "108": "Bosnia and Herzegovina",
+  "123": "Botswana", "187": "USA"
+};
+/* ==================================================================== */
 
 let currentId = "", baseURL = "", apiKey = "";
 let otpCodes = ["","","","","","","",""];
@@ -172,7 +190,7 @@ let cloudFavorites = [];
 let localPhonesCache = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1. Khởi động tải từ điển thời gian thực trước
+  // Thực thi nạp đồng bộ thời gian thực
   await loadBowerDictionaries();
 
   const localBackup = localStorage.getItem("otp_cloud_flat_backup");
@@ -183,45 +201,43 @@ document.addEventListener("DOMContentLoaded", async () => {
   fetchCloudData();
 });
 
-/* ==================================================================== */
-/* 🔄 TỰ ĐỘNG FETCH TOÀN BỘ TỪ ĐIỂN TỪ SMSBOWER THỜI GIAN THỰC */
 async function loadBowerDictionaries() {
   try {
-    // Tải danh sách dịch vụ
+    // 1. Đồng bộ và giải nén danh sách Dịch vụ
     const sRes = await fetch(PROXY_URL + "?url=" + encodeURIComponent("https://api.smsbower.com/sms/v1/guest/getServicesList"));
     const sData = await sRes.json();
-    if(Array.isArray(sData)) {
-      sData.forEach(item => {
-        if(item.code && item.name) {
-          SERVICES_DICT[item.code.toLowerCase().trim()] = item.name;
+    let sList = Array.isArray(sData) ? sData : (sData.record || sData.data || []);
+    if(sList && sList.length > 0) {
+      sList.forEach(item => {
+        let code = item.code || item.service || item.id;
+        let name = item.name || item.title;
+        if(code && name) {
+          SERVICES_DICT[String(code).toLowerCase().trim()] = String(name).trim();
         }
       });
-      // Dự phòng cứng cho trường hợp đặc biệt mmo
-      if(SERVICES_DICT["dp"] === "Direct") {
-        SERVICES_DICT["dp"] = "ProtonMail";
-      }
     }
+  } catch(e) { console.log("Sử dụng cơ sở dữ liệu dịch vụ có sẵn."); }
 
-    // Tải danh sách quốc gia
+  try {
+    // 2. Đồng bộ và giải nén danh sách Quốc gia
     const cRes = await fetch(PROXY_URL + "?url=" + encodeURIComponent("https://api.smsbower.com/sms/v1/guest/getCountries"));
     const cData = await cRes.json();
-    if(Array.isArray(cData)) {
-      cData.forEach(item => {
-        if(item.id !== undefined && item.name) {
-          COUNTRIES_DICT[String(item.id).trim()] = item.name;
+    let cList = Array.isArray(cData) ? cData : (cData.record || cData.data || []);
+    if(cList && cList.length > 0) {
+      cList.forEach(item => {
+        let id = item.id !== undefined ? item.id : item.code;
+        let name = item.name || item.title;
+        if(id !== undefined && name) {
+          COUNTRIES_DICT[String(id).trim()] = String(name).trim();
         }
       });
     }
-    console.log("Đã tải xong toàn bộ từ điển toàn cầu từ Smsbower.");
-  } catch(e) {
-    console.error("Lỗi tải từ điển thời gian thực, chuyển sang chế độ dự phòng thô:", e);
-    // Dự phòng thủ công cơ bản nếu mất mạng kết nối tới API gốc
-    SERVICES_DICT["dp"] = "ProtonMail";
-    SERVICES_DICT["yw"] = "Grindr";
-    SERVICES_DICT["tg"] = "Telegram";
-  }
+  } catch(e) { console.log("Sử dụng cơ sở dữ liệu quốc gia có sẵn."); }
+
+  // Luôn đảm bảo bẫy cứng cho mmo quy chuẩn
+  SERVICES_DICT["dp"] = "ProtonMail";
+  renderFavoritesList();
 }
-/* ==================================================================== */
 
 async function fetchCloudData() {
   try {
@@ -507,7 +523,7 @@ function renderFavoritesList() {
     
     const infoDiv = document.createElement("div");
     infoDiv.className = "fav-link-info";
-    infoDiv.innerHTML = `${idx + 1}. Dịch vụ: <span>${details.serviceName}</span> | Quốc gia: <span>${details.countryName}</span> | Mạng/Provider: <span>${details.providerOrOperator}</span>`;
+    infoDiv.innerHTML = `${idx + 1}. Dịch vụ: <span>${details.serviceName}</span> | Quốc gia: <span>${details.countryName}</span> | Mạng: <span>${details.providerOrOperator}</span>`;
     infoDiv.title = link;
     
     row.onclick = () => {
