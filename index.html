@@ -160,10 +160,11 @@ const JSONBIN_BIN_ID = "6a355370f5f4af5e290f87d1";
 const JSONBIN_KEY = "$2a$10$AmnqLVXNWMpRs2bSc2bwB.GbEJNwj.JlkfXm6fq9w0H4ZYnibQR2G"; 
 
 /* ==================================================================== */
-/* 🌍 BỘ TỪ ĐIỂN TOÀN CẦU HARDCODE 197 QUỐC GIA & MMO (DỰ PHÒNG CỨNG) */
+/* 🌍 BỘ TỪ ĐIỂN TOÀN CẦU DỰ PHÒNG CỨNG */
 let SERVICES_DICT = {
-  "dp": "ProtonMail", "yw": "Grindr", "tg": "Telegram", "fb": "Facebook", "wa": "WhatsApp", 
-  "go": "Google", "ig": "Instagram", "tw": "Twitter", "vi": "Viber", "tk": "TikTok", 
+  "go": "Google", "fb": "Facebook", "acz": "Claude", "ts": "PayPal",
+  "dp": "ProtonMail", "yw": "Grindr", "tg": "Telegram", "wa": "WhatsApp", 
+  "ig": "Instagram", "tw": "Twitter", "vi": "Viber", "tk": "TikTok", 
   "lf": "TikTok Lite", "qq": "Tencent QQ", "am": "Amazon", "nf": "Netflix", "wx": "WeChat", 
   "bl": "Bigo Live", "ba": "BlablaCar", "ds": "Discord", "ly": "Uber", "ma": "Mail.ru", 
   "me": "Line", "mm": "Microsoft", "re": "Reddit", "vk": "VKontakte", "wb": "Wildberries", 
@@ -199,62 +200,45 @@ document.addEventListener("DOMContentLoaded", async () => {
   fetchCloudData();
 });
 
-// THUẬT TOÁN DEEP SCAN: Tự tìm kiếm mọi cấp độ JSON để lôi dữ liệu ra ngoài
-function deepSearchData(obj, targetKey1, targetKey2) {
-  let matched = [];
-  function scan(node) {
-    if (!node || typeof node !== 'object') return;
-    if (Array.isArray(node)) {
-      node.forEach(scan);
-      return;
-    }
-    // Check nếu node chứa thông tin cặp key cần tìm
-    let k1 = Object.keys(node).find(k => k.toLowerCase() === targetKey1.toLowerCase());
-    let k2 = Object.keys(node).find(k => k.toLowerCase() === targetKey2.toLowerCase());
-    if (k1 && k2) {
-      matched.push({ id: node[k1], name: node[k2] });
-    }
-    for (let key in node) {
-      if (typeof node[key] === 'object') scan(node[key]);
-    }
-  }
-  scan(obj);
-  return matched;
-}
-
 async function loadBowerDictionaries() {
-  // 1. Quét sâu lấy dịch vụ
-  try {
-    const sRes = await fetch(PROXY_URL + "?url=" + encodeURIComponent("https://api.smsbower.com/sms/v1/guest/getServicesList"));
-    const sData = await sRes.json();
-    let scannedServices = [];
-    // Thử quét theo các biến thể cặp Key thị hiện phổ biến
-    scannedServices = scannedServices.concat(deepSearchData(sData, "code", "name"));
-    scannedServices = scannedServices.concat(deepSearchData(sData, "id", "name"));
-    scannedServices = scannedServices.concat(deepSearchData(sData, "service", "title"));
-    
-    scannedServices.forEach(item => {
-      if(item.id !== undefined && item.name) {
-        SERVICES_DICT[String(item.id).toLowerCase().trim()] = String(item.name).trim();
-      }
-    });
-  } catch(e) { console.log("Lỗi đồng bộ dịch vụ, chạy bộ nhớ cứng."); }
+  // 1. Đồng bộ và cập nhật danh sách Dịch vụ (Services) từ danh mục bạn cung cấp
+  const bowerServices = {
+    "go": "Google", "fb": "Facebook", "acz": "Claude", "ts": "PayPal",
+    "dp": "ProtonMail", "yw": "Grindr", "tg": "Telegram", "wa": "WhatsApp", 
+    "ig": "Instagram", "tw": "Twitter", "vi": "Viber", "tk": "TikTok", 
+    "lf": "TikTok Lite", "qq": "Tencent QQ", "am": "Amazon", "nf": "Netflix", 
+    "wx": "WeChat", "bl": "Bigo Live", "ba": "BlablaCar", "ds": "Discord", 
+    "ly": "Uber", "ma": "Mail.ru", "me": "Line", "mm": "Microsoft", 
+    "re": "Reddit", "vk": "VKontakte", "wb": "Wildberries", "ya": "Yandex", 
+    "zy": "Zalo", "ot": "Any other"
+  };
+  
+  Object.keys(bowerServices).forEach(key => {
+    SERVICES_DICT[key.toLowerCase().trim()] = bowerServices[key];
+  });
 
-  // 2. Quét sâu lấy Quốc gia
+  // 2. Đồng bộ Quốc gia (Xử lý cấu trúc Object đặc thù của Smsbower: ID làm Key -> Lấy thuộc tính "eng")
   try {
     const cRes = await fetch(PROXY_URL + "?url=" + encodeURIComponent("https://api.smsbower.com/sms/v1/guest/getCountries"));
     const cData = await cRes.json();
-    let scannedCountries = [];
-    scannedCountries = scannedCountries.concat(deepSearchData(cData, "id", "name"));
-    scannedCountries = scannedCountries.concat(deepSearchData(cData, "code", "name"));
-    scannedCountries = scannedCountries.concat(deepSearchData(cData, "country", "title"));
     
-    scannedCountries.forEach(item => {
-      if(item.id !== undefined && item.name) {
-        COUNTRIES_DICT[String(item.id).trim()] = String(item.name).trim();
-      }
-    });
-  } catch(e) { console.log("Lỗi đồng bộ quốc gia, chạy bộ nhớ cứng."); }
+    if (cData && typeof cData === 'object' && !Array.isArray(cData)) {
+      Object.keys(cData).forEach(id => {
+        const countryObj = cData[id];
+        if (countryObj && countryObj.eng) {
+          const englishName = countryObj.eng.trim();
+          if (COUNTRIES_DICT[id]) {
+            const viName = COUNTRIES_DICT[id].split(" (")[0];
+            COUNTRIES_DICT[id] = `${viName} (${englishName})`;
+          } else {
+            COUNTRIES_DICT[id] = englishName;
+          }
+        }
+      });
+    }
+  } catch(e) { 
+    console.log("Lỗi đồng bộ quốc gia Smsbower, chạy bộ danh mục cứng dự phòng."); 
+  }
 
   SERVICES_DICT["dp"] = "ProtonMail"; // Fix cứng quy định MMO
   renderFavoritesList();
@@ -311,6 +295,7 @@ async function pasteAPI() {
 
 function clearAPI() { document.getElementById("apiLink").value = ""; }
 
+// Hiển thị thông báo nhỏ dạng popup
 function showPopup(msg) {
   const popup = document.getElementById("popup");
   popup.innerText = msg; popup.style.display = "block";
@@ -451,6 +436,7 @@ function removeFavoriteItem(e, targetLink) {
   renderFavoritesList(); saveCloudData();
 }
 
+// Hàm bóc tách thông tin Link để hiển thị nhãn dịch vụ / quốc gia
 function parseApiDetails(link) {
   let domain = "Unknown Web", serviceName = "Mặc định", countryName = "Mặc định", providerOrOperator = "Tự động";
   try {
