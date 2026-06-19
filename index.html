@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>OTP Tool - Super Auto Detect API v5</title>
+  <title>OTP Tool - Realtime Global API v9</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: sans-serif; background: #ffffff; color: #000; padding: 10px; max-width: 480px; margin: auto; }
@@ -159,6 +159,10 @@ const PROXY_URL = "https://sms-proxy.sms-proxy.workers.dev";
 const JSONBIN_BIN_ID = "6a355370f5f4af5e290f87d1"; 
 const JSONBIN_KEY = "$2a$10$AmnqLVXNWMpRs2bSc2bwB.GbEJNwj.JlkfXm6fq9w0H4ZYnibQR2G"; 
 
+// Bộ từ điển trống ban đầu, sẽ được nạp tự động qua API
+let SERVICES_DICT = {};
+let COUNTRIES_DICT = {};
+
 let currentId = "", baseURL = "", apiKey = "";
 let otpCodes = ["","","","","","","",""];
 let checkInterval = null;
@@ -167,7 +171,10 @@ let price = "";
 let cloudFavorites = [];
 let localPhonesCache = [];
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  // 1. Khởi động tải từ điển thời gian thực trước
+  await loadBowerDictionaries();
+
   const localBackup = localStorage.getItem("otp_cloud_flat_backup");
   if(localBackup) {
     cloudFavorites = JSON.parse(localBackup);
@@ -175,6 +182,46 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   fetchCloudData();
 });
+
+/* ==================================================================== */
+/* 🔄 TỰ ĐỘNG FETCH TOÀN BỘ TỪ ĐIỂN TỪ SMSBOWER THỜI GIAN THỰC */
+async function loadBowerDictionaries() {
+  try {
+    // Tải danh sách dịch vụ
+    const sRes = await fetch(PROXY_URL + "?url=" + encodeURIComponent("https://api.smsbower.com/sms/v1/guest/getServicesList"));
+    const sData = await sRes.json();
+    if(Array.isArray(sData)) {
+      sData.forEach(item => {
+        if(item.code && item.name) {
+          SERVICES_DICT[item.code.toLowerCase().trim()] = item.name;
+        }
+      });
+      // Dự phòng cứng cho trường hợp đặc biệt mmo
+      if(SERVICES_DICT["dp"] === "Direct") {
+        SERVICES_DICT["dp"] = "ProtonMail";
+      }
+    }
+
+    // Tải danh sách quốc gia
+    const cRes = await fetch(PROXY_URL + "?url=" + encodeURIComponent("https://api.smsbower.com/sms/v1/guest/getCountries"));
+    const cData = await cRes.json();
+    if(Array.isArray(cData)) {
+      cData.forEach(item => {
+        if(item.id !== undefined && item.name) {
+          COUNTRIES_DICT[String(item.id).trim()] = item.name;
+        }
+      });
+    }
+    console.log("Đã tải xong toàn bộ từ điển toàn cầu từ Smsbower.");
+  } catch(e) {
+    console.error("Lỗi tải từ điển thời gian thực, chuyển sang chế độ dự phòng thô:", e);
+    // Dự phòng thủ công cơ bản nếu mất mạng kết nối tới API gốc
+    SERVICES_DICT["dp"] = "ProtonMail";
+    SERVICES_DICT["yw"] = "Grindr";
+    SERVICES_DICT["tg"] = "Telegram";
+  }
+}
+/* ==================================================================== */
 
 async function fetchCloudData() {
   try {
@@ -409,27 +456,28 @@ function removeFavoriteItem(e, targetLink) {
   saveCloudData();
 }
 
-/* ==================================================================== */
-/* 🛠️ THUẬT TOÁN ĐỌC VÀ HIỂN THỊ THAM SỐ THÔ KHÔNG QUA TỪ ĐIỂN DỄ BỊ SAI LỆCH */
 function parseApiDetails(link) {
   let domain = "Unknown Web";
-  let serviceCode = "—";
-  let countryCode = "—";
+  let serviceName = "Mặc định";
+  let countryName = "Mặc định";
   let providerOrOperator = "Tự động";
 
   try {
     const urlObj = new URL(link);
     domain = urlObj.hostname.replace("www.", ""); 
     
-    // Đọc mã dịch vụ thô từ link
     let s = urlObj.searchParams.get("service") || urlObj.searchParams.get("name") || urlObj.searchParams.get("service_id");
-    if(s) serviceCode = s.toUpperCase().trim();
+    if(s) {
+      let sKey = s.toLowerCase().trim();
+      serviceName = SERVICES_DICT[sKey] ? `${SERVICES_DICT[sKey]} (${s.toUpperCase()})` : s.toUpperCase();
+    }
 
-    // Đọc mã quốc gia thô từ link
     let c = urlObj.searchParams.get("country") || urlObj.searchParams.get("country_id") || urlObj.searchParams.get("nation");
-    if(c) countryCode = String(c).trim();
+    if(c) {
+      let cKey = String(c).trim();
+      countryName = COUNTRIES_DICT[cKey] ? `${COUNTRIES_DICT[cKey]} (${c})` : `Mã ${c}`;
+    }
 
-    // Đọc mã mạng/nhà cung cấp thô từ link
     let op = urlObj.searchParams.get("operator") || 
              urlObj.searchParams.get("provider") || 
              urlObj.searchParams.get("provider_id") ||
@@ -440,9 +488,8 @@ function parseApiDetails(link) {
     domain = "API Link";
   }
 
-  return { domain, serviceCode, countryCode, providerOrOperator };
+  return { domain, serviceName, countryName, providerOrOperator };
 }
-/* ==================================================================== */
 
 function renderFavoritesList() {
   const listContainer = document.getElementById("favUrlsList");
@@ -460,13 +507,12 @@ function renderFavoritesList() {
     
     const infoDiv = document.createElement("div");
     infoDiv.className = "fav-link-info";
-    // Hiển thị trực tiếp dạng mã gốc để tránh sai lệch nghĩa giữa các bên cung cấp dịch vụ khác nhau
-    infoDiv.innerHTML = `${idx + 1}. Dịch vụ: <span>[${details.serviceCode}]</span> | Quốc gia: <span>[${details.countryCode}]</span> | Mạng/Provider: <span>${details.providerOrOperator}</span>`;
+    infoDiv.innerHTML = `${idx + 1}. Dịch vụ: <span>${details.serviceName}</span> | Quốc gia: <span>${details.countryName}</span> | Mạng/Provider: <span>${details.providerOrOperator}</span>`;
     infoDiv.title = link;
     
     row.onclick = () => {
       document.getElementById("apiLink").value = link;
-      showPopup("Đã chọn: " + details.domain + " [" + details.serviceCode + "]");
+      showPopup("Đã chọn: " + details.domain + " [" + details.serviceName + "]");
     };
     
     const delBtn = document.createElement("span");
