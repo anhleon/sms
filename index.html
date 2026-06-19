@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>OTP Tool - Super Auto Detect API</title>
+  <title>OTP Tool - Super Auto Detect API v5</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: sans-serif; background: #ffffff; color: #000; padding: 10px; max-width: 480px; margin: auto; }
@@ -158,21 +158,6 @@
 const PROXY_URL = "https://sms-proxy.sms-proxy.workers.dev";
 const JSONBIN_BIN_ID = "6a355370f5f4af5e290f87d1"; 
 const JSONBIN_KEY = "$2a$10$AmnqLVXNWMpRs2bSc2bwB.GbEJNwj.JlkfXm6fq9w0H4ZYnibQR2G"; 
-
-/* ==================================================================== */
-/* 🌐 BỘ TỪ ĐIỂN DỊCH MÃ API SANG TIẾNG ANH / TIẾNG VIỆT CHUẨN XÁC */
-const SERVICES_DICT = {
-  "yw": "Grindr", "tg": "Telegram", "fb": "Facebook", "wa": "WhatsApp", 
-  "go": "Google", "ig": "Instagram", "tw": "Twitter", "vi": "Viber", 
-  "tk": "TikTok", "dp": "Dịch vụ DP", "lf": "TikTok Lite", "qq": "Tencent QQ"
-};
-
-const COUNTRIES_DICT = {
-  "16": "United Kingdom", "73": "Vietnam", "0": "Russia", "1": "Ukraine", 
-  "2": "Kazakhstan", "6": "Indonesia", "7": "Malaysia", "15": "Poland", 
-  "22": "Germany", "36": "Canada", "187": "USA", "86": "China"
-};
-/* ==================================================================== */
 
 let currentId = "", baseURL = "", apiKey = "";
 let otpCodes = ["","","","","","","",""];
@@ -425,31 +410,26 @@ function removeFavoriteItem(e, targetLink) {
 }
 
 /* ==================================================================== */
-/* 🛠️ THUẬT TOÁN ĐỌC, ĐỐI CHIẾU TỪ ĐIỂN VÀ DỊCH TOÀN BỘ THAM SỐ API CHUẨN XÁC */
+/* 🛠️ THUẬT TOÁN ĐỌC VÀ HIỂN THỊ THAM SỐ THÔ KHÔNG QUA TỪ ĐIỂN DỄ BỊ SAI LỆCH */
 function parseApiDetails(link) {
   let domain = "Unknown Web";
-  let serviceName = "Mặc định";
-  let countryName = "Gốc (0)";
+  let serviceCode = "—";
+  let countryCode = "—";
   let providerOrOperator = "Tự động";
 
   try {
     const urlObj = new URL(link);
     domain = urlObj.hostname.replace("www.", ""); 
     
-    // 1. Đọc và dịch Dịch Vụ (Service)
+    // Đọc mã dịch vụ thô từ link
     let s = urlObj.searchParams.get("service") || urlObj.searchParams.get("name") || urlObj.searchParams.get("service_id");
-    if(s) {
-      let codeLower = s.toLowerCase();
-      serviceName = SERVICES_DICT[codeLower] ? SERVICES_DICT[codeLower] : s.toUpperCase();
-    }
+    if(s) serviceCode = s.toUpperCase().trim();
 
-    // 2. Đọc và dịch Quốc Gia (Country)
+    // Đọc mã quốc gia thô từ link
     let c = urlObj.searchParams.get("country") || urlObj.searchParams.get("country_id") || urlObj.searchParams.get("nation");
-    if(c) {
-      countryName = COUNTRIES_DICT[c] ? COUNTRIES_DICT[c] : "Mã: " + c;
-    }
+    if(c) countryCode = String(c).trim();
 
-    // 3. Đọc linh hoạt Nhà mạng (operator) HOẶC Provider ID / providerIds (Smsbower)
+    // Đọc mã mạng/nhà cung cấp thô từ link
     let op = urlObj.searchParams.get("operator") || 
              urlObj.searchParams.get("provider") || 
              urlObj.searchParams.get("provider_id") ||
@@ -460,7 +440,7 @@ function parseApiDetails(link) {
     domain = "API Link";
   }
 
-  return { domain, serviceName, countryName, providerOrOperator };
+  return { domain, serviceCode, countryCode, providerOrOperator };
 }
 /* ==================================================================== */
 
@@ -472,7 +452,6 @@ function renderFavoritesList() {
     const row = document.createElement("div");
     row.className = "fav-row-item";
     
-    // Gọi bộ bóc tách và dịch thông minh
     const details = parseApiDetails(link);
     
     const webBadge = document.createElement("div");
@@ -481,12 +460,13 @@ function renderFavoritesList() {
     
     const infoDiv = document.createElement("div");
     infoDiv.className = "fav-link-info";
-    infoDiv.innerHTML = `${idx + 1}. Dịch vụ: <span>${details.serviceName}</span> | Quốc gia: <span>${details.countryName}</span> | Mạng/Provider: <span>${details.providerOrOperator}</span>`;
+    // Hiển thị trực tiếp dạng mã gốc để tránh sai lệch nghĩa giữa các bên cung cấp dịch vụ khác nhau
+    infoDiv.innerHTML = `${idx + 1}. Dịch vụ: <span>[${details.serviceCode}]</span> | Quốc gia: <span>[${details.countryCode}]</span> | Mạng/Provider: <span>${details.providerOrOperator}</span>`;
     infoDiv.title = link;
     
     row.onclick = () => {
       document.getElementById("apiLink").value = link;
-      showPopup("Đã chọn: " + details.domain + " [" + details.serviceName + "]");
+      showPopup("Đã chọn: " + details.domain + " [" + details.serviceCode + "]");
     };
     
     const delBtn = document.createElement("span");
