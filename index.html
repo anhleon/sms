@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>OTP Tool - Auto Smart Cloud Scan v16 (Persistent Machine Only)</title>
+  <title>OTP Tool - Auto Smart Cloud Scan v17</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: sans-serif; background: #ffffff; color: #000; padding: 10px; max-width: 480px; margin: auto; }
@@ -38,12 +38,12 @@
       background: #6c757d; display: flex; align-items: center; justify-content: center;
     }
     
-    /* CẤU TRÚC LƯỚI 3 X 3 - OTP MÀU ĐEN DỄ NHÌN */
+    /* GIAO DIỆN Ô OTP: VIỀN MỎNG 1PX VÀ NỀN MÀU TRẮNG */
     .otp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
     .otp-card { 
-      border: 2px solid #007bff; border-radius: 8px; 
-      background: #f0f7ff; padding: 12px 4px; text-align: center; 
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s;
+      border: 1px solid #007bff; border-radius: 8px; 
+      background: #ffffff; padding: 12px 4px; text-align: center; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s;
     }
     .otp-card-title { font-size: 12px; font-weight: bold; color: #555; margin-bottom: 6px; display: flex; justify-content: center; align-items: center; gap: 4px; }
     .otp-card-num { font-size: 24px; font-weight: 800; color: #000000; word-break: break-all; letter-spacing: 1px; }
@@ -60,7 +60,6 @@
       border:1px solid #d8b556; border-radius:6px; font-weight:600; white-space:nowrap; box-sizing:border-box;
     }
 
-    /* CSS PHẦN LIST CLOUD SMART DETECT */
     .addon-divider { margin: 25px 0 15px 0; border: 0; border-top: 1px solid #eee; }
     .addon-section-title { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
     
@@ -166,22 +165,19 @@ let cloudFavorites = [];
 let localPhonesCache = [];
 
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Phục hồi 5 số gần đây từ bộ nhớ máy hiện tại
   const savedCache = localStorage.getItem("otp_local_phones_cache");
   if(savedCache) {
     localPhonesCache = JSON.parse(savedCache);
     renderRecentPhones();
   }
 
-  // 2. Phục hồi danh sách Cloud dự phòng từ máy
   const localBackup = localStorage.getItem("otp_cloud_struct_backup");
   if(localBackup) {
     cloudFavorites = JSON.parse(localBackup);
     renderFavoritesList();
   }
-  fetchCloudData(); // Đồng bộ chung từ Cloud như cũ
+  fetchCloudData();
 
-  // 3. KHÔI PHỤC TRẠNG THÁI SỐ, LINK VÀ LƯỚI OTP TRÊN RIÊNG MÁY NÀY KHI F5
   const cachedLink = localStorage.getItem("otp_cached_api_link");
   if (cachedLink) {
     document.getElementById("apiLink").value = cachedLink;
@@ -208,7 +204,6 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("priceBadge").style.display = "inline-block";
     }
 
-    // Đổ lại dữ liệu lưới 9 ô OTP cũ
     let nextLoadingIndex = -1;
     for (let i = 1; i <= 9; i++) {
       const codeVal = otpCodes[i - 1];
@@ -226,7 +221,6 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("otp" + nextLoadingIndex + "-loading").style.display = "inline";
     }
 
-    // Tự động quét tiếp tục nhận OTP bình thường sau khi F5
     if (currentId) {
       startOTPCheck();
     }
@@ -245,7 +239,6 @@ function saveCurrentActiveStateToCache(number) {
   localStorage.setItem("otp_current_active_state", JSON.stringify(state));
 }
 
-// KHU VỰC ĐỒNG BỘ CHUNG CỦA ĐÁM MÂY (GIỮ NGUYÊN TÍNH NĂNG CŨ)
 async function fetchCloudData() {
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
@@ -397,7 +390,7 @@ async function getNumber() {
         navigator.clipboard.writeText(number).then(() => showPopup("Đã tự động sao chép số!"));
       }
       saveCurrentActiveStateToCache(number);
-      updateRecentPhonesCache(number, id, baseURL, apiKey, price, currentLink);
+      updateRecentPhonesCache(number, id, baseURL, apiKey, price, currentLink, ["","","","","","","","",""]);
       startOTPCheck();
     } else { 
       alert("Không lấy được số.\n" + text); 
@@ -427,9 +420,11 @@ async function checkOTP() {
 
     otpCodes[idx] = code;
     
-    // Đồng bộ lại bộ lưu trữ máy hiện tại khi có OTP mới về
     const currentNumVal = document.getElementById("number").value;
     saveCurrentActiveStateToCache(currentNumVal);
+    
+    // Cập nhật lại lịch sử mã OTP vào bộ nhớ đệm của riêng số điện thoại này
+    syncOtpToRecentPhonesCache(currentNumVal, otpCodes);
 
     document.getElementById("otp" + (idx + 1)).innerText = code;
     document.getElementById("otp" + (idx + 1) + "-loading").style.display = "none";
@@ -565,12 +560,25 @@ function renderFavoritesList() {
   });
 }
 
-function updateRecentPhonesCache(number, id, bUrl, aKey, prc, lnk) {
+function updateRecentPhonesCache(number, id, bUrl, aKey, prc, lnk, historyOtps) {
   localPhonesCache = localPhonesCache.filter(item => item.number !== number);
-  localPhonesCache.unshift({ number, id, bUrl, aKey, prc, lnk });
+  localPhonesCache.unshift({ number, id, bUrl, aKey, prc, lnk, historyOtps: historyOtps || ["","","","","","","","",""] });
   if (localPhonesCache.length > 5) localPhonesCache.pop();
   localStorage.setItem("otp_local_phones_cache", JSON.stringify(localPhonesCache));
   renderRecentPhones();
+}
+
+function syncOtpToRecentPhonesCache(number, updatedOtps) {
+  let found = false;
+  localPhonesCache.forEach(item => {
+    if(item.number === number) {
+      item.historyOtps = [...updatedOtps];
+      found = true;
+    }
+  });
+  if(found) {
+    localStorage.setItem("otp_local_phones_cache", JSON.stringify(localPhonesCache));
+  }
 }
 
 function renderRecentPhones() {
@@ -592,14 +600,30 @@ function renderRecentPhones() {
         document.getElementById("priceBadge").textContent = "Giá: " + price;
         document.getElementById("priceBadge").style.display = "inline-block";
       } else { document.getElementById("priceBadge").style.display = "none"; }
+      
+      // KHÔI PHỤC LẠI ĐÚNG LỊCH SỬ MÃ CỦA SỐ ĐIỆN THOẠI NÀY
+      otpCodes = item.historyOtps && item.historyOtps.length === 9 ? [...item.historyOtps] : ["","","","","","","","",""];
+      
+      let nextLoadingIndex = -1;
       for (let i = 1; i <= 9; i++) {
-        document.getElementById("otp" + i).innerText = "___";
-        document.getElementById("otp" + i + "-loading").style.display = "none";
+        const codeVal = otpCodes[i - 1];
+        if (codeVal) {
+          document.getElementById("otp" + i).innerText = codeVal;
+          document.getElementById("otp" + i + "-loading").style.display = "none";
+        } else {
+          document.getElementById("otp" + i).innerText = "___";
+          if (nextLoadingIndex === -1) nextLoadingIndex = i;
+          document.getElementById("otp" + i + "-loading").style.display = "none";
+        }
       }
-      document.getElementById("otp1-loading").style.display = "inline";
-      otpCodes = ["","","","","","","","",""];
+      
+      if (nextLoadingIndex !== -1 && currentId) {
+        document.getElementById("otp" + nextLoadingIndex + "-loading").style.display = "inline";
+      }
+
       saveCurrentActiveStateToCache(item.number);
-      startOTPCheck(); showPopup("Đã mở lại số: " + item.number);
+      startOTPCheck(); 
+      showPopup("Đã mở lại số & lịch sử OTP: " + item.number);
     };
     listContainer.appendChild(btn);
   });
