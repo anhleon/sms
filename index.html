@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>OTP Tool by Anhleon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+            padding: 10px;
+            max-width: 480px;
+            margin: auto;
+        }
+        .api-container {
+            position: relative;
+            margin-bottom: 5px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px 10px 30px;
+            margin: 0;
+            font-size: 15px;
+            background-color: #ffffff;
+            color: #000000;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            height: 75px;
+            resize: none;
+            display: block;
+        }
+        .api-actions {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            display: flex;
+            gap: 5px;
+        }
+        .api-actions button {
+            width: auto;
+            padding: 3px 8px;
+            margin: 0;
+            font-size: 11px;
+            background-color: #e0e0e0;
+            color: #333333;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 5px;
+        }
+        .row input {
+            flex: 1;
+            height: 42px;
+            padding: 0 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .copy-btn {
+            width: 110px;
+            height: 42px;
+            padding: 0;
+            margin: 0;
+            font-size: 16px;
+            background-color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .otp-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .otp-card {
+            border: 1px solid #007bff;
+            border-radius: 8px;
+            background-color: #ffffff;
+            padding: 12px 4px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .otp-card-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #555555;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+        }
+        .otp-card-num {
+            font-size: 24px;
+            font-weight: 800;
+            color: #000000;
+            word-break: break-all;
+            letter-spacing: 1px;
+        }
+        .popup {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333333;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: none;
+            z-index: 1000;
+        }
+        .phone-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .phone-actions button {
+            flex: 1;
+        }
+        .price-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0 10px;
+            height: 42px;
+            background-color: #ffe9a8;
+            border: 1px solid #d8b556;
+            border-radius: 6px;
+            font-weight: 600;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+        .history-box {
+            border: 1px solid #ffeeba;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #fffdf5;
+            margin-top: 15px;
+        }
+        .history-items-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 5px;
+        }
+        .history-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .history-number-btn {
+            font-size: 11px;
+            padding: 8px 2px;
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 700;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .otp-count-badge {
+            position: absolute;
+            top: -5px;
+            right: -4px;
+            font-size: 9px;
+            font-weight: 700;
+            color: #ffffff;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            z-index: 5;
+        }
+        .badge-red { background-color: #dc3545; }
+        .badge-green { background-color: #28a745; }
+        
+        .addon-divider {
+            margin: 20px 0 15px;
+            border: 0;
+            border-top: 1px solid #eeeeee;
+        }
+        .addon-section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #333333;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .favorite-box {
+            border: 1px dashed #007bff;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #f8f9fa;
+            margin-bottom: 15px;
+        }
+        .fav-input-group {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+        .fav-input-group input {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 13px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .fav-input-group button {
+            width: auto;
+            padding: 0 12px;
+            font-size: 13px;
+            background-color: #007bff;
+            margin: 0;
+            height: 34px;
+            border-radius: 4px;
+        }
+        .fav-items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .fav-row-item {
+            display: flex;
+            flex-direction: column;
+            background-color: #e7f1ff;
+            border: 1px solid #b8daff;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+        }
+        .fav-web-name {
+            font-size: 11px;
+            font-weight: 700;
+            color: #ffffff;
+            background-color: #007bff;
+            padding: 1px 5px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-bottom: 4px;
+            width: fit-content;
+        }
+        .fav-link-info {
+            font-size: 13px;
+            color: #222222;
+            font-weight: 500;
+            line-height: 1.5;
+            padding-right: 25px;
+        }
+        .fav-link-info span {
+            color: #ff5722;
+            font-weight: 700;
+        }
+        .fav-stats-bar {
+            display: flex;
+            gap: 10px;
+            font-size: 11px;
+            margin-top: 5px;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 3px 6px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            width: fit-content;
+        }
+        .stat-success { color: #2e7d32; font-weight: 600; }
+        .stat-cancel { color: #c62828; font-weight: 600; }
+        .stat-total { color: #475569; }
+        .fav-row-del {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            font-size: 18px;
+            color: #ff5722;
+            font-weight: 700;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .fav-row-del:hover {
+            background-color: rgba(255, 87, 34, 0.1);
+        }
+        .sync-btn {
+            background-color: #28a745;
+            font-size: 11px;
+            padding: 4px 8px;
+            width: auto;
+            margin: 0;
+            border-radius: 4px;
+        }
+        .spinner {
+            display: none;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #ccc;
+            border-top: 2px solid #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 3px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="api-container">
+        <textarea id="apiLink" placeholder="Nhập API Link mua số vào đây..."></textarea>
+        <div class="api-actions">
+            <button onclick="clearApiLink()">Xóa</button>
+            <button onclick="pasteApiLink()">Dán</button>
+        </div>
+    </div>
+
+    <button onclick="getPhoneNumber()">MUA SỐ NGAY</button>
+
+    <div id="phoneSection" style="display: none;">
+        <div class="row">
+            <input type="text" id="number" readonly>
+            <div id="priceBadge" class="price-badge" style="display: none;"></div>
+            <button class="copy-btn" onclick="copyPhone()">SAO CHÉP</button>
+        </div>
+        <div class="phone-actions">
+            <button id="cancelBtn" style="background-color: #dc3545;" onclick="cancelNumber()">HỦY SỐ</button>
+        </div>
+    </div>
+
+    <div id="otpSection" style="display: none;">
+        <div class="otp-grid">
+            <div class="otp-card">
+                <div class="otp-card-title">OTP 1 <div id="otp1-loading" class="spinner"></div></div>
+                <div class="otp-card-num" id="otp1">___</div>
+            </div>
+            <div class="otp-card">
+                <div class="otp-card-title">OTP 2 <div id="otp2-loading" class="spinner"></div></div>
+                <div class="otp-card-num" id="otp2">___</div>
+            </div>
+            <div class="otp-card">
+                <div class="otp-card-title">OTP 3 <div id="otp3-loading" class="spinner"></div></div>
+                <div class="otp-card-num" id="otp3">___</div>
+            </div>
+            <div class="otp-card">
+                <div class="otp-card-title">OTP 4 <div id="otp4-loading" class="spinner"></div></div>
+                <div class="otp-card-num" id="otp4">___</div>
+            </div>
+            <div class="otp-card">
+                <div class="otp-card-title">OTP 5 <div id="otp5-loading" class="spinner"></div></div>
+                <div class="otp-card-num" id="otp5">___</div>
+            </div>
+            <div class="otp-card">
+                <div class="otp-card-title">OTP 6 <div id="otp6-loading" class="spinner"></div></div>
+                <div class="otp-card-num" id="otp6">___</div>
+            </div>
+            <div class="otp-card">
+                <div class="otp-card-title">OTP 7 <div id="otp7-loading" class="spinner"></div></div>
+                <div class="otp-card-num" id="otp7">___</div>
+            </div>
+            <div class="otp-card">
+                <div class="otp-card-title">OTP 8 <div id="otp8-loading" class="spinner"></div></div>
+                <div class="otp-card-num" id="otp8">___</div>
+            </div>
+            <div class="otp-card">
+                <div class="otp-card-title">OTP 9 <div id="otp9-loading" class="spinner"></div></div>
+                <div class="otp-card-num" id="otp9">___</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="recentPhonesBox" class="history-box" style="display: none;">
+        <div style="font-size: 12px; font-weight: bold; color: #856404; margin-bottom: 5px;">
+            LỊCH SỬ 12 SỐ GẦN ĐÂY (Bấm để xem lại OTP):
+        </div>
+        <div id="recentPhonesList" class="history-items-grid"></div>
+    </div>
+
+    <hr class="addon-divider">
+
+    <div class="addon-section-title">
+        <span>DANH SÁCH LIÊN KẾT ĐÃ LƯU CLOUD</span>
+        <button class="sync-btn" onclick="fetchCloudData()">Đồng bộ Cloud</button>
+    </div>
+
+    <div class="favorite-box">
+        <div class="fav-input-group">
+            <input type="text" id="favLabelInput" placeholder="Tên gợi nhớ (Ví dụ: Telegram Chợ...)">
+            <button onclick="addCurrentToFavorites()">Lưu Link Hiện Tại</button>
+        </div>
+        <div id="favoritesList" class="fav-items-list">
+            <div style="font-size: 12px; color: #666; text-align: center; padding: 10px;">
+                Đang tải hoặc chưa có dữ liệu cấu trúc đám mây...
+            </div>
+        </div>
+    </div>
+
+    <div id="popup" class="popup"></div>
+
+    <script>
+        let currentLink = "";
+        let baseURL = "";
+        let apiKey = "";
+        let currentId = "";
+        let price = "";
+        let checkInterval = null;
+        let otpCodes = ["", "", "", "", "", "", "", "", ""];
+        let localPhonesCache = [];
+        let cloudFavorites = [];
+
+        function showPopup(text) {
+            const p = document.getElementById("popup");
+            p.innerText = text;
+            p.style.display = "block";
+            setTimeout(() => { p.style.display = "none"; }, 2000);
+        }
+
+        function cacheApiLink() {
+            const link = document.getElementById("apiLink").value.trim();
+            localStorage.setItem("otp_cached_api_link", link);
+        }
+
+        function clearApiLink() {
+            document.getElementById("apiLink").value = "";
+            localStorage.removeItem("otp_cached_api_link");
+            showPopup("Đã xóa link");
+        }
+
+        async function pasteApiLink() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById("apiLink").value = text;
+                localStorage.setItem("otp_cached_api_link", text);
+                showPopup("Đã dán link từ bộ nhớ tạm");
+            } catch (err) {
+                showPopup("Không thể truy cập bộ nhớ tạm. Hãy dán thủ công!");
+            }
+        }
+
+        function saveCurrentActiveStateToCache(phoneNum) {
+            const state = {
+                number: phoneNum,
+                currentId: currentId,
+                baseURL: baseURL,
+                apiKey: apiKey,
+                price: price,
+                currentLink: currentLink,
+                otpCodes: [...otpCodes]
+            };
+            localStorage.setItem("otp_current_active_state", JSON.stringify(state));
+        }
+
+        function clearCurrentActiveStateCache() {
+            localStorage.removeItem("otp_current_active_state");
+        }
+
+        function parseApiUrl(urlStr) {
+            try {
+                const urlObj = new URL(urlStr);
+                const bUrl = urlObj.originObj ? urlObj.originObj : (urlObj.protocol + "//" + urlObj.host);
+                const key = urlObj.searchParams.get("api_key") || urlObj.searchParams.get("apikey") || "";
+                return { bUrl, key };
+            } catch (e) {
+                if (urlStr.includes("chothuethansoc.com")) {
+                    const match = urlStr.match(/(https?:\/\/[^\/]+)/);
+                    const keyMatch = urlStr.match(/(?:api_key|apikey)=([^&]+)/);
+                    return {
+                        bUrl: match ? match[1] : "https://chothuethansoc.com",
+                        key: keyMatch ? keyMatch[1] : ""
+                    };
+                }
+                return { bUrl: "", key: "" };
+            }
+        }
+
+        function getPhoneNumber() {
+            currentLink = document.getElementById("apiLink").value.trim();
+            if (!currentLink) return alert("Vui lòng nhập API Link!");
+            cacheApiLink();
+
+            const parsed = parseApiUrl(currentLink);
+            baseURL = parsed.bUrl;
+            apiKey = parsed.key;
+
+            if (!baseURL || !apiKey) {
+                return alert("Link API không đúng cấu trúc (Thiếu api_key hoặc sai định dạng URL)!");
+            }
+
+            clearInterval(checkInterval);
+            currentId = "";
+            price = "";
+            otpCodes = ["", "", "", "", "", "", "", "", ""];
+
+            document.getElementById("phoneSection").style.display = "none";
+            document.getElementById("otpSection").style.display = "none";
+            document.getElementById("cancelBtn").style.display = "none";
+            document.getElementById("priceBadge").style.display = "none";
+
+            for (let i = 1; i <= 9; i++) {
+                document.getElementById("otp" + i).innerText = "___";
+                document.getElementById("otp" + i + "-loading").style.display = "none";
+            }
+
+            fetch(currentLink)
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success && res.data) {
+                        const d = res.data;
+                        currentId = d.id;
+                        price = d.price ? d.price + "đ" : "";
+                        const phoneNum = d.number;
+
+                        document.getElementById("number").value = phoneNum;
+                        document.getElementById("phoneSection").style.display = "block";
+                        document.getElementById("otpSection").style.display = "block";
+                        document.getElementById("cancelBtn").style.display = "inline-block";
+
+                        if (price) {
+                            document.getElementById("priceBadge").textContent = "Giá: " + price;
+                            document.getElementById("priceBadge").style.display = "inline-block";
+                        }
+
+                        document.getElementById("otp1-loading").style.display = "inline";
+
+                        updateRecentPhonesCache(phoneNum, currentId, baseURL, apiKey, price, currentLink, otpCodes);
+                        saveCurrentActiveStateToCache(phoneNum);
+
+                        startOTPCheck();
+                        showPopup("Mua số thành công!");
+                    } else {
+                        alert("Lỗi mua số: " + (res.message || "Không có số khả dụng hoặc tài khoản hết tiền."));
+                    }
+                })
+                .catch(err => alert("Lỗi kết nối API mua số: " + err.message));
+        }
+
+        function copyPhone() {
+            const num = document.getElementById("number");
+            num.select();
+            num.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(num.value).then(() => {
+                showPopup("Đã sao chép số: " + num.value);
+            });
+        }
+
+        function startOTPCheck() {
+            if (!currentId) return;
+            const checkUrl = `${baseURL}/api/activities/${currentId}?api_key=${apiKey}`;
+
+            checkInterval = setInterval(() => {
+                fetch(checkUrl)
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.success && res.data) {
+                            const d = res.data;
+                            let localOtpsChanged = false;
+
+                            if (d.status === "Sumited" || d.status === "Completed" || d.status === "Refunded") {
+                                if (d.code) {
+                                    const codesArr = Array.isArray(d.code) ? d.code : [d.code];
+                                    for (let i = 0; i < 9; i++) {
+                                        if (codesArr[i] && otpCodes[i] !== String(codesArr[i])) {
+                                            otpCodes[i] = String(codesArr[i]);
+                                            localOtpsChanged = true;
+                                        }
+                                    }
+                                }
+                                clearInterval(checkInterval);
+                                for (let i = 1; i <= 9; i++) {
+                                    document.getElementById("otp" + i + "-loading").style.display = "none";
+                                    document.getElementById("otp" + i).innerText = otpCodes[i - 1] ? otpCodes[i - 1] : "___";
+                                }
+                                document.getElementById("cancelBtn").style.display = "none";
+                                clearCurrentActiveStateCache();
+
+                                if (localOtpsChanged) {
+                                    const currentPhone = document.getElementById("number").value;
+                                    syncOtpToRecentPhonesCache(currentPhone, otpCodes);
+                                }
+                                return;
+                            }
+
+                            if (d.code) {
+                                const codesArr = Array.isArray(d.code) ? d.code : [d.code];
+                                let nextSlotIndex = -1;
+
+                                for (let i = 0; i < 9; i++) {
+                                    if (codesArr[i]) {
+                                        if (otpCodes[i] !== String(codesArr[i])) {
+                                            otpCodes[i] = String(codesArr[i]);
+                                            localOtpsChanged = true;
+                                        }
+                                        document.getElementById("otp" + (i + 1)).innerText = otpCodes[i];
+                                        document.getElementById("otp" + (i + 1) + "-loading").style.display = "none";
+                                    } else {
+                                        if (nextSlotIndex === -1) nextSlotIndex = i;
+                                        document.getElementById("otp" + (i + 1)).innerText = "___";
+                                        document.getElementById("otp" + (i + 1) + "-loading").style.display = "none";
+                                    }
+                                }
+
+                                if (nextSlotIndex !== -1) {
+                                    document.getElementById("otp" + (nextSlotIndex + 1) + "-loading").style.display = "inline";
+                                }
+
+                                if (localOtpsChanged) {
+                                    const currentPhone = document.getElementById("number").value;
+                                    syncOtpToRecentPhonesCache(currentPhone, otpCodes);
+                                    saveCurrentActiveStateToCache(currentPhone);
+                                }
+                            }
+                        }
+                    })
+                    .catch(e => console.log("Lỗi check OTP:", e));
+            }, 3500);
+        }
+
+        function cancelNumber() {
+            if (!currentId) return;
+            if (!confirm("Bạn chắc chắn muốn HỦY số điện thoại hiện tại?")) return;
+
+            clearInterval(checkInterval);
+            const cancelUrl = `${baseURL}/api/activities/${currentId}/cancel?api_key=${apiKey}`;
+
+            fetch(cancelUrl)
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        showPopup("Đã hủy số thành công!");
+                        document.getElementById("cancelBtn").style.display = "none";
+                        for (let i = 1; i <= 9; i++) {
+                            document.getElementById("otp" + i + "-loading").style.display = "none";
+                        }
+                        clearCurrentActiveStateCache();
+                    } else {
+                        alert("Lỗi khi gửi yêu cầu hủy số: " + (res.message || "Vui lòng thử lại"));
+                        startOTPCheck();
+                    }
+                })
+                .catch(err => {
+                    alert("Lỗi kết nối khi hủy số: " + err.message);
+                    startOTPCheck();
+                });
+        }
+
+        function fetchCloudData() {
+            const proxyUrl = "https://script.google.com/macros/s/AKfycbzL5Tbe6fUvY24m7qC7C00yG1Z4Yt74X-qf6w_j_B1GZ0r6I3u7_qg7EwF6mZ6D2w3a/exec";
+            fetch(proxyUrl)
+                .then(r => r.json())
+                .then(res => {
+                    if (res && Array.isArray(res)) {
+                        cloudFavorites = res;
+                        localStorage.setItem("otp_cloud_struct_backup", JSON.stringify(cloudFavorites));
+                        renderFavoritesList();
+                    }
+                })
+                .catch(e => console.log("Lỗi đồng bộ Cloud:", e));
+        }
+
+        function addCurrentToFavorites() {
+            const link = document.getElementById("apiLink").value.trim();
+            const label = document.getElementById("favLabelInput").value.trim();
+
+            if (!link) return alert("Vui lòng nhập hoặc chọn một link API trước!");
+            if (!label) return alert("Vui lòng điền tên gợi nhớ cho liên kết này!");
+
+            const parsed = parseApiUrl(link);
+            if (!parsed.bUrl || !parsed.key) return alert("Cấu trúc liên kết API không hợp lệ!");
+
+            const serviceIdMatch = link.match(/(?:serviceId|service_id|id)=([^&]+)/);
+            const sId = serviceIdMatch ? serviceIdMatch[1] : "0";
+
+            const payload = {
+                action: "add",
+                domain: parsed.bUrl.replace(/^https?:\/\//, ""),
+                apiKey: parsed.key,
+                serviceId: sId,
+                serviceName: label,
+                fullUrl: link
+            };
+
+            const proxyUrl = "https://script.google.com/macros/s/AKfycbzL5Tbe6fUvY24m7qC7C00yG1Z4Yt74X-qf6w_j_B1GZ0r6I3u7_qg7EwF6mZ6D2w3a/exec";
+
+            showPopup("Đang gửi yêu cầu lưu lên Cloud...");
+            fetch(proxyUrl, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                showPopup("Đã gửi yêu cầu thêm! Đang tải lại dữ liệu...");
+                document.getElementById("favLabelInput").value = "";
+                setTimeout(fetchCloudData, 1500);
+            })
+            .catch(e => alert("Lỗi khi thêm liên kết: " + e.message));
+        }
+
+        function removeFavoriteItem(event, linkUrl) {
+            event.stopPropagation();
+            if (!confirm("Bạn có chắc chắn muốn xóa liên kết này khỏi Cloud?")) return;
+
+            const payload = {
+                action: "delete",
+                fullUrl: linkUrl
+            };
+
+            const proxyUrl = "https://script.google.com/macros/s/AKfycbzL5Tbe6fUvY24m7qC7C00yG1Z4Yt74X-qf6w_j_B1GZ0r6I3u7_qg7EwF6mZ6D2w3a/exec";
+
+            showPopup("Đang gửi yêu cầu xóa lên Cloud...");
+            fetch(proxyUrl, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                showPopup("Đã gửi yêu cầu xóa! Đang tải lại dữ liệu...");
+                setTimeout(fetchCloudData, 1500);
+            })
+            .catch(e => alert("Lỗi khi xóa liên kết: " + e.message));
+        }
+
+        function renderFavoritesList() {
+            const box = document.getElementById("favoritesList");
+            box.innerHTML = "";
+
+            if (cloudFavorites.length === 0) {
+                box.innerHTML = '<div style="font-size:12px;color:#666;text-align:center;padding:10px;">Chưa có liên kết nào trên Cloud.</div>';
+                return;
+            }
+
+            cloudFavorites.forEach(item => {
+                const fullLink = item.fullUrl;
+                const total = parseInt(item.totalScan || 0);
+                const success = parseInt(item.successCount || 0);
+                const cancel = parseInt(item.cancelCount || 0);
+
+                let successRate = 0;
+                let cancelRate = 0;
+                if (total > 0) {
+                    successRate = Math.round((success / total) * 100);
+                    cancelRate = Math.round((cancel / total) * 100);
+                }
+
+                const row = document.createElement("div");
+                row.className = "fav-row-item";
+
+                const badge = document.createElement("span");
+                badge.className = "fav-web-name";
+                badge.innerText = item.domain;
+
+                const info = document.createElement("div");
+                info.className = "fav-link-info";
+                info.innerHTML = `Ứng dụng: <span>${item.serviceName}</span> (ID: ${item.serviceId})`;
+
+                const stats = document.createElement("div");
+                stats.className = "fav-stats-bar";
+                stats.innerHTML = `
+                    <span class="stat-success">✓ Về: ${successRate}% (${success} lần)</span>
+                    <span class="stat-cancel">✕ Hủy: ${cancelRate}% (${cancel} lần)</span>
+                    <span class="stat-total">Tổng: ${total}</span>
+                `;
+
+                row.onclick = () => {
+                    document.getElementById("apiLink").value = fullLink;
+                    currentLink = fullLink;
+                    cacheApiLink();
+                    showPopup("Đã chọn: " + item.domain + " [" + item.serviceName + "]");
+                };
+
+                const delBtn = document.createElement("span");
+                delBtn.className = "fav-row-del";
+                delBtn.innerText = "×";
+                delBtn.onclick = (e) => removeFavoriteItem(e, fullLink);
+
+                row.appendChild(badge);
+                row.appendChild(info);
+                row.appendChild(stats);
+                row.appendChild(delBtn);
+                box.appendChild(row);
+            });
+        }
+
+        function updateRecentPhonesCache(number, id, bUrl, aKey, prc, lnk, r_otps) {
+            localPhonesCache = localPhonesCache.filter(item => item.number !== number);
+            localPhonesCache.unshift({
+                number: number,
+                id: id,
+                bUrl: bUrl,
+                aKey: aKey,
+                prc: prc,
+                lnk: lnk,
+                historyOtps: r_otps || ["", "", "", "", "", "", "", "", ""]
+            });
+
+            if (localPhonesCache.length > 12) localPhonesCache.pop();
+            localStorage.setItem("otp_local_phones_cache", JSON.stringify(localPhonesCache));
+            renderRecentPhones();
+        }
+
+        function syncOtpToRecentPhonesCache(number, targetOtps) {
+            let changed = false;
+            localPhonesCache.forEach(item => {
+                if (item.number === number) {
+                    item.historyOtps = [...targetOtps];
+                    changed = true;
+                }
+            });
+            if (changed) {
+                localStorage.setItem("otp_local_phones_cache", JSON.stringify(localPhonesCache));
+                renderRecentPhones();
+            }
+        }
+
+        function renderRecentPhones() {
+            const box = document.getElementById("recentPhonesBox");
+            const list = document.getElementById("recentPhonesList");
+            list.innerHTML = "";
+
+            if (localPhonesCache.length === 0) {
+                box.style.display = "none";
+                return;
+            }
+            box.style.display = "block";
+
+            localPhonesCache.forEach(item => {
+                let otpCount = 0;
+                if (item.historyOtps && Array.isArray(item.historyOtps)) {
+                    otpCount = item.historyOtps.filter(x => x !== "").length;
+                }
+
+                const wrapper = document.createElement("div");
+                wrapper.className = "history-wrapper";
+
+                const btn = document.createElement("div");
+                btn.className = "history-number-btn";
+                btn.innerText = item.number;
+
+                const badge = document.createElement("span");
+                badge.className = "otp-count-badge " + (otpCount === 0 ? "badge-red" : "badge-green");
+                badge.innerText = otpCount;
+
+                btn.onclick = () => {
+                    clearInterval(checkInterval);
+                    currentId = item.id;
+                    baseURL = item.bUrl;
+                    apiKey = item.aKey;
+                    price = item.prc;
+                    currentLink = item.lnk;
+
+                    document.getElementById("number").value = item.number;
+                    document.getElementById("phoneSection").style.display = "block";
+                    document.getElementById("otpSection").style.display = "block";
+                    document.getElementById("cancelBtn").style.display = "inline-block";
+
+                    if (price) {
+                        document.getElementById("priceBadge").textContent = "Giá: " + price;
+                        document.getElementById("priceBadge").style.display = "inline-block";
+                    } else {
+                        document.getElementById("priceBadge").style.display = "none";
+                    }
+
+                    otpCodes = item.historyOtps && item.historyOtps.length === 9 ? [...item.historyOtps] : ["", "", "", "", "", "", "", "", ""];
+                    
+                    let firstEmptyIndex = -1;
+                    for (let i = 1; i <= 9; i++) {
+                        const val = otpCodes[i - 1];
+                        if (val) {
+                            document.getElementById("otp" + i).innerText = val;
+                            document.getElementById("otp" + i + "-loading").style.display = "none";
+                        } else {
+                            document.getElementById("otp" + i).innerText = "___";
+                            if (firstEmptyIndex === -1) firstEmptyIndex = i;
+                            document.getElementById("otp" + i + "-loading").style.display = "none";
+                        }
+                    }
+
+                    if (firstEmptyIndex !== -1 && currentId) {
+                        document.getElementById("otp" + firstEmptyIndex + "-loading").style.display = "inline";
+                    }
+
+                    saveCurrentActiveStateToCache(item.number);
+                    startOTPCheck();
+                    showPopup("Đã mở lại số & lịch sử OTP: " + item.number);
+                };
+
+                wrapper.appendChild(btn);
+                wrapper.appendChild(badge);
+                list.appendChild(wrapper);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const cachedList = localStorage.getItem("otp_local_phones_cache");
+            if (cachedList) {
+                localPhonesCache = JSON.parse(cachedList);
+                renderRecentPhones();
+            }
+
+            const cachedCloud = localStorage.getItem("otp_cloud_struct_backup");
+            if (cachedCloud) {
+                cloudFavorites = JSON.parse(cachedCloud);
+                renderFavoritesList();
+            }
+            fetchCloudData();
+
+            const cachedLink = localStorage.getItem("otp_cached_api_link");
+            if (cachedLink) {
+                document.getElementById("apiLink").value = cachedLink;
+                currentLink = cachedLink;
+            }
+
+            const activeState = localStorage.getItem("otp_current_active_state");
+            if (activeState) {
+                const state = JSON.parse(activeState);
+                currentId = state.currentId;
+                baseURL = state.baseURL;
+                apiKey = state.apiKey;
+                price = state.price;
+                currentLink = state.currentLink;
+                otpCodes = state.otpCodes || ["", "", "", "", "", "", "", "", ""];
+
+                document.getElementById("number").value = state.number;
+                document.getElementById("phoneSection").style.display = "block";
+                document.getElementById("otpSection").style.display = "block";
+                document.getElementById("cancelBtn").style.display = "inline-block";
+
+                if (price) {
+                    document.getElementById("priceBadge").textContent = "Giá: " + price;
+                    document.getElementById("priceBadge").style.display = "inline-block";
+                }
+
+                let firstEmptyIndex = -1;
+                for (let i = 1; i <= 9; i++) {
+                    const val = otpCodes[i - 1];
+                    if (val) {
+                        document.getElementById("otp" + i).innerText = val;
+                        document.getElementById("otp" + i + "-loading").style.display = "none";
+                    } else {
+                        document.getElementById("otp" + i).innerText = "___";
+                        if (firstEmptyIndex === -1) firstEmptyIndex = i;
+                        document.getElementById("otp" + i + "-loading").style.display = "none";
+                    }
+                }
+
+                if (firstEmptyIndex !== -1 && currentId) {
+                    document.getElementById("otp" + firstEmptyIndex + "-loading").style.display = "inline";
+                }
+
+                if (currentId) startOTPCheck();
+            }
+        });
+    </script>
+</body>
+</html>
