@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>OTP Tool by Anhleon</title>
+    <title>OTP Tool - Auto Smart Cloud Scan v19</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
@@ -48,6 +48,23 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             cursor: pointer;
+        }
+        /* Style cho khu vực hiển thị thông tin Server/Quốc gia */
+        .info-parsed-box {
+            background-color: #f1f3f4;
+            border: 1px solid #dadce0;
+            border-radius: 6px;
+            padding: 6px 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #3c4043;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .info-parsed-box span {
+            font-weight: bold;
+            color: #1a73e8;
         }
         button {
             width: 100%;
@@ -340,11 +357,17 @@
 <body>
 
     <div class="api-container">
-        <textarea id="apiLink" placeholder="Nhập API Link mua số vào đây..."></textarea>
+        <textarea id="apiLink" placeholder="Nhập API Link mua số vào đây..." oninput="parseAndShowLinkInfo()"></textarea>
         <div class="api-actions">
             <button onclick="clearApiLink()">Xóa</button>
             <button onclick="pasteApiLink()">Dán</button>
         </div>
+    </div>
+
+    <div id="linkInfoBox" class="info-parsed-box" style="display: none;">
+        <div>Server: <span id="infoServer">Chưa rõ</span></div>
+        <div>Quốc gia: <span id="infoCountry">Chưa rõ</span></div>
+        <div>Ứng dụng (Service): <span id="infoService">Chưa rõ</span></div>
     </div>
 
     <button onclick="getPhoneNumber()">MUA SỐ NGAY</button>
@@ -676,6 +699,30 @@
             setTimeout(() => { p.style.display = "none"; }, 2000);
         }
 
+        // Tự động giải mã Link và hiển thị Tên dịch vụ + Quốc gia
+        function parseAndShowLinkInfo() {
+            const link = document.getElementById("apiLink").value.trim();
+            if (!link) {
+                document.getElementById("linkInfoBox").style.display = "none";
+                return;
+            }
+
+            const parsed = parseApiUrl(link);
+            document.getElementById("infoServer").innerText = parsed.bUrl ? parsed.bUrl.replace(/^https?:\/\//, "") : "Chưa rõ";
+
+            // Phân tích serviceId / service_id / id
+            const serviceMatch = link.match(/(?:serviceId|service_id|id)=([^&]+)/);
+            const sId = serviceMatch ? serviceMatch[1] : "";
+            document.getElementById("infoService").innerText = SERVICES_DICT[sId] ? `${SERVICES_DICT[sId]} (${sId})` : (sId ? `Mã lỗi/Chưa rõ (${sId})` : "Mặc định / Không có");
+
+            // Phân tích country / quốc gia
+            const countryMatch = link.match(/(?:country|country_id)=([^&]+)/);
+            const cId = countryMatch ? countryMatch[1] : "";
+            document.getElementById("infoCountry").innerText = COUNTRIES_DICT[cId] ? `${COUNTRIES_DICT[cId]} (Mã: ${cId})` : (cId ? `Mã lạ (${cId})` : "Mặc định / Việt Nam");
+
+            document.getElementById("linkInfoBox").style.display = "block";
+        }
+
         function cacheApiLink() {
             const link = document.getElementById("apiLink").value.trim();
             localStorage.setItem("otp_cached_api_link", link);
@@ -684,6 +731,7 @@
         function clearApiLink() {
             document.getElementById("apiLink").value = "";
             localStorage.removeItem("otp_cached_api_link");
+            parseAndShowLinkInfo();
             showPopup("Đã xóa link");
         }
 
@@ -692,6 +740,7 @@
                 const text = await navigator.clipboard.readText();
                 document.getElementById("apiLink").value = text;
                 localStorage.setItem("otp_cached_api_link", text);
+                parseAndShowLinkInfo();
                 showPopup("Đã dán link từ bộ nhớ tạm");
             } catch (err) {
                 showPopup("Không thể truy cập bộ nhớ tạm. Hãy dán thủ công!");
@@ -738,6 +787,7 @@
             currentLink = document.getElementById("apiLink").value.trim();
             if (!currentLink) return alert("Vui lòng nhập API Link!");
             cacheApiLink();
+            parseAndShowLinkInfo();
 
             const parsed = parseApiUrl(currentLink);
             baseURL = parsed.bUrl;
@@ -1027,6 +1077,7 @@
                     document.getElementById("apiLink").value = fullLink;
                     currentLink = fullLink;
                     cacheApiLink();
+                    parseAndShowLinkInfo();
                     showPopup("Đã chọn: " + item.domain + " [" + item.serviceName + "]");
                 };
 
@@ -1142,6 +1193,7 @@
                     }
 
                     saveCurrentActiveStateToCache(item.number);
+                    parseAndShowLinkInfo(); // Cập nhật lại thông tin hiển thị của số cũ
                     startOTPCheck();
                     showPopup("Đã mở lại số & lịch sử OTP: " + item.number);
                 };
@@ -1170,6 +1222,7 @@
             if (cachedLink) {
                 document.getElementById("apiLink").value = cachedLink;
                 currentLink = cachedLink;
+                parseAndShowLinkInfo();
             }
 
             const activeState = localStorage.getItem("otp_current_active_state");
@@ -1209,6 +1262,7 @@
                     document.getElementById("otp" + firstEmptyIndex + "-loading").style.display = "inline";
                 }
 
+                parseAndShowLinkInfo();
                 if (currentId) startOTPCheck();
             }
         });
