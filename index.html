@@ -62,27 +62,18 @@
 
     /* VÙNG LỊCH SỬ GIỮA TRANG */
     .history-box { border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; background: #fffdf5; margin-top: 15px; }
-    .history-items-list { display: flex; flex-wrap: wrap; gap: 10px; }
-    
-    /* STYLE NÚT LỊCH SỬ CÓ BADGE */
-    .history-item-wrapper { position: relative; display: inline-block; }
-    .history-number-btn { font-size: 12px; padding: 5px 12px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+    .history-items-list { display: flex; flex-wrap: wrap; gap: 12px; padding-top: 5px; }
+    .history-number-btn { font-size: 12px; padding: 5px 10px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 4px; cursor: pointer; font-weight: bold; position: relative; }
     .history-number-btn:hover { background: #ffeeba; }
-    
-    .otp-count-badge {
-      position: absolute; top: -6px; right: -6px; font-size: 9px; width: 14px; height: 14px;
-      border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-    .badge-red { background: #dc3545; }
-    .badge-green { background: #28a745; }
 
-    /* HIỆU ỨNG NHẤP NHÁY KHI CÓ OTP MỚI VỀ */
-    @keyframes pulse-highlight {
-      0% { background: #ffeeba; border-color: #ffeeba; }
-      50% { background: #ffc107; border-color: #dc3545; box-shadow: 0 0 8px #dc3545; }
-      100% { background: #ffeeba; border-color: #ffeeba; }
+    /* Hiệu ứng nhấp nháy khi có mã OTP mới về trong lịch sử */
+    @keyframes blink-bg {
+      0%, 100% { background: #fff3cd; color: #856404; }
+      50% { background: #28a745; color: #ffffff; }
     }
-    .pulse-new-otp { animation: pulse-highlight 0.8s infinite ease-in-out; }
+    .blink-active {
+      animation: blink-bg 0.6s infinite alternate;
+    }
 
     .addon-divider { margin: 20px 0 15px 0; border: 0; border-top: 1px solid #eee; }
     .addon-section-title { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
@@ -176,7 +167,7 @@ const JSONBIN_BIN_ID = "6a355370f5f4af5e290f87d1";
 const JSONBIN_KEY = "$2a$10$AmnqLVXNWMpRs2bSc2bwB.GbEJNwj.JlkfXm6fq9w0H4ZYnibQR2G"; 
 
 const SERVICES_DICT = {"kt":"KakaoTalk","nv":"Naver","oi":"Tinder","ig":"Instagram","tg":"Telegram","dh":"Ebay","vi":"Viber","fb":"Facebook","go":"Google, Gmail, Youtube","me":"LINE","mt":"Steam","ts":"PayPal","wa":"WhatsApp","bz":"Blizzard","nf":"Netflix","tw":"Twitter","nz":"Foodpanda","vk":"ВК, Одноклассники, Юла (mail.ru group)","ub":"Uber","mm":"Microsoft","uk":"AirBnb","mb":"Yahoo","am":"Amazon","ab":"Alibaba","wc":"Craigslist","ew":"Nike","lf":"Tiktok","ka":"Shopee","za":"Jingdong","qq":"Tencent QQ","im":"IMO messenger","yl":"Yalla","pm":"AOL","zk":"Deliveroo","ls":"Careem","zr":"Papara","hw":"AliPay","ds":"Discord","an":"Adidas","xk":"DiDi taxi","wb":"WeChat","mc":"MiChat","bff":"Buff.163","ip":"Burger King","si":"Cita Previa","fr":"DANA","hk":"4FunLite","yw":"Grindr","ni":"Gojek","xs":"GroupMe","ae":"MyGLO","un":"Humble bundle","xf":"LightChath","fz":"KFC","zo":"Kaggle","ry":"McDonalds","vm":"Okcupid","sn":"OLX","fx":"Pgbonus","jq":"Paysafecard","pf":"Plenty of Fish","dp":"Protonmail","nc":"Payoneer","qi":"32Red","ij":"Revolut","scrf":"Scruff","tcw":"Switchere","alj":"Spotify","bw":"Signal","vj":"Stormgain","hb":"Twitch","gr_tl":"Tilda","xd":"Tokopedia","gc":"TradingView","YoHo":"YoHo","qy":"Zhihu","kf":"Weibo","wx":"Apple","kc":"Vinted","tn":"LinkedIn","bl":"Bigo Live","rc":"Skype","fu":"Snapchat","fi":"Dundle","vz":"Hinge","wh":"TanTan","dr":"OpenAI (ChatGPT)","ul":"Getir","py":"Monese","lt":"Bitclout","tx":"Bolt","gt":"Gett","ss":"Hezzl","dl":"Lazada","xh":"Ovo","vv":"Seo Sprint","tl":"Truecaller","mj":"Zalo","oz":"Poshmark","zz":"DENT","wg":"Skout","qd":"Taobao","os":"Dhani","hn":"1688","ju":"Indomaret","gf":"GoogleVoice","do":"Leboncoin","yy":"Venmo","cn":"Fiverr","ii":"CashKaro","ir":"Chispa","it":"CashApp","ix":"Celcoin","jd":"GiraBank","jw":"Br777","jy":"Sorare","kk":"Idealista","kq":"FotoCasa","qf":"RedBook","et":"Clubhouse","mo":"Bumble","pz":"Lidl","yi":"Yemeksepeti","ib":"Immowelt","ex":"Linode","rr":"Wolt","bf":"Keybase","xr":"Tango","xv":"Wish","xx":"Joyride","zh":"Zoho","lq":"Potato","dn":"Paxful","iq":"icq","jg":"Grab","en":"Hermes","ez":"GoerliFaucet","oh":"MapleSEA","yo":"Amasia","ys":"ZCity","zs":"Bilibili","vp":"Kwai","rl":"inDriver","fj":"Potato Chat","zx":"CommunityGaming","pu":"Justdating","aj":"OneAset","gj":"Carousell","zy":"Nttgame","zw":"Quack","zv":"Digikala","zu":"BigC","zt":"Budweiser","zq":"IndiaPlays","zn":"Biedronka","zm":"OfferUp","zj":"ROBINHOOD","zg":"Setel","zf":"OnTaxi","zd":"Zilch","yx":"JTExpress","yv":"IPLwin","yp":"Payzapp","yn":"Allegro","yj":"eWallet","yd":"米画师Mihuashi","xz":"paycell","xy":"Depop","xw":"Taki","xu":"RecargaPay","xq":"MPL","xn":"Familia","xl":"Wmaraci","xi":"InFund","xe":"GalaxyChat","xb":"RummyOla","wz":"FoxFord","ww":"BIP","wv":"AIS","wt":"IZI","wq":"Leboncoin1","wp":"163СOM","wo":"Parkplus","wn":"GameArena","wl":"YouGotaGift","wk":"Mobile01","vy":"Meta","vx":"HeyBox","vw":"CoinField","vq":"LadyMaria","vo":"Brand20ua","vn":"Yaay","vf":"Q12 Trivia","vc":"Banqi","va":"SportGully","uz":"OffGamers","uy":"Meliuz","uw":"Kirana","uv":"BinBin","us":"IRCTC","ur":"MyDailyCash","uq":"TopDetal","uo":"CafeBazaar","uj":"СhampionСasino","ui":"RuTube","uh":"Yubo","ug":"Fiqsy","uf":"Eneba","ue":"Onet","ud":"Disney Hotstar","tv":"Flink","tu":"Lyft","tt":"Ziglu","tr":"Paysend","tq":"Swvl","tp":"IndiaGold","tm":"Akulaku","tj":"dbrUA","ti":"cryptocom","tf":"Noon","te":"eFood","td":"ChaingeFinance","sy":"Brahma","sx":"Crowdtap","sw":"NCsoft","su":"LOCO","sr":"Starbucks","sp":"HappyFresh","so":"RummyWealth","sm":"YoWin","sk":"Skroutz","sj":"HandyPick","sf":"SneakersnStuff","se":"Feeld","sc":"Voggt","sa":"AGIBANK","rx":"Sheerid","rw":"BLS-SPAIN","rv":"Kotak811","ru":"HOP","rt":"hily","rs":"Lotus","rp":"hamrahaval","ro":"PingCode","rn":"neftm","rk":"Fotka","ri":"BillMill","rh":"Ace2Three","rf":"Akudo","rb":"Tick","ra":"KeyPay","qx":"WorldRemit","qt":"MoneyСontrol","qn":"Blued","ql":"CMTcuzdan","qk":"Bit","qg":"MoneyPay","qe":"GG","qb":"Payberry","px":"Nifty","pw":"SellMonitor","pt":"Bitaqaty","pq":"CDkeys","ph":"SnappFood","pc":"Casino, bet, gambling","pb":"SkyTV","pa":"Gamekit","oy":"CashFly","ox":"Damejidlo","ou":"Gabi","oq":"Vlife","oo":"LigaPro","om":"Corona","oe":"Codashop","od":"FWDMAX","oc":"DealShare","ob  ":"Onlinerby","ny":"Pyro Music","nu":"Stripe","ns":"Oldubil","np":"Siply","no":"Virgo","nn":"Giftcloud","nm":"Thisshop","nk":"Gittigidiyor","nh":"AlloBank","ng":"FunPay","ne":"Coindcx","mx":"SoulApp","mw":"Transfergo","mv":"Fruitz","mu":"MyMusicTaste","ms":"NovaPoshta","mr":"Fastmail","mq":"GMNG","mp":"Winmasters","mn":"RRSA","ml":"ApostaGanha","mk":"LongHu","mf":"Weidian","lz":"Things","lw":"MrGreen","lu":"Crickpe","lr":"Okta","lp":"Algida","lo":"OPPO","ln":"Grofers","lk":"PurePlatfrom","lj":"Santander","lg":"MediBuddy","le":"E bike Gewinnspiel","ld":"Cashmine","la":"ssoidnet","ky":"SpatenOktoberfest","kx":"Vivo","kw":"Foody","kv":"Rush","ku":"RoyalWin","ks":"Hirect","kr":"Eyecon","ko":"AdaKami","kn":"Verse","km":"Rozetka","kl":"kolesa.kz","kh":"Bukalapak","kg":"FreeChargeApp","kb":"kufarby","jz":"Kaya","jx":"Swiggy","jt":"TurkiyePetrolleri","jm":"mzadqatar","jj":"Aitu","ji":"Monobank","jh":"PingPong","je":"Nanovest","jb":"Wing Money","ja":"Weverse","iz":"Global24","iy":"FoodHub","iu":"Bykea","ih":"TeenPattiStarpro","ic":"JoGo","ia":"Socios","hx":"AliExpress","hu":"Ukrnet","ht":"Bitso","hs":"Asda","hr":"JKF","hq":"Magicbricks","hp":"Meesho","ho":"Cathay","hm":"Globus","hl":"Band","hi":"JungleeRummy","hh":"Uplay","hf":"Cleartrip","he":"Mewt","hd":"MarketPapa","hc":"MOMO","gy":"MIYACHAT","gv":"Humta","gu":"Fora","gs":"SamsungShop","gq":"Freelancer","gn":"A9A","gl":"GlobalTel","gi":"Hotline","gh":"GyFTR","gg":"PagSmile","ge":"Paytm","gd":"Surveytime","ga":"Roposo","fy":"Mylove","fw":"99acres","fv":"Vidio","fs":"Şikayet var","fp":"Phound","fo":"MobiKwik","fm":"Touchance","fl":"RummyLoot","fk":"BLIBLI","fh":"Lalamove","fh":"Lalamove","fg":"IndianOil","fe":"CliQQ","fc":"PharmEasy","fa":"XadrezFeliz","ey":"miloan","ev":"Picpay","eu":"LiveScore","er":"Kwork","ep":"Temu","eo":"Sizeer","em":"ZéDelivery","el":"Bisu","ej":"MrQ","ei":"Taksheel","eg":"ContactSys","ef":"Nextdoor","ed":"Gamer","ec":"RummyCulture","eb":"Voltz","ea":"JamesDelivery","dx":"Powerkredite","dw":"Divar","dv":"NoBroker","du":"AUBANK","dm":"Iwplay","dk":"Pairs","di":"Loanflix","dd":"CloudChat","dc":"YikYak","db":"ezbuy","cz":"Getmega","cx":"Icrypex","cw":"PaddyPower","cv":"WashXpress","cu":"炙热星河","cs":"AgriDevelop","cq":"Mercado","cp":"Uklon","co":"Rediffmail","cm":"Prom","cl":"UWIN","ck":"BeReal","cj":"Dotz","ci":"redBus","ch":"Pocket52","cg":"Gemgala","cf":"irancell","cb":"Bazos","ca":"SuperS","bx":"Dosi","bu":"MonobankIndia","bt":"Alfa","bs":"TradeUP","bq":"Adani","bm":"MarketGuru","bk":"G2G","bi":"勇仕网络Ys4fun","bg":"MIXMART","bc":"GCash","bb":"LazyPay","az":"CityBase","ay":"Ruten","ax":"CrefisaMais","au":"Haraj","at":"Perfluence","ar":"Wondermart","aq":"Glovo","ao":"UU163","af":"GalaxyWin","ad":"Iti","aa":"Probo","bn":"Alfagift","hy":"Ininal","ke":"Эльдорадо","cc":"Quipp","ee":"Twilio","kp":"HQ Trivia","gz":"LYKA","ac":"DoorDash","ai":"CELEBe","aw":"Taikang","ki":"99app","jl":"Hopi","gm":"Mocospace","es":"iQIYI","dy":"Zomato","pr":"Trendyol","gp":"Ticketmaster","eq":"Qoo10","full":"Full rent","lx":"DewuPoison","wj":"1xbet","ha":"My11Circle","nw":"Ximalaya","zl":"Airtel","pp":"Huya","ak":"Douyu","ly":"Olacabs","dz":"Dominos Pizza","vs":"WinzoGame","cr":"TenChat","hg":"Switips","gb":"YouStar","pd":"IFood","dt":"Delivery Club","yg":"CourseHero","nq":"Trip","qr":"MEGA","rz":"EasyPay","kz":"NimoTV","my":"CAIXA","gr":"Astropay","df":"Happn","dg":"Mercari","po":"premium.one","iv":"Inboxlv","bp":"GoFundMe","gx":"Hepsiburadacom","mi":"Zupee","nr":"Tosla","bo":"Wise","gw":"CallApp","qz":"Faceit","yu":"Xiaomi","kj":"YAPPY","ve":"Dream11","il":"IQOS","vg":"ShellBox","sq":"KuCoinPlay","ba":"Expressmoney","li":"Baidu","lc":"Subito","zi":"LoveLocal","jf":"Likee","gr_rd":"Chalkboard","boo":"CasinoPlus","ebay_kl":"Kleinanzeigen","rktn":"Rakuten","ads":"GoChat","agb":"Smiles","ot":"Any Other","xo":"Notifire","wu":"PrivetMir","wy":"Yami","xc":"SynotTip","yr":"Miravia","wr":"Walmart","xg":"FortunaSK","zb":"FreeNow","ze":"Shpock","vr":"MotorkuX","ws":"Indodax","abq":"Upwork","gr_bf":"Beanfun","acz":"Claude","enu":"Emenu","nmkz":"Naimi.kz","mcr":"MYCAR.KZ","avt":"Aviata.kz","ubr_gr":"Universal Beijing Resort","adq":"Uzum","agm":"CMB","agk":"Ipsos iSay","zp":"Pinduoduo","aab":"BharatPe","aay":"JioMart","abs":"Playerzpot","ace":"Tata Neu","acf":"Winter Loan","acg":"CollabAct","acr":"QwikCilver","acs":"Tata CLiQ Palette","acu":"CityMall","acv":"A23","adb":"PoshVine","adg":"Marwadi","adh":"Frizza","adi":"Zepto","adj":"RummyCircle","adk":"Khatabook","adl":"EarnEasy","adm":"FitCredit","aev":"BankKaro","afj":"SKCAPITAL","afn":"Roomster","ago":"Servify","agp":"Hdfcbank","agq":"Bajaj Finserv","agr":"Yonogames","aha":"Angel One","aht":"MockGuru","aii":"Hinge Dating","aed":"Kamatera","ack":"Tomato","aar":"Bearwww","agh":"Anibis","ahe":"Bunq","abd":"Beboo","abn":"Namars","acn":"Radium","adx":"BusyFly","afp":"VFS GLOBAL","ahk":"БлинБери","ahm":"BRO","ahx":"Bitrue","aid":"Kia","aif":"Royal Canin","aaw":"Aya Bank","aaq":"Netease","aba":"Rappi","adp":"Cabify","aij":"NEQUI","aaz":"Ozan","aih":"Fups","aer":"PlayerAuctions","afk":"Chevron","aas":"XXGame","aav":"Alchemy ","aax":"Boyaa","abi":"BytePlus","abr":"Privy","acj":"Meituan","aag":"Pockit","aap":"Tiptapp","aau":"RockeTreach","abc":"Taptap Send","abe":"Foodora","abz":"Friendtech","ach":"Haleon","acy":"Airtime","ada":"TRUTH SOCIAL","adc":"PlayOJO","aec":"JinJiang","aft":"Neocrypto","afy":"Tuul","afz":"Klarna","agc":"VIMpay","agd":"Grailed","age":"MTR Mobile","agf":"Meitu","agg":"OneForma","ags":"Abbott","abk":"GMX","abo":"WEBDE","ahj":"Strato","ahs":"1and1","ahv":"Surveybell","acd":"CheckDomain","aco":"AR Lens","acp":"BonusLink","acq":"Suntec ","aeb":"GoPayz","aei":"Tanoti","afb":"Maybank","afm":"Myboost","agx":"MeiQFashion","ahf":"Fugeelah","aig":"K11","aiv":"Striving in the Lion City","agj":"Marktplaats","aiq":"Prime Opinion","abt":"ArenaPlus","adt":"Willhaben","ahd":"OpenPhone","adu":"Seznam","afw":"Packeta","aga":"Publi24","agl":"Betano","ahw":"Zasilkovna","abu":"BPJSTK","adf":"BCA Syariah","ael":"Cloud Manager","aem":"AstraPay","aen":"Redigame","aeo":"Allofresh","aep":"ONBUKA","aeq":"Godrej","aet":"Greywoods","aeu":"TheFork","aex":"Neon","afc":"Bunda","afd":"Astra Otoshop","afx":"Gamesofa","agn":"Flik","agz":"Jiva Petani","ahb":"Ubisoft","aho":"UangMe","ahp":"PizzaHut","ahq":"SEEDS","aip":"AfreecaTV","air":"TipTip","ais":"Schibsted","ait":"FeetFinder","acc":" LuckyLand Slots","ahi":"Daki","agy":"Baihe","ahr":"This Fate","agi":"Njuškalo","abb":"Coca-Cola","abx":"Kaching","aby":"Couponscom","acb":"Spark Driver","acl":"Tiv","acm":"Razer","adn":"Zach Bryan","ado":"SmartyPig","ahy":"Fliff","ain":"SpaceWeb","aiy":"Nloto","aiz":"Brevo","ajl":"Av100pro","akf":"Ollis","ajd":"Bankera","aja":"G2A","aje":"CupidMedia","ajf":"IPanelOnline","ajg":"Fortumo","ajh":"WAUG","ajj":"Rebtel","ajm":"Gener8","ajn":"Gopuff","bak":"Gurmanika","ake":"DIKIDI","ale":"Lydia","alm":"Muzz","alg":"Ankama","alo":"Profee","ald":"Nice88","akc":"Paybis","alh":"Lion Parcel","ala":"GetResponse","aln":"Remotasks","alv":"TIER","als":"Greggs ","wmpl":"Womply","pcp":"Pcipay","gr_nd":"Battlestate Games","hrnjie":"华人街","amf":"Acko","amg":"SBI Card","ama":"WooPlus","amb":"Vercel","ame":"Discover Hong Kong","amd":"Smart","alt":"Segari","alu":"BC Game","alw":"Vida","alx":"NutriClub","aly":"Bebeclub","amm":"Punjab citizen","ami":"TEAMORU","amk":"GORDAN","amh":"MitID","amt":"Moneyview","aez":"Shein","ane":"Supercell","anc":"VARUS","cf_id":"CoinFantasy","ppl":"PYYPL","mgrs":"Migros","aml":"Xbox","ylww":"Yellow","satu_kz":"Satu","ob_uz":"OpenBudjet","snl":"Sonol","yudafr":"Yuda","gmsg":"Google Messenger","fst":"Fastwin","meex":"Media express","avz":"Getsbet","ars":"Bingoplus","brnc":"Branch","Prcl":"Poker Circle","ayk":"Radquest","aoa":"Hicard","ldps":"ludoplus","ctkt":"ConfirmTkt","axr":"match.com","vrst":"Verasight","ggms":"Goa games","btnn":"BETININ","avb":"Tealive","busq":"Busqo","nuum":"Nuum.ru","mua":"meta.ua","qcx":"Narendra modi","nmcr":"Namaskar","tjrm":"Taj Rummy","hpnc":"Happypancake","keet":"Keeta","hdfc":"HDFC Egro","tmro":"Tomoro Coffee","fvss":"fivesurveys","bdx":"Benjamin","ding":"ding","aprnt  ":"theAsianparent","tnst":"Tune studio","ani":"Talabat","qim":"HPGas","aos":"Loloo","talk":"Talkatone","etsy":"Etsy","git":"GitHub","sls":"Streamlabs","uns":"Unstop","stn":"Stan","swl":"Swarail","ade":"Magicpin","boc":"51exch","bbm":"Truemoney","qjp":"Innopay","hyp":"Hypermart","vsn":"Vision11","qiy":"Saathi","apr":"Capital One","bva":"Bingo101","brh":"Efsane","bgf":"Rapido","qbs":"Sixer","qhy":"Omnicard","qcb":"Shopsy","cgp":"College Pulse","bqz":"Credit Karma","gnt":"Gaintplay","trc":"TrapCall","kds":"Kudos","rsy":"Resy","blbk":"Blastbucks","tmw":"Timewall","apl":"Sideline","jno":"Juno","bhi":"Chase","dtc":"Dutch Bros","ctr":"CenturyLink","auw":"3Fun","ibt":"Ibotta","cim":"Acima","aptn":"Aspiration","ari":"Ring4","tmi":"Taimi","plg":"Pelago","tum":"Tumblr","aud":"Audible","rap":"RapidApi","ser":"SerpApi","bol":"Bosslike","fmc":"FMCPay","qbn":"RummyYes","awv":"Wallapop","mml":"MMLive","bnl":"Reddit","qks":"Winclash","auz":"Outlier","ctd":"Courtyard","tbn":"TurboTenant","my":"BridgeMoney","zlw":"Zillow","sgk":"SeatGeek","dav":"Dave","ghe":"GetHoldings","xgu":"RedNote / Xiaohongshu","blr":"DocuSign","bnu":"Qpon","sre":"Starexch","pkr":"Playkaro247","qkt":"SpinWinner","awq":"Atlas Earth","nst":"Instamatch","qld":"Ludo11","qdx":"Truemeds","hj":"Nykaa","qrr":"Roz Rummy","pzr":"Paisabazaar","bou":"汇旺 Huione Pay","skls":"Skills","crsr":"Cursor","aws":"Aws","qiv":"Goldsbet","qjm":"Cricbuzz","qit":"Royaljeet","avk":"Quoka","fpx":"500px","aqj":"BigBasket","ght":"Google Chat","bwb":"Winmatch","cpt":"Chipotle","wfargo":"Wells Fargo","qkz":"Govinda365","qly":"Woohoo","qbk":"First Games","kch":"KickCash","hra":"Aadhar","qjw":"Shriram One","pon":"Pokemon","aog":"Naukri","qjb":"Okwin","sht":"ShareChat","qmf":"Dream Money","kny":"Konvy","bsw":"Milanuncios","kiq":"Kliq","jau":"Jiagu360","bex":"Whatnot","bhl":"Ati.su","qcz":"Creditmantri","qaf":"Cred","qql":"QQLive","clg":"Clubgg","pla":"PolloAI","tln":"Toluna","kck":"Kick","blb":"foundit","bzb":"Big Cash","esz":"Ez777","dps":"FDJ Parions Sport","eve":"Enilive","ble":"NEXON","qml":"Ranglive","uta":"BEUTEA","qgh":"Indiapolls","qff":"Aditya birla","hep":"HeyPiggy","bbf":"Neosurf","tui":"Tutti","bdp":"Kredito","sli":"Sponline","brg":"Letgo","ido":"Idee Opinioni","awg":"Natura Avon","opd":"Poe","guv":"Guvi","qmq":"QuickTv","klb":"Kolotibablo","mlk":"Mackolik","zmx":"Zenmux","jwc":"Jalwa Game","apa":"Exness","qmp":"Tata Motors","rch":"Research 360","lid":"Ludo Winner","meb":"MBMBet","log":"Long Chau","tit":"TIM IT","wmb":"Wamba","byh":"Adobe","dah":"DahaDaha","aof":"Guzman y Gomez","guc":"SwagBucks","odl":"Ricardo","lmd":"Ashley Madison","otk":"51game","otr":"Story TV","tme":"OurTime","els":"Nielsen","tnx":"Telnyx","grk":"Grok","tis":"WinMate","asj":"T-Online","qhb":"Dot and Key","tod":"TheDermaCo","kir":"Predik","yab":"Brevistay","usp":"Australia Post","qhp":"CheQ","ioy":"Rupiyo","dgo":"DigitalOcean","idr":"FDA","awz":"PlayTime","bmj":"Betflag","bmi":"Sisal","bqe":"Lottomatica","gal":"Goldbet","brt":"Netwin","bqy":"SNAI","bhz":"Eurobet","nne":"OneOne","bcq":"Kopi Kenangan","baq":"Redbubble","ttn":"Textnow","amp":"Timepass","oji":"Ajio","gor":"Redrob Signal","gun":"Hungry Panda","fog":"Flamingo","yto":"Anna Lottery","saj":"Raja Games","edo":"RusDate","hug":"Driv&","omx":"Angi","pev":"WPlace","kon":"Monkey","gah":"Pazarama","gyt":"BetExc","wfo":"Ownly","max":"MAX","bfl":"Black Forest Labs","wnd":"Windsurf","cwg":"CWG","ccv":"Triumph","oxh":"Oxinchain","wku":"WorkUA","daz":"LODA"};
-const COUNTRIES_DICT = {"31":"South Africa","22":"India","66":"Pakistan","60":"Bangladesh","147":"Zambia","138":"Namibia","79":"Papua new gvineya","58":"Algeria","71":"Ethiopia","80":"Mozambique","76":"Angola","1":"Ukraine","21":"Egypt","73":"Brazil","26":"Haiti","57":"Iran","65":"Peru ","10":"Viet nam","96":"Zimbabwe","81":"Nepal","40":"Uzbekistan","19":"Nigeria","106":"Swaziland","18":"Congo (Dem. Republic)","78":"France","123":"Botswana","0":"Russian Federation","54":"Mexico","9":"Tanzania","64":"Sri Lanka","88":"Honduras","39":"Argentinas","5":"Myanmar","89":"Tunisia","91":"Timor-Leste","136":"Lesotho","105":"Ecuador","101":"El Salvador","37":"Morocco","75":"Uganda","137":"Malawi","38":"Ghana","8":"Kenya","112":"Panama","103":"Jamaica","70":"Venezuela","2 Worship":"Kazakhstan","2":"Kazakhstan","33":"Colombia","87":"Paraguay","62":"Turkey","11":"Kyrgyzstan","116":"Jordan","41":"Cameroon","13":"Israel","27":"Cote d`Ivoire Ivory Coast","51":"Belarus","83":"Bulgaria","102":"Libya","157":"Mauritius","161":"Turkmenistan","35":"Azerbaijan","69":"Mali","140":"Rwanda","154":"Gabon","1010":"Sudan","56":"Spain","90":"Nicaragua","85":"Moldova, Republic of","187":"United States","53":"Saudi Arabia","52":"Thailand","120":"Benin","93":"Costa Rica","152":"Burkina Faso","111":"Qatar","82":"Belgium","16":"United Kingdom","146":"Reunion","107":"Oman","150":"Congo","30":"Yemen","156":"Uruguay","47":"Iraq","61":"Senegal","43":"Germany","25":"Lao People`s","15":"Poland","99":"Togo","139":"Niger","1333":"Syrian Arab Republic","84":"Hungary","158":"Bhutan","119":"Burundi","7":"Malaysia","48":"Netherlands","167":"Equatorial Guinea","95":"United Arab Emirates","104":"Trinidad and Tobago","24":"Cambodia","177":"South Sudan","114":"Mauritania","4":"Philippines","3":"China","100":"Kuwait","130":"Guinea-Bissau","159":"Maldives","117":"Portugal","108":"Bosnia and Herzegovina","149":"Somalia","118":"Barbados","1011":"Martinique","109":"Dominican Republic","28":"Gambia","74":"Afghanistan","148":"Armenia","":"Faroe Islands","131":"Guyana","42":"Chad","173":"Switzerland","97":"Puerto Rico","23":"Ireland","29":"Serbia","34":"Estonia","145":"Bahrain","63":"Czech Republic","160":"Guadeloupe","174":"Norway","86":"Italy","32":"Romania","77":"Cyprus","165":"Luxembourg","142":"Suriname","94":"Guatemala","17":"Madagascar","6 Ges":"Indonesia","46":"Sweden","169":"Antigua and Barbuda","168":"Djibouti","163":"Finland","162":"French Guiana","164":"Saint Lucia","171":"Montenegro","36":"Canada","113":"Cuba","129":"Greece","151":"Chile","128":"Georgia","115":"Sierra Leone","122":"Bahamas","92":"Bolivia","127":"Grenada","49":"Latvia","143":"Tajikistan","121":"Brunei Darussalam","170":"Cayman islands","166":"Saint Vincent","155":"Albania","59":"Slovenia","14":"Hong Kong","134":"Saint Kitts and Nevis","55":"Taiwan","44":"Lithuania","125":"Central African Republic","135":"Liberia","1001":"Japan","68":"Guinea","179":"Aruba","133":"Comoros","199":"Malta","196":"Singapore","141":"Slovakia","181":"Anguilla","178":"Sao Tome and Principe","189":"Fiji","188":"Palestine","45":"Croatia","186":"Cape Verde","144":"Monaco","183":"Macedonia","124":"Belize","185":"New Caledonia","67":"New Zealand","72":"Mongolia","153":"Lebanon","172":"Denmark","50":"Austria","184":"Seychelles","175":"Australia","180":"Montserrat","126":"Dominica","1002":"Korea","20":"Macau","132":"Iceland","176":"Eritrea","1003":"Bermuda","1004":"Kosovo","1005":"Liechtenstein","1006":"Sint Maarten","1007":"Vanuatu","1008":"Greenland","12":"United States (virtual)","201":"Gibraltar","204":"Niue"};
+const COUNTRIES_DICT = {"31":"South Africa","22":"India","66":"Pakistan","60":"Bangladesh","147":"Zambia","138":"Namibia","79":"Papua new gvineya","58":"Algeria","71":"Ethiopia","80":"Mozambique","76":"Angola","1":"Ukraine","21":"Egypt","73":"Brazil","26":"Haiti","57":"Iran","65":"Peru ","10":"Viet nam","96":"Zimbabwe","81":"Nepal","40":"Uzbekistan","19":"Nigeria","106":"Swaziland","18":"Congo (Dem. Republic)","78":"France","123":"Botswana","0":"Russian Federation","54":"Mexico","9":"Tanzania","64":"Sri Lanka","88":"Honduras","39":"Argentinas","5":"Myanmar","89":"Tunisia","91":"Timor-Leste","136":"Lesotho","105":"Ecuador","101":"El Salvador","37":"Morocco","75":"Uganda","137":"Malawi","38":"Ghana","8":"Kenya","112":"Panama","103":"Jamaica","70":"Venezuela","2 Worship":"Kazakhstan","2":"Kazakhstan","33":"Colombia","87":"Paraguay","62":"Turkey","11":"Kyrgyzstan","116":"Jordan","41":"Cameroon","13":"Israel","27":"Cote d`Ivoire Ivory Coast","51":"Belarus","83":"Bulgaria","102":"Libya","157":"Mauritius","161":"Turkmenistan","35":"Azerbaijan","69":"Mali","140":"Rwanda","154":"Gabon","1010":"Sudan","56":"Spain","90":"Nicaragua","85":"Moldova, Republic of","187":"United States","53":"Saudi Arabia","52":"Thailand","120":"Benin","93":"Costa Rica","152":"Burkina Faso","111":"Qatar","82":"Belgium","16":"United Kingdom","146":"Reunion","107":"Oman","150":"Congo","30":"Yemen","156":"Uruguay","47":"Iraq","61":"Senegal","43":"Germany","25":"Lao People`s","15":"Poland","99":"Togo","139":"Niger","1333":"Syrian Arab Republic","84":"Hungary","158":"Bhutan","119":"Burundi","7":"Malaysia","48":"Netherlands","167":"Equatorial Guinea","95":"United Arab Emirates","104":"Trinidad and Tobago","24":"Cambodia","177":"South Sudan","114":"Mauritania","4":"Philippines","3":"China","100":"Kuwait","130":"Guinea-Bissau","159":"Maldives","117":"Portugal","108":"Bosnia and Herzegovina","149":"Somalia","118":"Barbados","1011":"Martinique","109":"Dominican Republic","28":"Gambia","74":"Afghanistan","148":"Armenia","":"Faroe Islands","131":"Guyana","42":"Chad","173":"Switzerland","97":"Puerto Rico","23":"Ireland","29":"Serbia","34":"Estonia","145":"Bahrain","63":"Czech Republic","160":"Guadeloupe","174":"Norway","86":"Italy","32":"Romania","77":"Cyprus","165":"Luxembourg","142":"Suriname","94":"Guatemala","17":"Madagascar","6":"Indonesia","46":"Sweden","169":"Antigua and Barbuda","168":"Djibouti","163":"Finland","162":"French Guiana","164":"Saint Lucia","171":"Montenegro","36":"Canada","113":"Cuba","129":"Greece","151":"Chile","128":"Georgia","115":"Sierra Leone","122":"Bahamas","92":"Bolivia","127":"Grenada","49":"Latvia","143":"Tajikistan","121":"Brunei Darussalam","170":"Cayman islands","166":"Saint Vincent","155":"Albania","59":"Slovenia","14":"Hong Kong","134":"Saint Kitts and Nevis","55":"Taiwan","44":"Lithuania","125":"Central African Republic","135":"Liberia","1001":"Japan","68":"Guinea","179":"Aruba","133":"Comoros","199":"Malta","196":"Singapore","141":"Slovakia","181":"Anguilla","178":"Sao Tome and Principe","189":"Fiji","188":"Palestine","45":"Croatia","186":"Cape Verde","144":"Monaco","183":"Macedonia","124":"Belize","185":"New Caledonia","67":"New Zealand","72":"Mongolia","153":"Lebanon","172":"Denmark","50":"Austria","184":"Seychelles","175":"Australia","180":"Montserrat","126":"Dominica","1002":"Korea","20":"Macau","132":"Iceland","176":"Eritrea","1003":"Bermuda","1004":"Kosovo","1005":"Liechtenstein","1006":"Sint Maarten","1007":"Vanuatu","1008":"Greenland","12":"United States (virtual)","201":"Gibraltar","204":"Niue"};
 
 let currentId = "", baseURL = "", apiKey = "", currentLink = "";
 let otpCodes = ["","","","","","","","",""]; 
@@ -243,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  // LUÔN LUÔN BẮT ĐẦU CHU KỲ KIỂM TRA OTP CHO TOÀN BỘ DANH SÁCH LỊCH SỬ
+  // Khởi động trình quét liên tục cho mọi số trong lịch sử
   startOTPCheck();
 });
 
@@ -303,8 +294,8 @@ async function saveCloudData() {
   }
 }
 
-async function updateLinkStats(isSuccess) {
-  if (!currentLink) return;
+async function updateLinkStatsForUrl(url, isSuccess) {
+  if (!url) return;
   
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
@@ -317,14 +308,14 @@ async function updateLinkStats(isSuccess) {
     }
   } catch(e) {}
 
-  let target = cloudFavorites.find(item => item.url === currentLink);
+  let target = cloudFavorites.find(item => item.url === url);
   
   if (target) {
     if (isSuccess) target.successCount = (target.successCount || 0) + 1;
     else target.cancelCount = (target.cancelCount || 0) + 1;
   } else {
     if (isSuccess) {
-      cloudFavorites.push({ url: currentLink, successCount: 1, cancelCount: 0 });
+      cloudFavorites.push({ url: url, successCount: 1, cancelCount: 0 });
       showPopup("Phát hiện link hiệu quả! Đã tự động lưu lên Đám mây.");
     } else {
       return;
@@ -333,6 +324,10 @@ async function updateLinkStats(isSuccess) {
   
   renderFavoritesList();
   await saveCloudData();
+}
+
+async function updateLinkStats(isSuccess) {
+  await updateLinkStatsForUrl(currentLink, isSuccess);
 }
 
 async function pasteAPI() {
@@ -418,88 +413,68 @@ async function getNumber() {
   document.getElementById("loading").style.display = "none";
 }
 
-// LOGIC KIỂM TRA ĐỒNG THỜI TOÀN BỘ CÁC SỐ TRONG LỊCH SỬ
-async function checkOTP() {
+// Hàm quét OTP chạy ngầm đồng thời cho TẤT CẢ các số trong lịch sử
+async function checkAllOTPs() {
   if (localPhonesCache.length === 0) return;
-
+  
   for (let item of localPhonesCache) {
     if (!item.id) continue;
-    
+    const url = `${item.bUrl}?api_key=${item.aKey}&action=getStatus&id=${item.id}&nocache=${Math.random()}`;
     try {
-      const url = `${item.bUrl}?api_key=${item.aKey}&action=getStatus&id=${item.id}&nocache=${Math.random()}`;
       const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
       const text = await res.text();
 
       if (text.startsWith("STATUS_OK")) {
         const code = text.split(":")[1];
-        let currentOtps = item.historyOtps ? [...item.historyOtps] : ["","","","","","","","",""];
-        let idx = currentOtps.findIndex(v => !v);
+        if (!item.historyOtps) item.historyOtps = ["","","","","","","","",""];
         
+        let idx = item.historyOtps.findIndex(v => !v);
         if (idx === -1) continue;
-        if (idx > 0 && code === currentOtps[idx - 1]) {
-          await requestNextOTPForId(item.bUrl, item.aKey, item.id); 
+        if (idx > 0 && code === item.historyOtps[idx - 1]) {
+          const urlNext = `${item.bUrl}?api_key=${item.aKey}&action=setStatus&id=${item.id}&status=3`;
+          await fetch(PROXY_URL + "?url=" + encodeURIComponent(urlNext));
           continue;
         }
         
-        if (idx === 0 && item.id === currentId) {
-          await updateLinkStats(true);
+        if (idx === 0) {
+          await updateLinkStatsForUrl(item.lnk, true);
         }
 
-        currentOtps[idx] = code;
-        item.historyOtps = currentOtps;
+        item.historyOtps[idx] = code;
+        item.isBlinking = true; // Kích hoạt trạng thái nhấp nháy báo hiệu có mã về
         localStorage.setItem("otp_local_phones_cache", JSON.stringify(localPhonesCache));
-
-        // Nếu số nhận được OTP chính là số đang hiển thị trên giao diện chính
-        if (item.number === document.getElementById("number").value) {
-          otpCodes = currentOtps;
-          saveCurrentActiveStateToCache(item.number);
+        
+        // Nếu số nhận được mã trùng với số đang kích hoạt trên màn hình, cập nhật UI chính
+        if (currentId === item.id) {
+          otpCodes = [...item.historyOtps];
           document.getElementById("otp" + (idx + 1)).innerText = code;
           document.getElementById("otp" + (idx + 1) + "-loading").style.display = "none";
           
           if (idx < 8) {
             document.getElementById("otp" + (idx + 2) + "-loading").style.display = "inline";
-            await requestNextOTPForId(item.bUrl, item.aKey, item.id);
           }
-        } else {
-          if (idx < 8) {
-            await requestNextOTPForId(item.bUrl, item.aKey, item.id);
-          }
+          saveCurrentActiveStateToCache(document.getElementById("number").value);
         }
-
-        // Kích hoạt nhấp nháy báo hiệu trên nút số trong danh sách lịch sử
-        triggerVisualFlash(item.number);
+        
         renderRecentPhones();
-
+        
+        if (idx < 8) {
+          const urlNext = `${item.bUrl}?api_key=${item.aKey}&action=setStatus&id=${item.id}&status=3`;
+          await fetch(PROXY_URL + "?url=" + encodeURIComponent(urlNext));
+        }
       } else if (text === "STATUS_CANCELED") {
-        if (item.id === currentId) {
-          showPopup(`Số ${item.number} đã bị hệ thống hủy!`);
+        if (currentId === item.id) {
+          showPopup("Số hiện tại đã bị hệ thống hủy!");
           resetAll();
         }
       }
-    } catch(err) {}
+    } catch (e) { console.error(e); }
   }
-}
-
-function triggerVisualFlash(number) {
-  setTimeout(() => {
-    const element = document.getElementById("hist-btn-" + number);
-    if (element) {
-      element.classList.add("pulse-new-otp");
-      setTimeout(() => {
-        element.classList.remove("pulse-new-otp");
-      }, 8000); // Nhấp nháy trong 8 giây rồi tắt
-    }
-  }, 100);
-}
-
-async function requestNextOTPForId(bUrl, aKey, id) {
-  const url = `${bUrl}?api_key=${aKey}&action=setStatus&id=${id}&status=3`;
-  await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
 }
 
 function startOTPCheck() {
   clearInterval(checkInterval);
-  checkInterval = setInterval(checkOTP, 5000);
+  checkInterval = setInterval(checkAllOTPs, 5000);
 }
 
 async function cancelOrder() {
@@ -567,14 +542,11 @@ function renderFavoritesList() {
   const listContainer = document.getElementById("favUrlsList");
   listContainer.innerHTML = "";
 
-  // THAY ĐỔI LOGIC XẾP HẠNG: ƯU TIÊN SẮP XẾP THEO TỔNG SỐ LẦN LẤY NHIỀU NHẤT
+  // Thay đổi cách sắp xếp: Sắp xếp theo TỔNG SỐ LẦN LẤY nhiều nhất lên đầu
   cloudFavorites.sort((a, b) => {
     let totalA = (a.successCount || 0) + (a.cancelCount || 0);
     let totalB = (b.successCount || 0) + (b.cancelCount || 0);
-    if (totalB !== totalA) return totalB - totalA;
-    let rateA = totalA > 0 ? (a.successCount || 0) / totalA : 0;
-    let rateB = totalB > 0 ? (b.successCount || 0) / totalB : 0;
-    return rateB - rateA;
+    return totalB - totalA;
   });
 
   cloudFavorites.forEach((item, idx) => {
@@ -615,69 +587,41 @@ function renderFavoritesList() {
 
 function updateRecentPhonesCache(number, id, bUrl, aKey, prc, lnk, historyOtps) {
   localPhonesCache = localPhonesCache.filter(item => item.number !== number);
-  localPhonesCache.unshift({ number, id, bUrl, aKey, prc, lnk, historyOtps: historyOtps || ["","","","","","","","",""] });
-  // TĂNG LÊN THÀNH LƯU TRỮ TỐI ĐA 12 SỐ GẦN NHẤT
+  localPhonesCache.unshift({ number, id, bUrl, aKey, prc, lnk, historyOtps: historyOtps || ["","","","","","","","",""], isBlinking: false });
+  // Tăng giới hạn bộ nhớ đệm lưu trữ từ 5 số lên thành 12 số gần nhất
   if (localPhonesCache.length > 12) localPhonesCache.pop();
   localStorage.setItem("otp_local_phones_cache", JSON.stringify(localPhonesCache));
   renderRecentPhones();
 }
 
-function syncOtpToRecentPhonesCache(number, updatedOtps) {
-  let found = false;
-  localPhonesCache.forEach(item => {
-    if(item.number === number) {
-      item.historyOtps = [...updatedOtps];
-      found = true;
-    }
-  });
-  if(found) {
-    localStorage.setItem("otp_local_phones_cache", JSON.stringify(localPhonesCache));
-  }
-}
-
 function renderRecentPhones() {
   const boxContainer = document.getElementById("recentPhonesBox");
   const listContainer = document.getElementById("recentPhonesList");
-  
-  // Lưu giữ lại danh sách các class đang nhấp nháy để tránh bị mất hiệu ứng khi render lại
-  const flashingIds = {};
-  localPhonesCache.forEach(item => {
-    const el = document.getElementById("hist-btn-" + item.number);
-    if (el && el.classList.contains("pulse-new-otp")) {
-      flashingIds[item.number] = true;
-    }
-  });
-
   listContainer.innerHTML = "";
   if (localPhonesCache.length === 0) { boxContainer.style.display = "none"; return; }
   boxContainer.style.display = "block";
   
   localPhonesCache.forEach(item => {
-    const wrapper = document.createElement("div");
-    wrapper.className = "history-item-wrapper";
-    
     const btn = document.createElement("div"); 
     btn.className = "history-number-btn"; 
-    btn.id = "hist-btn-" + item.number;
-    btn.innerText = item.number;
     
-    if (flashingIds[item.number]) {
-      btn.classList.add("pulse-new-otp");
+    // Áp dụng class nhấp nháy nếu số này nhận được OTP mới chạy ngầm
+    if (item.isBlinking) {
+      btn.classList.add("blink-active");
     }
 
-    // ĐẾM SỐ LẦN MÃ VỀ (Tính theo số chuỗi không rỗng trong lịch sử)
-    let otpSuccessCount = 0;
-    if (item.historyOtps) {
-      otpSuccessCount = item.historyOtps.filter(v => v !== "").length;
-    }
-
-    // ĐÁNH SỐ LẦN MÃ VỀ TRÊN GÓC NÚT SỐ
-    const badge = document.createElement("span");
-    badge.className = "otp-count-badge " + (otpSuccessCount === 0 ? "badge-red" : "badge-green");
-    badge.innerText = otpSuccessCount;
-    wrapper.appendChild(badge);
-
+    // Đếm số lần mã về để gán màu sắc góc nhỏ gọn gàng
+    let codeCount = item.historyOtps ? item.historyOtps.filter(v => v).length : 0;
+    let badgeColor = codeCount === 0 ? "#dc3545" : "#28a745"; // 0 mã về: Đỏ, có mã về: Xanh lá
+    
+    btn.innerHTML = `${item.number}<span style="position:absolute; top:-6px; right:-6px; background:${badgeColor}; color:#fff; border-radius:50%; width:15px; height:15px; font-size:9px; display:flex; align-items:center; justify-content:center; font-weight:bold; border:1px solid #fff; box-shadow:0 1px 2px rgba(0,0,0,0.2);">${codeCount}</span>`;
+    
     btn.onclick = () => {
+      // Khi nhấn vào xem lại số, tắt chế độ nhấp nháy cho số đó
+      item.isBlinking = false;
+      localStorage.setItem("otp_local_phones_cache", JSON.stringify(localPhonesCache));
+      btn.classList.remove("blink-active");
+
       currentId = item.id; baseURL = item.bUrl; apiKey = item.aKey; price = item.prc; currentLink = item.lnk;
       document.getElementById("number").value = item.number;
       document.getElementById("phoneSection").style.display = "block";
@@ -710,9 +654,7 @@ function renderRecentPhones() {
       saveCurrentActiveStateToCache(item.number);
       showPopup("Đã mở lại số & lịch sử OTP: " + item.number);
     };
-    
-    wrapper.appendChild(btn);
-    listContainer.appendChild(wrapper);
+    listContainer.appendChild(btn);
   });
 }
 </script>
