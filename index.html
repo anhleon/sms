@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bộ Tạo Link API SMS Hiện Đại</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --success-hover: #059669;
+            --bg-site: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 8px;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-site);
+            color: var(--text-main);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+
+        /* TIÊU ĐỀ HƠI TO XÍU VÀ CÓ THỂ ẤN ĐỂ ẨN HIỆN */
+        .toggle-title {
+            text-align: center;
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            cursor: pointer;
+            user-select: none;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .toggle-title::after {
+            content: '▼';
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+        
+        .toggle-title.active::after {
+            transform: rotate(180deg);
+        }
+
+        /* KHU VỰC CHỨA KHUNG TẠO API */
+        #apiGeneratorForm {
+            display: none; /* Ẩn mặc định cho gọn */
+            transition: all 0.3s ease;
+        }
+
+        .provider-selector {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .radio-label input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+            margin: 0;
+        }
+
+        .flex-selection-row {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .flex-col-50 {
+            flex: 1 !important;
+            width: 50% !important;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 13.5px;
+            color: var(--text-main);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        select {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            outline: none;
+            background-color: #fff;
+            padding: 6px;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        .dynamic-fields {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .result-box {
+            margin-top: 20px;
+            background-color: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            display: none;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 8px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-copy {
+            padding: 4px 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-copy:hover {
+            opacity: 0.9;
+        }
+
+        .btn-get-number {
+            padding: 4px 12px;
+            background-color: var(--success);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-get-number:hover {
+            background-color: var(--success-hover);
+        }
+
+        .api-url {
+            width: 100%;
+            background: transparent;
+            padding: 12px;
+            border: none;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 13px;
+            color: #0f172a;
+            word-break: break-all;
+            box-sizing: border-box;
+            resize: none;
+            display: block;
+        }
+
+        /* KHU VỰC HIỂN THỊ KẾT QUẢ KHI ẤN LẤY SỐ */
+        .phone-response-box {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: var(--radius);
+            font-family: monospace;
+            font-size: 13.5px;
+            display: none;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="toggle-title" id="toggleApiBtn" onclick="toggleApiContainer()">Công cụ tạo link API</h2>
+
+    <div id="apiGeneratorForm">
+        <div class="provider-selector">
+            <label class="radio-label">
+                <input type="radio" name="api_provider" value="smsbower" checked onchange="toggleFields()"> SmsBower.page
+            </label>
+            <label class="radio-label">
+                <input type="radio" name="api_provider" value="herosms" onchange="toggleFields()"> Hero-SMS.com
+            </label>
+        </div>
+
+        <div class="flex-selection-row">
+            <div class="flex-col-50">
+                <label for="countrySearch">Chọn Quốc Gia:</label>
+                <input type="text" id="countrySearch" class="search-input" placeholder="Tìm hoặc bấm chọn bên dưới..." onkeyup="filterSelect('countrySearch', 'countrySelect')">
+                <select id="countrySelect" size="8" onchange="selectItem('countrySearch', 'countrySelect')"></select>
+            </div>
+
+            <div class="flex-col-50">
+                <label for="serviceSearch">Chọn Dịch Vụ:</label>
+                <input type="text" id="serviceSearch" class="search-input" placeholder="Tìm hoặc bấm chọn bên dưới..." onkeyup="filterSelect('serviceSearch', 'serviceSelect')">
+                <select id="serviceSelect" size="8" onchange="selectItem('serviceSearch', 'serviceSelect')"></select>
+            </div>
+        </div>
+
+        <div class="dynamic-fields">
+            <div class="form-group" id="providerIdsGroup">
+                <label for="providerIds">Provider IDs (Nhà cung cấp):</label>
+                <input type="text" id="providerIds" class="search-input" placeholder="Nhập Provider ID tùy chọn (ví dụ: 2421)...">
+            </div>
+
+            <div class="form-group" id="operatorGroup" style="display: none;">
+                <label for="operator">Operator (Nhà mạng):</label>
+                <input type="text" id="operator" class="search-input" placeholder="Nhập tên nhà mạng (ví dụ: three)...">
+            </div>
+        </div>
+
+        <button type="button" class="btn-submit" onclick="generateApiUrl()">Tạo Đường Dẫn API</button>
+
+        <div class="result-box" id="resultBox">
+            <div class="result-header">
+                <span class="result-title">LINK API CỦA BẠN:</span>
+                <div class="action-buttons">
+                    <button class="btn-copy" id="copyBtn" onclick="copyToClipboard()">Copy Link</button>
+                    <button class="btn-get-number" id="getNumberBtn" onclick="fetchSmsNumber()">Lấy Số</button>
+                </div>
+            </div>
+            <textarea id="apiUrlResult" class="api-url" rows="3" readonly></textarea>
+            <div id="phoneResponse" class="phone-response-box"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // DỮ LIỆU QUỐC GIA CHUNG (GIỮ NGUYÊN)
+    const countryData = {"31":{"id":"31","eng":"South Africa"},"22":{"id":"22","eng":"India"},"66":{"id":"66","eng":"Pakistan"},"60":{"id":"60","eng":"Bangladesh"},"147":{"id":"147","eng":"Zambia"},"138":{"id":"138","eng":"Namibia"},"79":{"id":"79","eng":"Papua new gvineya"},"58":{"id":"58","eng":"Algeria"},"71":{"id":"71","eng":"Ethiopia"},"80":{"id":"80","eng":"Mozambique"},"76":{"id":"76","eng":"Angola"},"1":{"id":"1","eng":"Ukraine"},"21":{"id":"21","eng":"Egypt"},"73":{"id":"73","eng":"Brazil"},"26":{"id":"26","eng":"Haiti"},"57":{"id":"57","eng":"Iran"},"65":{"id":"65","eng":"Peru "},"10":{"id":"10","eng":"Viet nam"},"96":{"id":"96","eng":"Zimbabwe"},"81":{"id":"81","eng":"Nepal"},"40":{"id":"40","eng":"Uzbekistan"},"19":{"id":"19","eng":"Nigeria"},"106":{"id":"106","eng":"Swaziland"},"18":{"id":"18","eng":"Congo (Dem. Republic)"},"78":{"id":"78","eng":"France"},"123":{"id":"123","eng":"Botswana"},"0":{"id":"0","eng":"Russian Federation"},"54":{"id":"54","eng":"Mexico"},"9":{"id":"9","eng":"Tanzania"},"64":{"id":"64","eng":"Sri Lanka"},"88":{"id":"88","eng":"Honduras"},"39":{"id":"39","eng":"Argentinas"},"5":{"id":"5","eng":"Myanmar"},"89":{"id":"89","eng":"Tunisia"},"91":{"id":"91","eng":"Timor-Leste"},"136":{"id":"136","eng":"Lesotho"},"105":{"id":"105","eng":"Ecuador"},"101":{"id":"101","eng":"El Salvador"},"37":{"id":"37","eng":"Morocco"},"75":{"id":"75","eng":"Uganda"},"137":{"id":"137","eng":"Malawi"},"38":{"id":"38","eng":"Ghana"},"8":{"id":"8","eng":"Kenya"},"112":{"id":"112","eng":"Panama"},"103":{"id":"103","eng":"Jamaica"},"70":{"id":"70","eng":"Venezuela"},"2":{"id":"2","eng":"Kazakhstan"},"33":{"id":"33","eng":"Colombia"},"87":{"id":"87","eng":"Paraguay"},"62":{"id":"62","eng":"Turkey"},"11":{"id":"11","eng":"Kyrgyzstan"},"116":{"id":"116","eng":"Jordan"},"41":{"id":"41","eng":"Cameroon"},"13":{"id":"13","eng":"Israel"},"27":{"id":"27","eng":"Cote d`Ivoire Ivory Coast"},"51":{"id":"51","eng":"Belarus"},"83":{"id":"83","eng":"Bulgaria"},"102":{"id":"102","eng":"Libya"},"157":{"id":"157","eng":"Mauritius"},"161":{"id":"161","eng":"Turkmenistan"},"35":{"id":"35","eng":"Azerbaijan"},"69":{"id":"69","eng":"Mali"},"140":{"id":"140","eng":"Rwanda"},"154":{"id":"154","eng":"Gabon"},"1010":{"id":"1010","eng":"Sudan"},"56":{"id":"56","eng":"Spain"},"90":{"id":"90","eng":"Nicaragua"},"85":{"id":"85","eng":"Moldova, Republic of"},"187":{"id":"187","eng":"United States"},"53":{"id":"53","eng":"Saudi Arabia"},"52":{"id":"52","eng":"Thailand"},"120":{"id":"120","eng":"Benin"},"93":{"id":"93","eng":"Costa Rica"},"152":{"id":"152","eng":"Burkina Faso"},"111":{"id":"111","eng":"Qatar"},"82":{"id":"82","eng":"Belgium"},"16":{"id":"16","eng":"United Kingdom"},"146":{"id":"146","eng":"Reunion"},"107":{"id":"107","eng":"Oman"},"150":{"id":"150","eng":"Congo"},"30":{"id":"30","eng":"Yemen"},"156":{"id":"156","eng":"Uruguay"},"47":{"id":"47","eng":"Iraq"},"61":{"id":"61","eng":"Senegal"},"43":{"id":"43","eng":"Germany"},"25":{"id":"25","eng":"Lao People`s"},"15":{"id":"15","eng":"Poland"},"99":{"id":"99","eng":"Togo"},"139":{"id":"139","eng":"Niger"},"1333":{"id":"1333","eng":"Syrian Arab Republic"},"84":{"id":"84","eng":"Hungary"},"158":{"id":"158","eng":"Bhutan"},"119":{"id":"119","eng":"Burundi"},"7":{"id":"7","eng":"Malaysia"},"48":{"id":"48","eng":"Netherlands"},"167":{"id":"167","eng":"Equatorial Guinea"},"95":{"id":"95","eng":"United Arab Emirates"},"104":{"id":"104","eng":"Trinidad and Tobago"},"24":{"id":"24","eng":"Cambodia"},"177":{"id":"177","eng":"South Sudan"},"114":{"id":"114","eng":"Mauritania"},"4":{"id":"4","eng":"Philippines"},"3":{"id":"3","eng":"China"},"100":{"id":"100","eng":"Kuwait"},"130":{"id":"130","eng":"Guinea-Bissau"},"159":{"id":"159","eng":"Maldives"},"117":{"id":"117","eng":"Portugal"},"108":{"id":"108","eng":"Bosnia and Herzegovina"},"149":{"id":"149","eng":"Somalia"},"118":{"id":"118","eng":"Barbados"},"1011":{"id":"1011","eng":"Martinique"},"109":{"id":"109","eng":"Dominican Republic"},"28":{"id":"28","eng":"Gambia"},"74":{"id":"74","eng":"Afghanistan"},"148":{"id":"148","eng":"Armenia"},"131":{"id":"131","eng":"Guyana"},"42":{"id":"42","eng":"Chad"},"173":{"id":"173","eng":"Switzerland"},"97":{"id":"97","eng":"Puerto Rico"},"23":{"id":"23","eng":"Ireland"},"29":{"id":"29","eng":"Serbia"},"34":{"id":"34","eng":"Estonia"},"145":{"id":"145","eng":"Bahrain"},"63":{"id":"63","eng":"Czech Republic"},"160":{"id":"160","eng":"Guadeloupe"},"174":{"id":"174","eng":"Norway"},"86":{"id":"86","eng":"Italy"},"32":{"id":"32","eng":"Romania"},"77":{"77":"Cyprus"},"165":{"id":"165","eng":"Luxembourg"},"142":{"id":"142","eng":"Suriname"},"94":{"id":"94","eng":"Guatemala"},"17":{"id":"17","eng":"Madagascar"},"6":{"id":"6","eng":"Indonesia"},"46":{"id":"46","eng":"Sweden"},"169":{"id":"169","eng":"Antigua and Barbuda"},"168":{"id":"168","eng":"Djibouti"},"163":{"id":"163","eng":"Finland"},"162":{"id":"162","eng":"French Guiana"},"164":{"id":"164","eng":"Saint Lucia"},"171":{"id":"171","eng":"Montenegro"},"36":{"id":"36","eng":"Canada"},"113":{"id":"113","eng":"Cuba"},"129":{"id":"129","eng":"Greece"},"151":{"id":"151","eng":"Chile"},"128":{"id":"128","eng":"Georgia"},"115":{"id":"115","eng":"Sierra Leone"},"122":{"id":"122","eng":"Bahamas"},"92":{"id":"92","eng":"Bolivia"},"127":{"id":"127","eng":"Grenada"},"49":{"id":"49","eng":"Latvia"},"143":{"id":"143","eng":"Tajikistan"},"121":{"id":"121","eng":"Brunei Darussalam"},"170":{"id":"170","eng":"Cayman islands"},"166":{"id":"166","eng":"Saint Vincent"},"155":{"id":"155","eng":"Albania"},"59":{"id":"59","eng":"Slovenia"},"14":{"id":"14","eng":"Hong Kong"},"134":{"id":"134","eng":"Saint Kitts and Nevis"},"55":{"id":"55","eng":"Taiwan"},"44":{"id":"44","eng":"Lithuania"},"125":{"id":"125","eng":"Central African Republic"},"135":{"id":"135","eng":"Liberia"},"1001":{"id":"1001","eng":"Japan"},"68":{"id":"68","eng":"Guinea"},"179":{"id":"179","eng":"Aruba"},"133":{"id":"133","eng":"Comoros"},"199":{"id":"199","eng":"Malta"},"196":{"id":"196","eng":"Singapore"},"141":{"id":"141","eng":"Slovakia"},"181":{"id":"181","eng":"Anguilla"},"178":{"id":"178","eng":"Sao Tome and Principe"},"189":{"id":"189","eng":"Fiji"},"188":{"id":"188","eng":"Palestine"},"45":{"id":"45","eng":"Croatia"},"186":{"id":"186","eng":"Cape Verde"},"144":{"id":"144","eng":"Monaco"},"183":{"id":"183","eng":"Macedonia"},"124":{"id":"124","eng":"Belize"},"185":{"id":"185","eng":"New Caledonia"},"67":{"id":"67","eng":"New Zealand"},"72":{"id":"72","eng":"Mongolia"},"153":{"id":"153","eng":"Lebanon"},"172":{"id":"172","eng":"Denmark"},"50":{"id":"50","eng":"Austria"},"184":{"id":"184","eng":"Seychelles"},"175":{"id":"175","eng":"Australia"},"180":{"id":"180","eng":"Montserrat"},"126":{"id":"126","eng":"Dominica"},"1002":{"id":"1002","eng":"Korea"},"20":{"id":"20","eng":"Macau"},"132":{"id":"132","eng":"Iceland"},"176":{"id":"176","eng":"Eritrea"},"1003":{"id":"1003","eng":"Bermuda"},"1004":{"id":"1004","eng":"Kosovo"},"1005":{"id":"1005","eng":"Liechtenstein"},"1006":{"id":"1006","eng":"Sint Maarten"},"1007":{"id":"1007","eng":"Vanuatu"},"1008":{"id":"1008","eng":"Greenland"},"12":{"id":"12","eng":"United States (virtual)"},"201":{"id":"201","eng":"Gibraltar"},"204":{"id":"204","eng":"Niue"}};
+
+    // DỮ LIỆU DỊCH VỤ CHUNG (GIỮ NGUYÊN)
+    const serviceData = [{"code":"kt","name":"KakaoTalk"},{"code":"nv","name":"Naver"},{"code":"oi","name":"Tinder"},{"code":"ig","name":"Instagram"},{"code":"tg","name":"Telegram"},{"code":"dh","name":"Ebay"},{"code":"vi","name":"Viber"},{"code":"fb","name":"Facebook"},{"code":"go","name":"Google, Gmail, Youtube"},{"code":"me","name":"LINE"},{"code":"mt","name":"Steam"},{"code":"ts","name":"PayPal"},{"code":"wa","name":"WhatsApp"},{"code":"bz","name":"Blizzard"},{"code":"nf","name":"Netflix"},{"code":"tw","name":"Twitter"},{"code":"nz","name":"Foodpanda"},{"code":"vk","name":"ВК, Одноклассники, Юла (mail.ru group)"},{"code":"ub","name":"Uber"},{"code":"mm","name":"Microsoft"},{"code":"uk","name":"AirBnb"},{"code":"mb","name":"Yahoo"},{"code":"am","name":"Amazon"},{"code":"ab","name":"Alibaba"},{"code":"wc","name":"Craigslist"},{"code":"ew","name":"Nike"},{"code":"lf","name":"Tiktok"},{"code":"ka","name":"Shopee"},{"code":"za","name":"Jingdong"},{"code":"qq","name":"Tencent QQ"},{"code":"im","name":"IMO messenger"},{"code":"yl","name":"Yalla"},{"code":"pm","name":"AOL"},{"code":"zk","name":"Deliveroo"},{"code":"ls","name":"Careem"},{"code":"zr","name":"Papara"},{"code":"hw","name":"AliPay"},{"code":"ds","name":"Discord"},{"code":"an","name":"Adidas"},{"code":"xk","name":"DiDi taxi"},{"code":"wb","name":"WeChat"},{"code":"mc","name":"MiChat"},{"code":"bff","name":"Buff.163"},{"code":"ip","name":"Burger King"},{"code":"si","name":"Cita Previa"},{"code":"fr","name":"DANA"},{"code":"hk","name":"4FunLite"},{"code":"yw","name":"Grindr"},{"code":"ni","name":"Gojek"},{"code":"xs","name":"GroupMe"},{"code":"ae","name":"MyGLO"},{"code":"un","name":"Humble bundle"},{"code":"xf","name":"LightChath"},{"code":"fz","name":"KFC"},{"code":"zo","name":"Kaggle"},{"code":"ry","name":"McDonalds"},{"code":"vm","name":"Okcupid"},{"code":"sn","name":"OLX"},{"code":"fx","name":"Pgbonus"},{"code":"jq","name":"Paysafecard"},{"code":"pf","name":"Plenty of Fish"},{"code":"dp","name":"Protonmail"},{"code":"nc","name":"Payoneer"},{"code":"qi","name":"32Red"},{"code":"ij","name":"Revolut"},{"code":"scrf","name":"Scruff"},{"code":"tcw","name":"Switchere"},{"code":"alj","name":"Spotify"},{"code":"bw","name":"Signal"},{"code":"vj","name":"Stormgain"},{"code":"hb","name":"Twitch"},{"code":"gr_tl","name":"Tilda"},{"code":"xd","name":"Tokopedia"},{"code":"gc","name":"TradingView"},{"code":"YoHo","name":"YoHo"},{"code":"qy","name":"Zhihu"},{"code":"kf","name":"Weibo"},{"code":"wx","name":"Apple"},{"code":"kc","name":"Vinted"},{"code":"tn","name":"LinkedIn"},{"code":"bl","name":"Bigo Live"},{"code":"rc","name":"Skype"},{"code":"fu","name":"Snapchat"},{"code":"fi","name":"Dundle"},{"code":"vz","name":"Hinge"},{"code":"wh","name":"TanTan"},{"code":"dr","name":"OpenAI (ChatGPT)"},{"code":"ul","name":"Getir"},{"code":"py","name":"Monese"},{"code":"lt","name":"Bitclout"},{"code":"tx","name":"Bolt"},{"code":"gt","name":"Gett"},{"code":"ss","name":"Hezzl"},{"code":"dl","name":"Lazada"},{"code":"xh","name":"Ovo"},{"code":"vv","name":"Seo Sprint"},{"code":"tl","name":"Truecaller"},{"code":"mj","name":"Zalo"},{"code":"oz","name":"Poshmark"},{"code":"zz","name":"DENT"},{"code":"wg","name":"Skout"},{"code":"qd","name":"Taobao"},{"code":"os","name":"Dhani"},{"code":"hn","name":"1688"},{"code":"ju","name":"Indomaret"},{"code":"gf","name":"GoogleVoice"},{"code":"do","name":"Leboncoin"},{"code":"yy","name":"Venmo"},{"code":"cn","name":"Fiverr"},{"code":"ii","name":"CashKaro"},{"code":"ir","name":"Chispa"},{"code":"it","name":"CashApp"},{"code":"ix","name":"Celcoin"},{"code":"jd","name":"GiraBank"},{"code":"jw","name":"Br777"},{"code":"jy","name":"Sorare"},{"code":"kk","name":"Idealista"},{"code":"kq","name":"FotoCasa"},{"code":"qf","name":"RedBook"},{"code":"et","name":"Clubhouse"},{"code":"mo","name":"Bumble"},{"code":"pz","name":"Lidl"},{"code":"yi","name":"Yemeksepeti"},{"code":"ib","name":"Immowelt"},{"code":"ex","name":"Linode"},{"code":"rr","name":"Wolt"},{"code":"bf","name":"Keybase"},{"code":"xr","name":"Tango"},{"code":"xv","name":"Wish"},{"code":"xx","name":"Joyride"},{"code":"zh","name":"Zoho"},{"code":"lq","name":"Potato"},{"code":"dn","name":"Paxful"},{"code":"iq","name":"icq"},{"code":"jg","name":"Grab"},{"code":"en","name":"Hermes"},{"code":"ez","name":"GoerliFaucet"},{"code":"oh","name":"MapleSEA"},{"code":"yo","name":"Amasia"},{"code":"ys","name":"ZCity"},{"code":"zs","name":"Bilibili"},{"code":"vp","name":"Kwai"},{"code":"rl","name":"inDriver"},{"code":"fj","name":"Potato Chat"},{"code":"zx","name":"CommunityGaming"},{"code":"pu","name":"Justdating"},{"code":"aj","name":"OneAset"},{"code":"gj","name":"Carousell"},{"code":"zy","name":"Nttgame"},{"code":"zw","name":"Quack"},{"code":"zv","name":"Digikala"},{"code":"zu","name":"BigC"},{"code":"zt","name":"Budweiser"},{"code":"zq","name":"IndiaPlays"},{"code":"zn","name":"Biedronka"},{"code":"zm","name":"OfferUp"},{"code":"zj","name":"ROBINHOOD"},{"code":"zg","name":"Setel"},{"code":"zf","name":"OnTaxi"},{"code":"zd","name":"Zilch"},{"code":"yx","name":"JTExpress"},{"code":"yv","name":"IPLwin"},{"code":"yp","name":"Payzapp"},{"code":"yn","name":"Allegro"},{"code":"yj","name":"eWallet"},{"code":"yd","name":"米画师Mihuashi"},{"code":"xz","name":"paycell"},{"code":"xy","name":"Depop"},{"code":"xw","name":"Taki"},{"code":"xu","name":"RecargaPay"},{"code":"xq","name":"MPL"},{"code":"xn","name":"Familia"},{"code":"xl","name":"Wmaraci"},{"code":"xi","name":"InFund"},{"code":"xe","name":"GalaxyChat"},{"code":"xb","name":"RummyOla"},{"code":"wz","name":"FoxFord"},{"code":"ww","name":"BIP"},{"code":"wv","name":"AIS"},{"code":"wt","name":"IZI"},{"code":"wq","name":"Leboncoin1"},{"code":"wp","name":"163СOM"},{"code":"wo","name":"Parkplus"},{"code":"wn","name":"GameArena"},{"code":"wl","name":"YouGotaGift"},{"code":"wk","name":"Mobile01"},{"code":"vy","name":"Meta"},{"code":"vx","name":"HeyBox"},{"code":"vw","name":"CoinField"},{"code":"vq","name":"LadyMaria"},{"code":"vo","name":"Brand20ua"},{"code":"vn","name":"Yaay"},{"code":"vf","name":"Q12 Trivia"},{"code":"vc","name":"Banqi"},{"code":"va","name":"SportGully"},{"code":"uz","name":"OffGamers"},{"code":"uy","name":"Meliuz"},{"code":"uw","name":"Kirana"},{"code":"uv","name":"BinBin"},{"code":"us","name":"IRCTC"},{"code":"ur","name":"MyDailyCash"},{"code":"uq","name":"TopDetal"},{"code":"uo","name":"CafeBazaar"},{"code":"uj","name":"СhampionСasino"},{"code":"ui","name":"RuTube"},{"code":"uh","name":"Yubo"},{"code":"ug","name":"Fiqsy"},{"code":"uf","name":"Eneba"},{"code":"ue","name":"Onet"},{"code":"ud","name":"Disney Hotstar"},{"code":"tv","name":"Flink"},{"code":"tu","name":"Lyft"},{"code":"tt","name":"Ziglu"},{"code":"tr","name":"Paysend"},{"code":"tq","name":"Swvl"},{"code":"tp","name":"IndiaGold"},{"code":"tm","name":"Akulaku"},{"code":"tj","name":"dbrUA"},{"code":"ti","name":"cryptocom"},{"code":"tf","name":"Noon"},{"code":"te","name":"eFood"},{"code":"td","name":"ChaingeFinance"},{"code":"sy","name":"Brahma"},{"code":"sx","name":"Crowdtap"}];
+
+    // HÀM TỰ ĐỘNG NẠP DỮ LIỆU KHI MỞ TRANG
+    function initData() {
+        const countrySelect = document.getElementById('countrySelect');
+        const serviceSelect = document.getElementById('serviceSelect');
+
+        let countryOptions = '';
+        for (const key in countryData) {
+            if (countryData.hasOwnProperty(key)) {
+                countryOptions += `<option value="${countryData[key].id}">${countryData[key].eng}</option>`;
+            }
+        }
+        countrySelect.innerHTML = countryOptions;
+
+        let serviceOptions = '';
+        serviceData.forEach(item => {
+            serviceOptions += `<option value="${item.code}">${item.name}</option>`;
+        });
+        serviceSelect.innerHTML = serviceOptions;
+    }
+
+    window.onload = function() {
+        initData();
+    };
+
+    // HÀM ẨN / HIỆN KHUNG TẠO API KHI BẤM VÀO TIÊU ĐỀ
+    function toggleApiContainer() {
+        const form = document.getElementById('apiGeneratorForm');
+        const btn = document.getElementById('toggleApiBtn');
+        if (form.style.display === 'none' || form.style.display === '') {
+            form.style.display = 'block';
+            btn.classList.add('active');
+        } else {
+            form.style.display = 'none';
+            btn.classList.remove('active');
+        }
+    }
+
+    function filterSelect(searchId, selectId) {
+        const input = document.getElementById(searchId);
+        const filter = input.value.toLowerCase();
+        const select = document.getElementById(selectId);
+        const options = select.options;
+
+        for (let i = 0; i < options.length; i++) {
+            const text = options[i].text.toLowerCase();
+            if (text.includes(filter)) {
+                options[i].style.display = "";
+            } else {
+                options[i].style.display = "none";
+            }
+        }
+    }
+
+    function selectItem(searchId, selectId) {
+        const select = document.getElementById(selectId);
+        const input = document.getElementById(searchId);
+        if (select.selectedIndex !== -1) {
+            input.value = select.options[select.selectedIndex].text;
+        }
+    }
+
+    function toggleFields() {
+        const provider = document.querySelector('input[name="api_provider"]:checked').value;
+        const providerIdsGroup = document.getElementById('providerIdsGroup');
+        const operatorGroup = document.getElementById('operatorGroup');
+
+        if (provider === 'smsbower') {
+            providerIdsGroup.style.display = 'flex';
+            operatorGroup.style.display = 'none';
+        } else {
+            providerIdsGroup.style.display = 'none';
+            operatorGroup.style.display = 'flex';
+        }
+    }
+
+    function generateApiUrl() {
+        const provider = document.querySelector('input[name="api_provider"]:checked').value;
+        const country = document.getElementById('countrySelect').value;
+        const service = document.getElementById('serviceSelect').value;
+        
+        if (!country || !service) {
+            alert("Vui lòng chọn đầy đủ Quốc gia và Dịch vụ!");
+            return;
+        }
+
+        let finalUrl = "";
+
+        if (provider === 'smsbower') {
+            const providerIds = document.getElementById('providerIds').value;
+            finalUrl = `https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=${service}&country=${country}&maxPrice=0.015&phoneException=&providerIds=${providerIds}`;
+        } else {
+            const apiKey = "83e86c5d05d24cAf7e808f355cf74b16";
+            const operator = document.getElementById('operator').value;
+            finalUrl = `https://hero-sms.com/stubs/handler_api.php?api_key=${apiKey}&action=getNumber&service=${service}&operator=${operator}&country=${country}&maxPrice=0.015`;
+        }
+
+        const resultBox = document.getElementById('resultBox');
+        document.getElementById('apiUrlResult').value = finalUrl;
+        resultBox.style.display = 'block';
+        document.getElementById('copyBtn').textContent = "Copy Link";
+        
+        // Ẩn phản hồi lấy số cũ nếu có khi tạo link mới
+        document.getElementById('phoneResponse').style.display = 'none';
+    }
+
+    function copyToClipboard() {
+        const copyText = document.getElementById("apiUrlResult");
+        const copyBtn = document.getElementById('copyBtn');
+
+        if (!copyText.value) return;
+
+        navigator.clipboard.writeText(copyText.value).then(() => {
+            copyBtn.textContent = "Đã Copy! ✓";
+            setTimeout(() => { copyBtn.textContent = "Copy Link"; }, 2000);
+        }).catch(err => {
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            try {
+                document.execCommand("copy");
+                copyBtn.textContent = "Đã Copy! ✓";
+                setTimeout(() => { copyBtn.textContent = "Copy Link"; }, 2000);
+            } catch (e) {
+                alert("Hãy bôi đen toàn bộ link kết quả rồi nhấn sao chép.");
+            }
+        });
+    }
+
+    // HÀM GỌI API ĐỂ LẤY SỐ TRỰC TIẾP TỪ LINK ĐÃ TẠO
+    function fetchSmsNumber() {
+        const apiUrl = document.getElementById('apiUrlResult').value;
+        const responseBox = document.getElementById('phoneResponse');
+        
+        if (!apiUrl) {
+            alert("Vui lòng tạo đường dẫn API trước!");
+            return;
+        }
+
+        responseBox.style.display = 'block';
+        responseBox.style.backgroundColor = '#f1f5f9';
+        responseBox.style.border = '1px solid #cbd5e1';
+        responseBox.style.color = '#475569';
+        responseBox.innerText = 'Đang gửi yêu cầu lấy số từ hệ thống...';
+
+        fetch(apiUrl)
+            .then(res => res.text())
+            .then(data => {
+                if (data.includes('ACCESS_NUMBER')) {
+                    responseBox.style.backgroundColor = '#ecfdf5';
+                    responseBox.style.border = '1px solid #a7f3d0';
+                    responseBox.style.color = '#065f46';
+                } else {
+                    responseBox.style.backgroundColor = '#fff7ed';
+                    responseBox.style.border = '1px solid #fed7aa';
+                    responseBox.style.color = '#c2410c';
+                }
+                responseBox.innerText = 'Kết quả phản hồi: ' + data;
+            })
+            .catch(err => {
+                responseBox.style.backgroundColor = '#fef2f2';
+                responseBox.style.border = '1px solid #fca5a5';
+                responseBox.style.color = '#991b1b';
+                responseBox.innerText = 'Lỗi kết nối API (Nếu bị lỗi bảo mật CORS, vui lòng copy link và mở trực tiếp trên tab trình duyệt mới): ' + err.message;
+            });
+    }
+</script>
+
+</body>
+</html>
