@@ -416,6 +416,20 @@ async function checkAllOTPs() {
   
   for (let item of localPhonesCache) {
     if (!item.id) continue;
+    
+    // Áp dụng bộ lọc hạn chế cho các số trong lịch sử (không phải số đang chọn)
+    if (currentId !== item.id) {
+      // Giới hạn thời gian quét tối đa là 25 phút kể từ lúc lấy số
+      if (item.timestamp && (Date.now() - item.timestamp > 25 * 60 * 1000)) {
+        continue;
+      }
+      // Hạn chế tần suất chỉ quét mã khoảng 30 giây 1 lần
+      if (item.lastChecked && (Date.now() - item.lastChecked < 30000)) {
+        continue;
+      }
+      item.lastChecked = Date.now();
+    }
+
     const url = `${item.bUrl}?api_key=${item.aKey}&action=getStatus&id=${item.id}&nocache=${Math.random()}`;
     try {
       const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
@@ -589,7 +603,7 @@ function renderFavoritesList() {
 
 function updateRecentPhonesCache(number, id, bUrl, aKey, prc, lnk, historyOtps) {
   localPhonesCache = localPhonesCache.filter(item => item.number !== number);
-  localPhonesCache.unshift({ number, id, bUrl, aKey, prc, lnk, historyOtps: historyOtps || ["","","","","","","","",""], isBlinking: false });
+  localPhonesCache.unshift({ number, id, bUrl, aKey, prc, lnk, historyOtps: historyOtps || ["","","","","","","","",""], isBlinking: false, timestamp: Date.now() });
   // Tăng giới hạn bộ nhớ đệm lưu trữ từ 12 số lên thành 15 số gần nhất
   if (localPhonesCache.length > 15) localPhonesCache.pop();
   localStorage.setItem("otp_local_phones_cache", JSON.stringify(localPhonesCache));
