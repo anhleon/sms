@@ -578,7 +578,423 @@ let currentId = "", baseURL = "", apiKey = "", currentLink = "";
 let otpCodes = ["","","","","","","","",""]; 
 let checkInterval = null;
 let price = "";
-let cloudFavorites = []; 
+let cloudFavorites = [
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=three&country=16&maxPrice=0.015",
+    "successCount": 627,
+    "cancelCount": 14
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=dp&country=73&maxPrice=0.015&phoneException=&providerIds=3018",
+    "successCount": 295,
+    "cancelCount": 214
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=dp&country=73&maxPrice=0.015&phoneException=&providerIds=3229",
+    "successCount": 312,
+    "cancelCount": 21
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=tw&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 280,
+    "cancelCount": 41
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=151&maxPrice=0.015&phoneException=&providerIds=2421",
+    "successCount": 101,
+    "cancelCount": 189
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=yw&country=16&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 249,
+    "cancelCount": 4
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=ads&country=151&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 193,
+    "cancelCount": 17
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=yw&country=33&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 187,
+    "cancelCount": 7
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 123,
+    "cancelCount": 31
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=mc&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 120,
+    "cancelCount": 9
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=giffgaff&country=16&maxPrice=0.015",
+    "successCount": 80,
+    "cancelCount": 15
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=nv&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 78,
+    "cancelCount": 14
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=lebara&country=16&maxPrice=0.015",
+    "successCount": 77,
+    "cancelCount": 9
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=mc&country=6&maxPrice=0.016&phoneException=&providerIds=",
+    "successCount": 74,
+    "cancelCount": 10
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=o2&country=16&maxPrice=0.015",
+    "successCount": 63,
+    "cancelCount": 16
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=vinaphone&country=10&maxPrice=0.015",
+    "successCount": 57,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=vodafone&country=16&maxPrice=0.015",
+    "successCount": 43,
+    "cancelCount": 1
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=mm&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 38,
+    "cancelCount": 5
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=dp&country=33&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 38,
+    "cancelCount": 1
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=yw&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 37,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=yw&country=6&maxPrice=0.015&phoneException=&providerIds=1170",
+    "successCount": 24,
+    "cancelCount": 10
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=6&maxPrice=0.016&phoneException=&providerIds=",
+    "successCount": 25,
+    "cancelCount": 3
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=lt&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 25,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=im&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 23,
+    "cancelCount": 2
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=151&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 23,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=&country=73&maxPrice=0.015",
+    "successCount": 7,
+    "cancelCount": 11
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=dp&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 15,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=yw&country=6&maxPrice=0.015&phoneException=&providerIds=1507",
+    "successCount": 5,
+    "cancelCount": 9
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=6&maxPrice=0.015&phoneException=&providerIds=1170",
+    "successCount": 13,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=ka&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 12,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=tw&country=6&maxPrice=0.015&phoneException=&providerIds=3332",
+    "successCount": 7,
+    "cancelCount": 5
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=6&maxPrice=0.015&phoneException=&providerIds=3332",
+    "successCount": 5,
+    "cancelCount": 6
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=nv&country=73&maxPrice=0.015&phoneException=&providerIds=3018",
+    "successCount": 3,
+    "cancelCount": 7
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=wx&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 4,
+    "cancelCount": 5
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=tw&country=6&maxPrice=0.016&phoneException=&providerIds=",
+    "successCount": 9,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=viettel&country=10&maxPrice=0.015",
+    "successCount": 8,
+    "cancelCount": 1
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=tw&country=6&maxPrice=0.015&phoneException=&providerIds=3408",
+    "successCount": 7,
+    "cancelCount": 1
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=fu&country=151&maxPrice=0.015&phoneException=&providerIds=2421",
+    "successCount": 0,
+    "cancelCount": 8
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=T-mobile&country=16&maxPrice=0.015",
+    "successCount": 4,
+    "cancelCount": 2
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=yw&country=6&maxPrice=0.015&phoneException=&providerIds=3333",
+    "successCount": 6,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=any&country=27&maxPrice=0.015",
+    "successCount": 3,
+    "cancelCount": 3
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=tw&country=6&maxPrice=0.015&phoneException=&providerIds=3267",
+    "successCount": 5,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=vi&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 5,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=6&maxPrice=0.016&phoneException=&providerIds=3347",
+    "successCount": 4,
+    "cancelCount": 1
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=&country=31&maxPrice=0.015",
+    "successCount": 1,
+    "cancelCount": 4
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=im&country=6&maxPrice=0.015&phoneException=&providerIds=3332",
+    "successCount": 3,
+    "cancelCount": 2
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=yw&country=73&maxPrice=0.015&phoneException=&providerIds=3415",
+    "successCount": 1,
+    "cancelCount": 4
+  },
+  {
+    "url": "https://sms-verification-number.com/stubs/handler_api?api_key=4bada3116f8b3b18429f8b9a299327c2&action=getNumber&service=yw&operator=any&country=16&maxPrice=2&lang=ru",
+    "successCount": 1,
+    "cancelCount": 4
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=6&maxPrice=0.015&phoneException=&providerIds=3347",
+    "successCount": 2,
+    "cancelCount": 3
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=6&maxPrice=0.015&phoneException=&providerIds=3333",
+    "successCount": 5,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=tw&country=6&maxPrice=0.015&phoneException=&providerIds=3334",
+    "successCount": 4,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=6&maxPrice=0.015&phoneException=&providerIds=3029",
+    "successCount": 3,
+    "cancelCount": 1
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=dp&country=73&maxPrice=0.016&phoneException=&providerIds=3018",
+    "successCount": 4,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=yw&country=73&maxPrice=0.015&phoneException=&providerIds=3018",
+    "successCount": 4,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=&country=16&maxPrice=0.015",
+    "successCount": 4,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=dp&country=6&maxPrice=0.015&phoneException=&providerIds=3332",
+    "successCount": 3,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=mc&country=6&maxPrice=0.016&phoneException=&providerIds=3332",
+    "successCount": 3,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=mc&country=6&maxPrice=0.016&phoneException=&providerIds=3334",
+    "successCount": 2,
+    "cancelCount": 1
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=&country=41&maxPrice=0.015",
+    "successCount": 3,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=xk&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 3,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=dp&country=73&maxPrice=0.015&phoneException=&providerIds=2404",
+    "successCount": 2,
+    "cancelCount": 1
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=mc&country=6&maxPrice=0.015&phoneException=&providerIds=3334",
+    "successCount": 3,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=yw&country=6&maxPrice=0.016&phoneException=&providerIds=",
+    "successCount": 3,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=6&maxPrice=0.015&phoneException=&providerIds=3355",
+    "successCount": 2,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=6&maxPrice=0.016&phoneException=&providerIds=3332",
+    "successCount": 2,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=6&maxPrice=0.015&phoneException=&providerIds=3334",
+    "successCount": 2,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=tw&country=6&maxPrice=0.015&phoneException=&providerIds=3333",
+    "successCount": 2,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=6&maxPrice=0.016&phoneException=&providerIds=1170",
+    "successCount": 2,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=opd&country=151&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 2,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=T-mobilw&country=16&maxPrice=0.015",
+    "successCount": 2,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=&country=7&maxPrice=0.015",
+    "successCount": 1,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=me&country=6&maxPrice=0.015&phoneException=&providerIds=3251",
+    "successCount": 1,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=mc&country=6&maxPrice=0.015&phoneException=&providerIds=3029",
+    "successCount": 1,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=tw&country=6&maxPrice=0.015&phoneException=&providerIds=3355",
+    "successCount": 1,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=mtn&country=31&maxPrice=0.015",
+    "successCount": 0,
+    "cancelCount": 1
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=dp&country=33&maxPrice=0.015&phoneException=&providerIds=2236",
+    "successCount": 1,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=ka&country=6&maxPrice=0.016&phoneException=&providerIds=",
+    "successCount": 1,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=mt&country=6&maxPrice=0.015&phoneException=&providerIds=",
+    "successCount": 1,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=mc&country=6&maxPrice=0.016&phoneException=&providerIds=3289",
+    "successCount": 1,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=vi&country=6&maxPrice=0.016&phoneException=&providerIds=",
+    "successCount": 1,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=any&country=7&maxPrice=0.015",
+    "successCount": 1,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=any&country=41&maxPrice=0.015",
+    "successCount": 1,
+    "cancelCount": 0
+  },
+  {
+    "url": "https://hero-sms.com/stubs/handler_api.php?api_key=83e86c5d05d24cAf7e808f355cf74b16&action=getNumber&service=yw&operator=any&country=33&maxPrice=0.015",
+    "successCount": 0,
+    "cancelCount": 0
+  }
+]; 
 let localPhonesCache = [];
 
 document.addEventListener("DOMContentLoaded", () => {
