@@ -655,12 +655,18 @@ function saveCurrentActiveStateToCache(number) {
   localStorage.setItem("otp_current_active_state", JSON.stringify(state));
 }
 
-async function fetchCloudData() {
+async async function fetchCloudData() {
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-      method: "GET", headers: { "X-Master-Key": JSONBIN_KEY }
+      method: "GET", 
+      headers: { 
+        "X-Master-Key": JSONBIN_KEY,
+        "X-Bin-Meta": "false" // Bắt buộc phải có dòng này để JsonBin trả về mảng link gốc
+      }
     });
     const data = await res.json();
+    
+    // Đọc trực tiếp mảng dữ liệu trả về
     let records = data.record ? data.record : data;
     
     if (Array.isArray(records)) {
@@ -668,17 +674,21 @@ async function fetchCloudData() {
         if (typeof item === 'string') return { url: item, successCount: 0, cancelCount: 0 };
         return { url: item.url, successCount: item.successCount || 0, cancelCount: item.cancelCount || 0 };
       });
-    } else { cloudFavorites = []; }
+    } else { 
+      cloudFavorites = []; 
+    }
     
     localStorage.setItem("otp_cloud_struct_backup", JSON.stringify(cloudFavorites));
     renderFavoritesList();
     document.getElementById("syncStatus").innerText = "Đồng bộ Đám mây Online thành công! ✔️";
     document.getElementById("syncStatus").style.color = "green";
   } catch (e) {
+    console.error("Lỗi nạp cloud:", e);
     document.getElementById("syncStatus").innerText = "Lỗi nạp Cloud trực tuyến";
     document.getElementById("syncStatus").style.color = "red";
   }
 }
+
 
 async function saveCloudData() {
   document.getElementById("syncStatus").innerText = "Đang đồng bộ Cloud... ⏳";
