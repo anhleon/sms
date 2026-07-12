@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>OTP Tool V18 by Anhleon</title>
+  <meta name="viewport" content="width=dewide-width, initial-scale=1" />
+  <style>
+    body { font-family: sans-serif; background: #ffffff; color: #000; padding: 10px; max-width: 480px; margin: auto; }
+    
+    .api-container { position: relative; margin-bottom: 5px; margin-top: 0; }
+    textarea {
+      width: 100%; padding: 10px; padding-bottom: 30px; margin: 0;
+      font-size: 15px; background: #fff; color: #000;
+      border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+      height: 75px; resize: none; display: block;
+    }
+    .api-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 5px; }
+    .api-actions button {
+      width: auto; padding: 3px 8px; margin: 0; font-size: 11px;
+      background: #e0e0e0; color: #333; border: 1px solid #ccc;
+      border-radius: 4px; cursor: pointer;
+    }
+    .api-actions button:hover { background: #d0d0d0; }
+
+    button {
+      width: 100%; padding: 10px; margin: 5px 0;
+      font-size: 16px; background: #007bff; color: #fff;
+      border: none; border-radius: 6px; cursor: pointer;
+    }
+    
+    .row { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
+    .row input {
+      flex: 1; height: 42px; padding: 0 10px; font-size: 16px;
+      box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px;
+    }
+    .copy-btn {
+      width: 110px; height: 42px; padding: 0; margin: 0; font-size: 16px;
+      background: #6c757d; display: flex; align-items: center; justify-content: center;
+    }
+    
+    /* GIAO DIỆN Ô OTP: VIỀN MỎNG 1PX VÀ NỀN MÀU TRẮNG */
+    .otp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .otp-card { 
+      border: 1px solid #007bff; border-radius: 8px; 
+      background: #ffffff; padding: 12px 4px; text-align: center; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s;
+    }
+    .otp-card-title { font-size: 15px; font-weight: bold; color: #555; margin-bottom: 6px; display: flex; justify-content: center; align-items: center; gap: 4px; }
+    .otp-card-num { font-size: 24px; font-weight: 800; color: #000000; word-break: break-all; letter-spacing: 1px; }
+    
+    .popup {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #333; color: #fff; padding: 10px 20px; border-radius: 10px;
+      display: none; z-index: 1000;
+    }
+    .phone-actions { display: flex; justify-content: space-between; gap: 10px; margin: 10px 0; }
+    .phone-actions button { flex: 1; }
+    .price-badge{
+      display:inline-flex; align-items:center; padding:0 10px; height:42px; background:#ffe9a8;
+      border:1px solid #d8b556; border-radius:6px; font-weight:600; white-space:nowrap; box-sizing:border-box;
+    }
+
+    /* VÙNG LỊCH SỬ GIỮA TRANG */
+    .history-box { border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; background: #fffdf5; margin-top: 15px; }
+    .history-items-list { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; padding-top:5px; overflow:visible; width:100%; }
+    .history-number-btn { width:100%; box-sizing:border-box; text-align:center; font-size:14px; padding:8px 4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; background:#fff3cd; color:#856404; border:1px solid #ffeeba; border-radius:4px; cursor:pointer; font-weight:bold; position:relative; overflow:visible; }
+    .history-number-btn:hover { background: #ffeeba; }
+
+    /* Hiệu ứng nhấp nháy khi có mã OTP mới về trong lịch sử */
+    @keyframes blink-bg {
+      0%, 100% { background: #fff3cd; color: #856404; }
+      50% { background: #28a745; color: #ffffff; }
+    }
+    .blink-active {
+      animation: blink-bg 0.6s infinite alternate;
+    }
+    
+    /* Trạng thái bôi xanh cố định khi đủ 6 mã */
+    .green-solid {
+      background: #28a745 !important;
+      color: #ffffff !important;
+      border-color: #218838 !important;
+    }
+
+    .addon-divider { margin: 20px 0 15px 0; border: 0; border-top: 1px solid #eee; }
+    .addon-section-title { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+    
+    .favorite-box { border: 1px dashed #007bff; padding: 10px; border-radius: 6px; background: #f8f9fa; margin-bottom: 15px; }
+    .fav-input-group { display: flex; gap: 5px; margin-bottom: 4px; }
+    .fav-input-group input { flex: 1; padding: 6px 10px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .fav-input-group button { width: auto; padding: 0 12px; font-size: 13px; background: #007bff; margin: 0; height: 34px; border-radius: 4px; }
+    .fav-items-list { display: flex; flex-direction: column; gap: 6px; }
+    
+    .fav-row-item { display: flex; flex-direction: column; background: #e7f1ff; border: 1px solid #b8daff; padding: 8px 10px; border-radius: 6px; cursor: pointer; transition: background 0.2s; position: relative; }
+    .fav-row-item:hover { background: #d0e3ff; }
+    .fav-web-name { font-size: 11px; font-weight: bold; color: #fff; background: #007bff; padding: 1px 5px; border-radius: 3px; display: inline-block; margin-bottom: 4px; width: fit-content; }
+    .fav-link-info { font-size: 13px; color: #222; font-weight: 500; line-height: 1.5; padding-right: 25px; }
+    .fav-link-info span { color: #ff5722; font-weight: bold; }
+    
+    .fav-stats-bar { display: flex; gap: 10px; font-size: 11px; margin-top: 5px; background: rgba(255,255,255,0.6); padding: 3px 6px; border-radius: 4px; border: 1px solid #e2e8f0; width: fit-content; }
+    .stat-success { color: #28a745; font-weight: bold; }
+    .stat-cancel { color: #dc3545; font-weight: bold; }
+    .stat-total { color: #6c757d; }
+
+    .fav-row-del { font-weight: bold; color: #dc3545; font-size: 20px; cursor: pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); padding: 5px; }
+    .fav-row-del:hover { color: #bd2130; }
+
+    .sync-status { font-size: 11px; font-weight: normal; color: #6c757d; }
+  </style>
+</head>
+<body>
+<div style="margin-bottom:10px;"><div class="api-toggle-header" onclick="toggleApiGenerator()">
+📌 Công cụ tạo link API
+</div>
+
+<div id="apiGeneratorWrapper">
+
+
+<div class="container">
+    
+
+    <div class="provider-selector">
+        <label class="radio-label">
+            <input type="radio" name="api_provider" value="smsbower" checked onchange="toggleFields()"> SmsBower.page
+        </label>
+        <label class="radio-label">
+            <input type="radio" name="api_provider" value="herosms" onchange="toggleFields()"> Hero-SMS.com
+        </label>
+    </div>
+
+    <div class="flex-selection-row">
+        <div class="flex-col-50">
+            <label for="countrySearch">Chọn Quốc Gia:</label>
+            <input type="text" id="countrySearch" class="search-input" placeholder="Tìm hoặc bấm chọn bên dưới..." onkeyup="filterSelect('countrySearch', 'countrySelect')">
+            <select id="countrySelect" size="5" style="height:140px" onchange="selectItem('countrySearch', 'countrySelect')"></select>
+        </div>
+
+        <div class="flex-col-50">
+            <label for="serviceSearch">Chọn Dịch Vụ:</label>
+            <input type="text" id="serviceSearch" class="search-input" placeholder="Tìm hoặc bấm chọn bên dưới..." onkeyup="filterSelect('serviceSearch', 'serviceSelect')">
+            <select id="serviceSelect" size="5" style="height:140px" onchange="selectItem('serviceSearch', 'serviceSelect')"></select>
+        </div>
+    </div>
+
+
+<style>
+.api-toggle-header{
+background:#007bff;color:#fff;padding:10px;border-radius:6px;
+text-align:center;font-weight:bold;cursor:pointer;margin-bottom:10px;
+}
+#apiGeneratorWrapper{display:none;margin-bottom:15px;}
+
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-site: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 8px;
+        }
+
+        body{
+font-family:sans-serif;
+background:#ffffff;
+color:#000;
+padding:10px;
+max-width:480px;
+margin:auto;
+}
+
+        .container{
+width:100%;
+max-width:100%;
+padding:8px;
+margin:0;
+box-sizing:border-box;
+box-shadow:none;
+border:1px solid #e2e8f0;
+border-radius:8px;
+}
+
+        h2 {
+            text-align: center;
+            margin:0 0 8px 0;
+            font-size:16px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .provider-selector {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 4px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .radio-label input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+            margin: 0;
+        }
+
+        /* BỐ CỤC HAI Ô CHỌN NẰM NGANG NHAU */
+        .flex-selection-row {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-between;
+            gap: 6px;
+            margin-bottom: 4px;
+            width: 100%;
+        }
+
+        .flex-col-50 {
+            flex: 1 !important;
+            width: 50% !important;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 13.5px;
+            color: var(--text-main);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        select {
+            width: 100%;
+            height:180px !important;
+            min-height:180px !important;
+            max-height:180px !important;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            outline: none;
+            background-color: #fff;
+            padding: 6px;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        .dynamic-fields {
+            margin-bottom: 4px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .result-box {
+            margin-top: 20px;
+            background-color: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            display: none;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 8px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .btn-copy {
+            padding: 10px 18px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-copy:hover {
+            opacity: 0.9;
+        }
+
+        .api-url {
+            width: 100%;
+            background: transparent;
+            padding: 12px;
+            border: none;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 13px;
+            color: #0f172a;
+            word-break: break-all;
+            box-sizing: border-box;
+            resize: none;
+            display: block;
+        }
+    
+</style>
+
+
+
+    <div class="dynamic-fields">
+        <div class="form-group" id="providerIdsGroup">
+            <label for="providerIds">Provider IDs (Nhà cung cấp):</label>
+            <input type="text" id="providerIds" class="search-input" placeholder="Nhập Provider ID tùy chọn (ví dụ: 2421)...">
+        </div>
+
+        <div class="form-group" id="operatorGroup" style="display: none;">
+            <label for="operator">Operator (Nhà mạng):</label>
+            <input type="text" id="operator" class="search-input" placeholder="Nhập tên nhà mạng (ví dụ: three)..." oninput="this.value=this.value.toLowerCase()">
+        </div>
+    </div>
+
+    <button type="button" class="btn-submit" onclick="generateApiUrl()">Tạo Đường Dẫn API</button>
+
+    <div class="result-box" id="resultBox">
+        <div class="result-header">
+            <span class="result-title">LINK API</span>
+            <button class="btn-copy" id="copyBtn" onclick="copyToClipboard()">Copy Link</button>
+        </div>
+        <textarea id="apiUrlResult" class="api-url" rows="3" readonly></textarea>
+    </div>
+</div>
+
+
+</div>
+
+<script>
+function toggleApiGenerator(){
+ const el=document.getElementById('apiGeneratorWrapper');
+ el.style.display=(el.style.display==='none'||el.style.display==='')?'block':'none';
+}
+
+    // DỮ LIỆU QUỐC GIA
+    const countryData = {"31":{"id":"31","eng":"South Africa"},"22":{"id":"22","eng":"India"},"66":{"id":"66","eng":"Pakistan"},"60":{"id":"60","eng":"Bangladesh"},"147":{"id":"147","eng":"Zambia"},"138":{"id":"138","eng":"Namibia"},"79":{"id":"79","eng":"Papua new gvineya"},"58":{"id":"58","eng":"Algeria"},"71":{"id":"71","eng":"Ethiopia"},"80":{"id":"80","eng":"Mozambique"},"76":{"id":"76","eng":"Angola"},"1":{"id":"1","eng":"Ukraine"},"21":{"id":"21","eng":"Egypt"},"73":{"id":"73","eng":"Brazil"},"26":{"id":"26","eng":"Haiti"},"57":{"id":"57","eng":"Iran"},"65":{"id":"65","eng":"Peru "},"10":{"id":"10","eng":"Viet nam"},"96":{"id":"96","eng":"Zimbabwe"},"81":{"id":"81","eng":"Nepal"},"40":{"id":"40","eng":"Uzbekistan"},"19":{"id":"19","eng":"Nigeria"},"106":{"id":"106","eng":"Swaziland"},"18":{"id":"18","eng":"Congo (Dem. Republic)"},"78":{"id":"78","eng":"France"},"123":{"id":"123","eng":"Botswana"},"0":{"id":"0","eng":"Russian Federation"},"54":{"id":"54","eng":"Mexico"},"9":{"id":"9","eng":"Tanzania"},"64":{"id":"64","eng":"Sri Lanka"},"88":{"id":"88","eng":"Honduras"},"39":{"id":"39","eng":"Argentinas"},"5":{"id":"5","eng":"Myanmar"},"89":{"id":"89","eng":"Tunisia"},"91":{"id":"91","eng":"Timor-Leste"},"136":{"id":"136","eng":"Lesotho"},"105":{"id":"105","eng":"Ecuador"},"101":{"id":"101","eng":"El Salvador"},"37":{"id":"37","eng":"Morocco"},"75":{"id":"75","eng":"Uganda"},"137":{"id":"137","eng":"Malawi"},"38":{"id":"38","eng":"Ghana"},"8":{"id":"8","eng":"Kenya"},"112":{"id":"112","eng":"Panama"},"103":{"id":"103","eng":"Jamaica"},"70":{"id":"70","eng":"Venezuela"},"2":{"id":"2","eng":"Kazakhstan"},"33":{"id":"33","eng":"Colombia"},"87":{"id":"87","eng":"Paraguay"},"62":{"id":"62","eng":"Turkey"},"11":{"id":"11","eng":"Kyrgyzstan"},"116":{"id":"116","eng":"Jordan"},"41":{"id":"41","eng":"Cameroon"},"13":{"id":"13","eng":"Israel"},"27":{"id":"27","eng":"Cote d`Ivoire Ivory Coast"},"51":{"id":"51","eng":"Belarus"},"83":{"id":"83","eng":"Bulgaria"},"102":{"id":"102","eng":"Libya"},"157":{"id":"157","eng":"Mauritius"},"161":{"id":"161","eng":"Turkmenistan"},"35":{"id":"35","eng":"Azerbaijan"},"69":{"id":"69","eng":"Mali"},"140":{"id":"140","eng":"Rwanda"},"154":{"id":"154","eng":"Gabon"},"1010":{"id":"1010","eng":"Sudan"},"56":{"id":"56","eng":"Spain"},"90":{"id":"90","eng":"Nicaragua"},"85":{"id":"85","eng":"Moldova, Republic of"},"187":{"id":"187","eng":"United States"},"53":{"id":"53","eng":"Saudi Arabia"},"52":{"id":"52","eng":"Thailand"},"120":{"id":"120","eng":"Benin"},"93":{"id":"93","eng":"Costa Rica"},"152":{"id":"152","eng":"Burkina Faso"},"111":{"id":"111","eng":"Qatar"},"82":{"id":"82","eng":"Belgium"},"16":{"id":"16","eng":"United Kingdom"},"146":{"id":"146","eng":"Reunion"},"107":{"id":"107","eng":"Oman"},"150":{"id":"150","eng":"Congo"},"30":{"id":"30","eng":"Yemen"},"156":{"id":"156","eng":"Uruguay"},"47":{"id":"47","eng":"Iraq"},"61":{"id":"61","eng":"Senegal"},"43":{"id":"43","eng":"Germany"},"25":{"id":"25","eng":"Lao People`s"},"15":{"id":"15","eng":"Poland"},"99":{"id":"99","eng":"Togo"},"139":{"id":"139","eng":"Niger"},"1333":{"id":"1333","eng":"Syrian Arab Republic"},"84":{"id":"84","eng":"Hungary"},"158":{"id":"158","eng":"Bhutan"},"119":{"id":"119","eng":"Burundi"},"7":{"id":"7","eng":"Malaysia"},"48":{"id":"48","eng":"Netherlands"},"167":{"id":"167","eng":"Equatorial Guinea"},"95":{"id":"95","eng":"United Arab Emirates"},"104":{"id":"104","eng":"Trinidad and Tobago"},"24":{"id":"24","eng":"Cambodia"},"177":{"id":"177","eng":"South Sudan"},"114":{"id":"114","eng":"Mauritania"},"4":{"id":"4","eng":"Philippines"},"3":{"id":"3","eng":"China"},"100":{"id":"100","eng":"Kuwait"},"130":{"id":"130","eng":"Guinea-Bissau"},"159":{"id":"159","eng":"Maldives"},"117":{"id":"117","eng":"Portugal"},"108":{"id":"108","eng":"Bosnia and Herzegovina"},"149":{"id":"149","eng":"Somalia"},"118":{"id":"118","eng":"Barbados"},"1011":{"id":"1011","eng":"Martinique"},"109":{"id":"109","eng":"Dominican Republic"},"28":{"id":"28","eng":"Gambia"},"74":{"id":"74","eng":"Afghanistan"},"148":{"id":"148","eng":"Armenia"},"131":{"id":"131","eng":"Guyana"},"42":{"id":"42","eng":"Chad"},"173":{"id":"173","eng":"Switzerland"},"97":{"id":"97","eng":"Puerto Rico"},"23":{"id":"23","eng":"Ireland"},"29":{"id":"29","eng":"Serbia"},"34":{"id":"34","eng":"Estonia"},"145":{"id":"145","eng":"Bahrain"},"63":{"id":"63","eng":"Czech Republic"},"160":{"id":"160","eng":"Guadeloupe"},"174":{"id":"174","eng":"Norway"},"86":{"id":"86","eng":"Italy"},"32":{"id":"32","eng":"Romania"},"77":{"id":"77","eng":"Cyprus"},"165":{"id":"165","eng":"Luxembourg"},"142":{"id":"142","eng":"Suriname"},"94":{"id":"94","eng":"Guatemala"},"17":{"id":"17","eng":"Madagascar"},"6":{"id":"6","eng":"Indonesia"},"46":{"id":"46","eng":"Sweden"},"169":{"id":"169","eng":"Antigua and Barbuda"},"168":{"id":"168","eng":"Djibouti"},"163":{"id":"163","eng":"Finland"},"162":{"id":"162","eng":"French Guiana"},"164":{"id":"164","eng":"Saint Lucia"},"171":{"id":"171","eng":"Montenegro"},"36":{"id":"36","eng":"Canada"},"113":{"id":"113","eng":"Cuba"},"129":{"id":"129","eng":"Greece"},"151":{"id":"151","eng":"Chile"},"128":{"id":"128","eng":"Georgia"},"115":{"id":"115","eng":"Sierra Leone"},"122":{"id":"122","eng":"Bahamas"},"92":{"id":"92","eng":"Bolivia"},"127":{"id":"127","eng":"Grenada"},"49":{"id":"49","eng":"Latvia"},"143":{"id":"143","eng":"Tajikistan"},"121":{"id":"121","eng":"Brunei Darussalam"},"170":{"id":"170","eng":"Cayman islands"},"166":{"id":"166","eng":"Saint Vincent"},"155":{"id":"155","eng":"Albania"},"59":{"id":"59","eng":"Slovenia"},"14":{"id":"14","eng":"Hong Kong"},"134":{"id":"134","eng":"Saint Kitts and Nevis"},"55":{"id":"55","eng":"Taiwan"},"44":{"id":"44","eng":"Lithuania"},"125":{"id":"125","eng":"Central African Republic"},"135":{"id":"135","eng":"Liberia"},"1001":{"id":"1001","eng":"Japan"},"68":{"id":"68","eng":"Guinea"},"179":{"id":"179","eng":"Aruba"},"133":{"id":"133","eng":"Comoros"},"199":{"id":"199","eng":"Malta"},"196":{"id":"196","eng":"Singapore"},"141":{"id":"141","eng":"Slovakia"},"181":{"id":"181","eng":"Anguilla"},"178":{"id":"178","eng":"Sao Tome and Principe"},"189":{"id":"189","eng":"Fiji"},"188":{"id":"188","eng":"Palestine"},"45":{"id":"45","eng":"Croatia"},"186":{"id":"186","eng":"Cape Verde"},"144":{"id":"144","eng":"Monaco"},"183":{"id":"183","eng":"Macedonia"},"124":{"id":"124","eng":"Belize"},"185":{"id":"185","eng":"New Caledonia"},"67":{"id":"67","eng":"New Zealand"},"72":{"id":"72","eng":"Mongolia"},"153":{"id":"153","eng":"Lebanon"},"172":{"id":"172","eng":"Denmark"},"50":{"id":"50","eng":"Austria"},"184":{"id":"184","eng":"Seychelles"},"175":{"id":"175","eng":"Australia"},"180":{"id":"180","eng":"Montserrat"},"126":{"id":"126","eng":"Dominica"},"1002":{"id":"1002","eng":"Korea"},"20":{"id":"20","eng":"Macau"},"132":{"id":"132","eng":"Iceland"},"176":{"id":"176","eng":"Eritrea"},"1003":{"id":"1003","eng":"Bermuda"},"1004":{"id":"1004","eng":"Kosovo"},"1005":{"id":"1005","eng":"Liechtenstein"},"1006":{"id":"1006","eng":"Sint Maarten"},"1007":{"id":"1007","eng":"Vanuatu"},"1008":{"id":"1008","eng":"Greenland"},"12":{"id":"12","eng":"United States (virtual)"},"201":{"id":"201","eng":"Gibraltar"},"204":{"id":"204","eng":"Niue"}};
+
+    // DỮ LIỆU DỊCH VỤ
+    const serviceData = [{"code":"kt","name":"KakaoTalk"},{"code":"nv","name":"Naver"},{"code":"oi","name":"Tinder"},{"code":"ig","name":"Instagram"},{"code":"tg","name":"Telegram"},{"code":"dh","name":"Ebay"},{"code":"vi","name":"Viber"},{"code":"fb","name":"Facebook"},{"code":"go","name":"Google, Gmail, Youtube"},{"code":"me","name":"LINE"},{"code":"mt","name":"Steam"},{"code":"ts","name":"PayPal"},{"code":"wa","name":"WhatsApp"},{"code":"bz","name":"Blizzard"},{"code":"nf","name":"Netflix"},{"code":"tw","name":"Twitter"},{"code":"nz","name":"Foodpanda"},{"code":"vk","name":"ВК, Одноклассники, Юла (mail.ru group)"},{"code":"ub","name":"Uber"},{"code":"mm","name":"Microsoft"},{"code":"uk","name":"AirBnb"},{"code":"mb","name":"Yahoo"},{"code":"am","name":"Amazon"},{"code":"ab","name":"Alibaba"},{"code":"wc","name":"Craigslist"},{"code":"ew","name":"Nike"},{"code":"lf","name":"Tiktok"},{"code":"ka","name":"Shopee"},{"code":"za","name":"Jingdong"},{"code":"qq","name":"Tencent QQ"},{"code":"im","name":"IMO messenger"},{"code":"yl","name":"Yalla"},{"code":"pm","name":"AOL"},{"code":"zk","name":"Deliveroo"},{"code":"ls","name":"Careem"},{"code":"zr","name":"Papara"},{"code":"hw","name":"AliPay"},{"code":"ds","name":"Discord"},{"code":"an","name":"Adidas"},{"code":"xk","name":"DiDi taxi"},{"code":"wb","name":"WeChat"},{"code":"mc","name":"MiChat"},{"code":"bff","name":"Buff.163"},{"code":"ip","name":"Burger King"},{"code":"si","name":"Cita Previa"},{"code":"fr","name":"DANA"},{"code":"hk","name":"4FunLite"},{"code":"yw","name":"Grindr"},{"code":"ni","name":"Gojek"},{"code":"xs","name":"GroupMe"},{"code":"ae","name":"MyGLO"},{"code":"un","name":"Humble bundle"},{"code":"xf","name":"LightChath"},{"code":"fz","name":"KFC"},{"code":"zo","name":"Kaggle"},{"code":"ry","name":"McDonalds"},{"code":"vm","name":"Okcupid"},{"code":"sn","name":"OLX"},{"code":"fx","name":"Pgbonus"},{"code":"jq","name":"Paysafecard"},{"code":"pf","name":"Plenty of Fish"},{"code":"dp","name":"Protonmail"},{"code":"nc","name":"Payoneer"},{"code":"qi","name":"32Red"},{"code":"ij","name":"Revolut"},{"code":"scrf","name":"Scruff"},{"code":"tcw","name":"Switchere"},{"code":"alj","name":"Spotify"},{"code":"bw","name":"Signal"},{"code":"vj","name":"Stormgain"},{"code":"hb","name":"Twitch"},{"code":"gr_tl","name":"Tilda"},{"code":"xd","name":"Tokopedia"},{"code":"gc","name":"TradingView"},{"code":"YoHo","name":"YoHo"},{"code":"qy","name":"Zhihu"},{"code":"kf","name":"Weibo"},{"code":"wx","name":"Apple"},{"code":"kc","name":"Vinted"},{"code":"tn","name":"LinkedIn"},{"code":"bl","name":"Bigo Live"},{"code":"rc","name":"Skype"},{"code":"fu","name":"Snapchat"},{"code":"fi","name":"Dundle"},{"code":"vz","name":"Hinge"},{"code":"wh","name":"TanTan"},{"code":"dr","name":"OpenAI (ChatGPT)"},{"code":"ul","name":"Getir"},{"code":"py","name":"Monese"},{"code":"lt","name":"Bitclout"},{"code":"tx","name":"Bolt"},{"code":"gt","name":"Gett"},{"code":"ss","name":"Hezzl"},{"code":"dl","name":"Lazada"},{"code":"xh","name":"Ovo"},{"code":"vv","name":"Seo Sprint"},{"code":"tl","name":"Truecaller"},{"code":"mj","name":"Zalo"},{"code":"oz","name":"Poshmark"},{"code":"zz","name":"DENT"},{"code":"wg","name":"Skout"},{"code":"qd","name":"Taobao"},{"code":"os","name":"Dhani"},{"code":"hn","name":"1688"},{"code":"ju","name":"Indomaret"},{"code":"gf","name":"GoogleVoice"},{"code":"do","name":"Leboncoin"},{"code":"yy","name":"Venmo"},{"code":"cn","name":"Fiverr"},{"code":"ii","name":"CashKaro"},{"code":"ir","name":"Chispa"},{"code":"it","name":"CashApp"},{"code":"ix","name":"Celcoin"},{"code":"jd","name":"GiraBank"},{"code":"jw","name":"Br777"},{"code":"jy","name":"Sorare"},{"code":"kk","name":"Idealista"},{"code":"kq","name":"FotoCasa"},{"code":"qf","name":"RedBook"},{"code":"et","name":"Clubhouse"},{"code":"mo","name":"Bumble"},{"code":"pz","name":"Lidl"},{"code":"yi","name":"Yemeksepeti"},{"code":"ib","name":"Immowelt"},{"code":"ex","name":"Linode"},{"code":"rr","name":"Wolt"},{"code":"bf","name":"Keybase"},{"code":"xr","name":"Tango"},{"code":"xv","name":"Wish"},{"code":"xx","name":"Joyride"},{"code":"zh","name":"Zoho"},{"code":"lq","name":"Potato"},{"code":"dn","name":"Paxful"},{"code":"iq","name":"icq"},{"code":"jg","name":"Grab"},{"code":"en","name":"Hermes"},{"code":"ez","name":"GoerliFaucet"},{"code":"oh","name":"MapleSEA"},{"code":"yo","name":"Amasia"},{"code":"ys","name":"ZCity"},{"code":"zs","name":"Bilibili"},{"code":"vp","name":"Kwai"},{"code":"rl","name":"inDriver"},{"code":"fj","name":"Potato Chat"},{"code":"zx","name":"CommunityGaming"},{"code":"pu","name":"Justdating"},{"code":"aj","name":"OneAset"},{"code":"gj","name":"Carousell"},{"code":"zy","name":"Nttgame"},{"code":"zw","name":"Quack"},{"code":"zv","name":"Digikala"},{"code":"zu","name":"BigC"},{"code":"zt","name":"Budweiser"},{"code":"zq","name":"IndiaPlays"},{"code":"zn","name":"Biedronka"},{"code":"zm","name":"OfferUp"},{"code":"zj","name":"ROBINHOOD"},{"code":"zg","name":"Setel"},{"code":"zf","name":"OnTaxi"},{"code":"zd","name":"Zilch"},{"code":"yx","name":"JTExpress"},{"code":"yv","name":"IPLwin"},{"code":"yp","name":"Payzapp"},{"code":"yn","name":"Allegro"},{"code":"yj","name":"eWallet"},{"code":"yd","name":"米画师Mihuashi"},{"code":"xz","name":"paycell"},{"code":"xy","name":"Depop"},{"code":"xw","name":"Taki"},{"code":"xu","name":"RecargaPay"},{"code":"xq","name":"MPL"},{"code":"xn","name":"Familia"},{"code":"xl","name":"Wmaraci"},{"code":"xi","name":"InFund"},{"code":"xe","name":"GalaxyChat"},{"code":"xb","name":"RummyOla"},{"code":"wz","name":"FoxFord"},{"code":"ww","name":"BIP"},{"code":"wv","name":"AIS"},{"code":"wt","name":"IZI"},{"code":"wq","name":"Leboncoin1"},{"code":"wp","name":"163c"codeN:"wo","name":"Parkplus"},{"code":"wn","name":"GameArena"},{"code":"wl","name":"YouGotaGift"},{"code":"wk","name":"Mobile01"},{"code":"vy","name":"Meta"},{"code":"vx","name":"HeyBox"},{"code":"vw","name":"CoinField"},{"code":"vq","name":"LadyMaria"},{"code":"vo","name":"Brand20ua"},{"code":"vn","name":"Yaay"},{"code":"vf","name":"Q12 Trivia"},{"code":"vc","name":"Banqi"},{"code":"va","name":"SportGully"},{"code":"uz","name":"OffGamers"},{"code":"uy","name":"Meliuz"},{"code":"uw","name":"Kirana"},{"code":"uv","name":"BinBin"},{"code":"us","name":"IRCTC"},{"code":"ur","name":"MyDailyCash"},{"code":"uq","name":"TopDetal"},{"code":"uo","name":"CafeBazaar"},{"code":"uj","name":"СhampionСasino"},{"code":"ui","name":"RuTube"},{"code":"uh","name":"Yubo"},{"code":"ug","name":"Fiqsy"},{"code":"uf","name":"Eneba"},{"code":"ue","name":"Onet"},{"code":"ud","name":"Disney Hotstar"},{"code":"tv","name":"Flink"},{"code":"tu","name":"Lyft"},{"code":"tt","name":"Ziglu"},{"code":"tr","name":"Paysend"},{"code":"tq","name":"Swvl"},{"code":"tp","name":"IndiaGold"},{"code":"tm","name":"Akulaku"},{"code":"tj","name":"dbrUA"},{"code":"ti","name":"cryptocom"},{"code":"tf","name":"Noon"},{"code":"te","name":"eFood"},{"code":"td","name":"ChaingeFinance"},{"code":"sy","name":"Brahma"},{"code":"sx","name":"Crowdtap"}];
+
+    // HÀM TỰ ĐỘNG NẠP DỮ LIỆU KHI MỞ TRANG
+    function initData() {
+        const countrySelect = document.getElementById('countrySelect');
+        const serviceSelect = document.getElementById('serviceSelect');
+
+        let countryOptions = '';
+        for (const key in countryData) {
+            if (countryData.hasOwnProperty(key)) {
+                countryOptions += `<option value="${countryData[key].id}">${countryData[key].eng}</option>`;
+            }
+        }
+        countrySelect.innerHTML = countryOptions;
+
+        let serviceOptions = '';
+        serviceData.forEach(item => {
+            serviceOptions += `<option value="${item.code}">${item.name}</option>`;
+        });
+        serviceSelect.innerHTML = serviceOptions;
+    }
+
+    // Kích hoạt nạp dữ liệu ngay khi tải xong trang
+    window.addEventListener('load', function() {
+        initData();
+    });
+
+    function filterSelect(searchId, selectId) {
+        const input = document.getElementById(searchId);
+        const filter = input.value.toLowerCase();
+        const select = document.getElementById(selectId);
+        const options = select.options;
+
+        for (let i = 0; i < options.length; i++) {
+            const text = options[i].text.toLowerCase();
+            if (text.includes(filter)) {
+                options[i].style.display = "";
+            } else {
+                options[i].style.display = "none";
+            }
+        }
+    }
+
+    function selectItem(searchId, selectId) {
+        const select = document.getElementById(selectId);
+        const input = document.getElementById(searchId);
+        if (select.selectedIndex !== -1) {
+            input.value = select.options[select.selectedIndex].text;
+        }
+    }
+
+    function toggleFields() {
+        const provider = document.querySelector('input[name="api_provider"]:checked').value;
+        const providerIdsGroup = document.getElementById('providerIdsGroup');
+        const operatorGroup = document.getElementById('operatorGroup');
+
+        if (provider === 'smsbower') {
+            providerIdsGroup.style.display = 'flex';
+            operatorGroup.style.display = 'none';
+        } else {
+            providerIdsGroup.style.display = 'none';
+            operatorGroup.style.display = 'flex';
+        }
+    }
+
+    function generateApiUrl() {
+        const provider = document.querySelector('input[name="api_provider"]:checked').value;
+        const country = document.getElementById('countrySelect').value;
+        const service = document.getElementById('serviceSelect').value;
+        
+        if (!country || !service) {
+            alert("Vui lòng chọn đầy đủ Quốc gia và Dịch vụ!");
+            return;
+        }
+
+        let finalUrl = "";
+
+        if (provider === 'smsbower') {
+            const providerIds = document.getElementById('providerIds').value;
+            // Sửa định dạng chính xác theo mẫu của smsbower
+            finalUrl = `https://smsbower.page/stubs/handler_api.php?api_key=urx1IyXC55LfD2tNxXR9WVOe6E22X6ID&action=getNumber&service=${service}&country=${country}&maxPrice=0.015&phoneException=&providerIds=${providerIds}`;
+        } else {
+            // Giữ nguyên định dạng và API Key gốc của herosms theo mẫu
+            const apiKey = "83e86c5d05d24cAf7e808f355cf74b16";
+            const operator = document.getElementById('operator').value;
+            finalUrl = `https://hero-sms.com/stubs/handler_api.php?api_key=${apiKey}&action=getNumber&service=${service}&operator=${operator}&country=${country}&maxPrice=0.015`;
+        }
+
+        const resultBox = document.getElementById('resultBox');
+        document.getElementById('apiUrlResult').value = finalUrl;
+        resultBox.style.display = 'block';
+        document.getElementById('copyBtn').textContent = "Copy Link";
+    }
+
+    function copyToClipboard() {
+        const copyText = document.getElementById("apiUrlResult");
+        const copyBtn = document.getElementById('copyBtn');
+
+        if (!copyText.value) return;
+
+        navigator.clipboard.writeText(copyText.value).then(() => {
+            copyBtn.textContent = "Đã Copy! ✓";
+            setTimeout(() => { copyBtn.textContent = "Copy Link"; }, 2000);
+        }).catch(err => {
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            try {
+                document.execCommand("copy");
+                copyBtn.textContent = "Đã Copy! ✓";
+                setTimeout(() => { copyBtn.textContent = "Copy Link"; }, 2000);
+            } catch (e) {
+                alert("Hãy bôi đen toàn bộ link kết quả rồi nhấn sao chép.");
+            }
+        });
+    }
+
+</script>
+
+
+<div class="api-container">
+  <textarea id="apiLink" placeholder="Dán link API getNumber tại đây" oninput="cacheApiLink()"></textarea>
+  <div class="api-actions">
+    <button onclick="clearAPI()">Xóa</button>
+  </div>
+</div>
+
+<div class="phone-actions">
+  <button onclick="getNumber()">Lấy số <span id="loading" style="display:none;">⏳</span></button>
+  <button onclick="cancelOrder()" style="display:none;" id="cancelBtn">Hủy số</button>
+</div>
+
+<div id="phoneSection" style="display:none;">
+  <div class="row" style="align-items:stretch;">
+    <input id="number" readonly />
+    <span id="priceBadge" class="price-badge" style="display:none;">Giá: —</span>
+    <button class="copy-btn" onclick="copyText('number')">Sao chép</button>
+  </div>
+</div>
+
+<div id="otpSection" style="display:none;">
+  <div class="otp-grid">
+    <div class="otp-card"><div class="otp-card-title">OTP 1 <img id="otp1-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:10px; display:none;" /></div><div id="otp1" class="otp-card-num">___</div></div>
+    <div class="otp-card"><div class="otp-card-title">OTP 2 <img id="otp2-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:10px; display:none;" /></div><div id="otp2" class="otp-card-num">___</div></div>
+    <div class="otp-card"><div class="otp-card-title">OTP 3 <img id="otp3-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:10px; display:none;" /></div><div id="otp3" class="otp-card-num">___</div></div>
+    <div class="otp-card"><div class="otp-card-title">OTP 4 <img id="otp4-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:10px; display:none;" /></div><div id="otp4" class="otp-card-num">___</div></div>
+    <div class="otp-card"><div class="otp-card-title">OTP 5 <img id="otp5-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:10px; display:none;" /></div><div id="otp5" class="otp-card-num">___</div></div>
+    <div class="otp-card"><div class="otp-card-title">OTP 6 <img id="otp6-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:10px; display:none;" /></div><div id="otp6" class="otp-card-num">___</div></div>
+    <div class="otp-card"><div class="otp-card-title">OTP 7 <img id="otp7-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:10px; display:none;" /></div><div id="otp7" class="otp-card-num">___</div></div>
+    <div class="otp-card"><div class="otp-card-title">OTP 8 <img id="otp8-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:10px; display:none;" /></div><div id="otp8" class="otp-card-num">___</div></div>
+    <div class="otp-card"><div class="otp-card-title">OTP 9 <img id="otp9-loading" src="https://i.imgur.com/llF5iyg.gif" style="height:10px; display:none;" /></div><div id="otp9" class="otp-card-num">___</div></div>
+  </div>
+</div>
+
+<div class="history-box" id="recentPhonesBox" style="display: none;">
+  <div class="addon-section-title">15 số vừa lấy gần đây (Bấm để xem lại OTP):</div>
+  <div class="history-items-list" id="recentPhonesList"></div>
+</div>
+
+<hr class="addon-divider">
+
+<div class="favorite-box">
+  <div class="addon-section-title">
+    <span>Xếp hạng Link Đám Mây Trực Tuyến:</span>
+    <button onclick="fetchCloudData()" style="width:auto; padding:2px 8px; font-size:11px; margin:0; background:#28a745;">Làm mới 🔄</button>
+  </div>
+  <div style="margin-bottom: 4px;"><span class="sync-status" id="syncStatus">Đang tải Cloud... ⏳</span></div>
+  <div class="fav-input-group">
+    <input type="text" id="favUrlInput" placeholder="Thêm thủ công link API vào đây..." />
+    <button onclick="saveToFavorites()">Thêm và lưu Cloud</button>
+  </div>
+  <div class="fav-items-list" id="favUrlsList"></div>
+</div>
+
+<div id="popup" class="popup"></div>
+
+<script>
+const PROXY_URL = "https://pry.haodinh548.workers.dev/";
+const JSONBIN_BIN_ID = "6a462aacda38895dfe213776"; 
+const JSONBIN_KEY = "$2a$10$94LIgmKAICph5haVEbV.c.LUYjFiNLCKWf5uOGnCPaZkSB7BUaodu"; 
+const SERVICES_DICT = {"kt":"KakaoTalk","nv":"Naver","oi":"Tinder","ig":"Instagram","tg":"Telegram","dh":"Ebay","vi":"Viber","fb":"Facebook","go":"Google, Gmail, Youtube","me":"LINE","mt":"Steam","ts":"PayPal","wa":"WhatsApp","bz":"Blizzard","nf":"Netflix","tw":"Twitter","nz":"Foodpanda","vk":"ВК, Одноклассники, Юла (mail.ru group)","ub":"Uber","mm":"Microsoft","uk":"AirBnb","mb":"Yahoo","am":"Amazon","ab":"Alibaba","wc":"Craigslist","ew":"Nike","lf":"Tiktok","ka":"Shopee","za":"Jingdong","qq":"Tencent QQ","im":"IMO messenger","yl":"Yalla","pm":"AOL","zk":"Deliveroo","ls":"Careem","zr":"Papara","hw":"AliPay","ds":"Discord","an":"Adidas","xk":"DiDi taxi","wb":"WeChat","mc":"MiChat","bff":"Buff.163","ip":"Burger King","si":"Cita Previa","fr":"DANA","hk":"4FunLite","yw":"Grindr","ni":"Gojek","xs":"GroupMe","ae":"MyGLO","un":"Humble bundle","xf":"LightChath","fz":"KFC","zo":"Kaggle","ry":"McDonalds","vm":"Okcupid","sn":"OLX","fx":"Pgbonus","jq":"Paysafecard","pf":"Plenty of Fish","dp":"Protonmail","nc":"Payoneer","qi":"32Red","ij":"Revolut","scrf":"Scruff","tcw":"Switchere","alj":"Spotify","bw":"Signal","vj":"Stormgain","hb":"Twitch","gr_tl":"Tilda","xd":"Tokopedia","gc":"TradingView","YoHo":"YoHo","qy":"Zhihu","kf":"Weibo","wx":"Apple","kc":"Vinted","tn":"LinkedIn","bl":"Bigo Live","rc":"Skype","fu":"Snapchat","fi":"Dundle","vz":"Hinge","wh":"TanTan","dr":"OpenAI (ChatGPT)","ul":"Getir","py":"Monese","lt":"Bitclout","tx":"Bolt","gt":"Gett","ss":"Hezzl","dl":"Lazada","xh":"Ovo","vv":"Seo Sprint","tl":"Truecaller","mj":"Zalo","oz":"Poshmark","zz":"DENT","wg":"Skout","qd":"Taobao","os":"Dhani","hn":"1688","ju":"Indomaret","gf":"GoogleVoice","do":"Leboncoin","yy":"Venmo","cn":"Fiverr","ii":"CashKaro","ir":"Chispa","it":"CashApp","ix":"Celcoin","jd":"GiraBank","jw":"Br777","jy":"Sorare","kk":"Idealista","kq":"FotoCasa","qf":"RedBook","et":"Clubhouse","mo":"Bumble","pz":"Lidl","yi":"Yemeksepeti","ib":"Immowelt","ex":"Linode","rr":"Wolt","bf":"Keybase","xr":"Tango","xv":"Wish","xx":"Joyride","zh":"Zoho","lq":"Potato","dn":"Paxful","iq":"icq","jg":"Grab","en":"Hermes","ez":"GoerliFaucet","oh":"MapleSEA","yo":"Amasia","ys":"ZCity","zs":"Bilibili","vp":"Kwai","rl":"inDriver","fj":"Potato Chat","zx":"CommunityGaming","pu":"Justdating","aj":"OneAset","gj":"Carousell","zy":"Nttgame","zw":"Quack","zv":"Digikala","zu":"BigC","zt":"Budweiser","zq":"IndiaPlays","zn":"Biedronka","zm":"OfferUp","zj":"ROBINHOOD","zg":"Setel","zf":"OnTaxi","zd":"Zilch","yx":"JTExpress","yv":"IPLwin","yp":"Payzapp","yn":"Allegro","yj":"eWallet","yd":"米画师Mihuashi","xz":"paycell","xy":"Depop","xw":"Taki","xu":"RecargaPay","xq":"MPL","xn":"Familia","xl":"Wmaraci","xi":"InFund","xe":"GalaxyChat","xb":"RummyOla","wz":"FoxFord","ww":"BIP","wv":"AIS","wt":"IZI","wq":"Leboncoin1","wp":"163СOM","wo":"Parkplus","wn":"GameArena","wl":"YouGotaGift","wk":"Mobile01","vy":"Meta","vx":"HeyBox","vw":"CoinField","vq":"LadyMaria","vo":"Brand20ua","vn":"Yaay","vf":"Q12 Trivia","vc":"Banqi","va":"SportGully","uz":"OffGamers","uy":"Meliuz","uw":"Kirana","uv":"BinBin","us":"IRCTC","ur":"MyDailyCash","uq":"TopDetal","uo":"CafeBazaar","uj":"СhampionСasino","ui":"RuTube","uh":"Yubo","ug":"Fiqsy","uf":"Eneba","ue":"Onet","ud":"Disney Hotstar","tv":"Flink","tu":"Lyft","tt":"Ziglu","tr":"Paysend","tq":"Swvl","tp":"IndiaGold","tm":"Akulaku","tj":"dbrUA","ti":"cryptocom","tf":"Noon","te":"eFood","td":"ChaingeFinance","sy":"Brahma","sx":"Crowdtap","sw":"NCsoft","su":"LOCO","sr":"Starbucks","sp":"HappyFresh","so":"RummyWealth","sm":"YoWin","sk":"Skroutz","sj":"HandyPick","sf":"SneakersnStuff","se":"Feeld","sc":"Voggt","sa":"AGIBANK","rx":"Sheerid","rw":"BLS-SPAIN","rv":"Kotak811","ru":"HOP","rt":"hily","rs":"Lotus","rp":"hamrahaval","ro":"PingCode","rn":"neftm","rk":"Fotka","ri":"BillMill","rh":"Ace2Three","rf":"Akudo","rb":"Tick","ra":"KeyPay","qx":"WorldRemit","qt":"MoneyСontrol","qn":"Blued","ql":"CMTcuzdan","qk":"Bit","qg":"MoneyPay","qe":"GG","qb":"Payberry","px":"Nifty","pw":"SellMonitor","pt":"Bitaqaty","pq":"CDkeys","ph":"SnappFood","pc":"Casino, bet, gambling","pb":"SkyTV","pa":"Gamekit","oy":"CashFly","ox":"Damejidlo","ou":"Gabi","oq":"Vlife","oo":"LigaPro","om":"Corona","oe":"Codashop","od":"FWDMAX","oc":"DealShare","ob  ":"Onlinerby","ny":"Pyro Music","nu":"Stripe","ns":"Oldubil","np":"Siply","no":"Virgo","nn":"Giftcloud","nm":"Thisshop","nk":"Gittigidiyor","nh":"AlloBank","ng":"FunPay","ne":"Coindcx","mx":"SoulApp","mw":"Transfergo","mv":"Fruitz","mu":"MyMusicTaste","ms":"NovaPoshta","mr":"Fastmail","mq":"GMNG","mp":"Winmasters","mn":"RRSA","ml":"ApostaGanha","mk":"LongHu","mf":"Weidian","lz":"Things","lw":"MrGreen","lu":"Crickpe","lr":"Okta","lp":"Algida","lo":"OPPO","ln":"Grofers","lk":"PurePlatfrom","lj":"Santander","lg":"MediBuddy","le":"E bike Gewinnspiel","ld":"Cashmine","la":"ssoidnet","ky":"SpatenOktoberfest","kx":"Vivo","kw":"Foody","kv":"Rush","ku":"RoyalWin","ks":"Hirect","kr":"Eyecon","ko":"AdaKami","kn":"Verse","km":"Rozetka","kl":"kolesa.kz","kh":"Bukalapak","kg":"FreeChargeApp","kb":"kufarby","jz":"Kaya","jx":"Swiggy","jt":"TurkiyePetrolleri","jm":"mzadqatar","jj":"Aitu","ji":"Monobank","jh":"PingPong","je":"Nanovest","jb":"Wing Money","ja":"Weverse","iz":"Global24","iy":"FoodHub","iu":"Bykea","ih":"TeenPattiStarpro","ic":"JoGo","ia":"Socios","hx":"AliExpress","hu":"Ukrnet","ht":"Bitso","hs":"Asda","hr":"JKF","hq":"Magicbricks","hp":"Meesho","ho":"Cathay","hm":"Globus","hl":"Band","hi":"JungleeRummy","hh":"Uplay","hf":"Cleartrip","he":"Mewt","hd":"MarketPapa","hc":"MOMO","gy":"MIYACHAT","gv":"Humta","gu":"Fora","gs":"SamsungShop","gq":"Freelancer","gn":"A9A","gl":"GlobalTel","gi":"Hotline","gh":"GyFTR","gg":"PagSmile","ge":"Paytm","gd":"Surveytime","ga":"Roposo","fy":"Mylove","fw":"99acres","fv":"Vidio","fs":"Şikayet var","fp":"Phound","fo":"MobiKwik","fm":"Touchance","fl":"RummyLoot","fk":"BLIBLI","fh":"Lalamove","fh":"Lalamove","fg":"IndianOil","fe":"CliQQ","fc":"PharmEasy","fa":"XadrezFeliz","ey":"miloan","ev":"Picpay","eu":"LiveScore","er":"Kwork","ep":"Temu","eo":"Sizeer","em":"ZéDelivery","el":"Bisu","ej":"MrQ","ei":"Taksheel","eg":"ContactSys","ef":"Nextdoor","ed":"Gamer","ec":"RummyCulture","eb":"Voltz","ea":"JamesDelivery","dx":"Powerkredite","dw":"Divar","dv":"NoBroker","du":"AUBANK","dm":"Iwplay","dk":"Pairs","di":"Loanflix","dd":"CloudChat","dc":"YikYak","db":"ezbuy","cz":"Getmega","cx":"Icrypex","cw":"PaddyPower","cv":"WashXpress","cu":"炙热星河","cs":"AgriDevelop","cq":"Mercado","cp":"Uklon","co":"Rediffmail","cm":"Prom","cl":"UWIN","ck":"BeReal","cj":"Dotz","ci":"redBus","ch":"Pocket52","cg":"Gemgala","cf":"irancell","cb":"Bazos","ca":"SuperS","bx":"Dosi","bu":"MonobankIndia","bt":"Alfa","bs":"TradeUP","bq":"Adani","bm":"MarketGuru","bk":"G2G","bi":"勇仕网络Ys4fun","bg":"MIXMART","bc":"GCash","bb":"LazyPay","az":"CityBase","ay":"Ruten","ax":"CrefisaMais","au":"Haraj","at":"Perfluence","ar":"Wondermart","aq":"Glovo","ao":"UU163","af":"GalaxyWin","ad":"Iti","aa":"Probo","bn":"Alfagift","hy":"Ininal","ke":"Эльдорадо","cc":"Quipp","ee":"Twilio","kp":"HQ Trivia","gz":"LYKA","ac":"DoorDash","ai":"CELEBe","aw":"Taikang","ki":"99app","jl":"Hopi","gm":"Mocospace","es":"iQIYI","dy":"Zomato","pr":"Trendyol","gp":"Ticketmaster","eq":"Qoo10","full":"Full rent","lx":"DewuPoison","wj":"1xbet","ha":"My11Circle","nw":"Ximalaya","zl":"Airtel","pp":"Huya","ak":"Douyu","ly":"Olacabs","dz":"Dominos Pizza","vs":"WinzoGame","cr":"TenChat","hg":"Switips","gb":"YouStar","pd":"IFood","dt":"Delivery Club","yg":"CourseHero","nq":"Trip","qr":"MEGA","rz":"EasyPay","kz":"NimoTV","my":"CAIXA","gr":"Astropay","df":"Happn","dg":"Mercari","po":"premium.one","iv":"Inboxlv","bp":"GoFundMe","gx":"Hepsiburadacom","mi":"Zupee","nr":"Tosla","bo":"Wise","gw":"CallApp","qz":"Faceit","yu":"Xiaomi","kj":"YAPPY","ve":"Dream11","il":"IQOS","vg":"ShellBox","sq":"KuCoinPlay","ba":"Expressmoney","li":"Baidu","lc":"Subito","zi":"LoveLocal","jf":"Likee","gr_rd":"Chalkboard","boo":"CasinoPlus","ebay_kl":"Kleinanzeigen","rktn":"Rakuten","ads":"GoChat","agb":"Smiles","ot":"Any Other","xo":"Notifire","wu":"PrivetMir","wy":"Yami","xc":"SynotTip","yr":"Miravia","wr":"Walmart","xg":"FortunaSK","zb":"FreeNow","ze":"Shpock","vr":"MotorkuX","ws":"Indodax","abq":"Upwork","gr_bf":"Beanfun","acz":"Claude","enu":"Emenu","nmkz":"Naimi.kz","mcr":"MYCAR.KZ","avt":"Aviata.kz","ubr_gr":"Universal Beijing Resort","adq":"Uzum","agm":"CMB","agk":"Ipsos iSay","zp":"Pinduoduo","aab":"BharatPe","aay":"JioMart","abs":"Playerzpot","ace":"Tata Neu","acf":"Winter Loan","acg":"CollabAct","acr":"QwikCilver","acs":"Tata CLiQ Palette","acu":"CityMall","acv":"A23","adb":"PoshVine","adg":"Marwadi","adh":"Frizza","adi":"Zepto","adj":"RummyCircle","adk":"Khatabook","adl":"EarnEasy","adm":"FitCredit","aev":"BankKaro","afj":"SKCAPITAL","afn":"Roomster","ago":"Servify","agp":"Hdfcbank","agq":"Bajaj Finserv","agr":"Yonogames","aha":"Angel One","aht":"MockGuru","aii":"Hinge Dating","aed":"Kamatera","ack":"Tomato","aar":"Bearwww","agh":"Anibis","ahe":"Bunq","abd":"Beboo","abn":"Namars","acn":"Radium","adx":"BusyFly","afp":"VFS GLOBAL","ahk":"БлинБери","ahm":"BRO","ahx":"Bitrue","aid":"Kia","aif":"Royal Canin","aaw":"Aya Bank","aaq":"Netease","aba":"Rappi","adp":"Cabify","aij":"NEQUI","aaz":"Ozan","aih":"Fups","aer":"PlayerAuctions","afk":"Chevron","aas":"XXGame","aav":"Alchemy ","aax":"Boyaa","abi":"BytePlus","abr":"Privy","acj":"Meituan","aag":"Pockit","aap":"Tiptapp","aau":"RockeTreach","abc":"Taptap Send","abe":"Foodora","abz":"Friendtech","ach":"Haleon","acy":"Airtime","ada":"TRUTH SOCIAL","adc":"PlayOJO","aec":"JinJiang","aft":"Neocrypto","afy":"Tuul","afz":"Klarna","agc":"VIMpay","agd":"Grailed","age":"MTR Mobile","agf":"Meitu","agg":"OneForma","ags":"Abbott","abk":"GMX","abo":"WEBDE","ahj":"Strato","ahs":"1and1","ahv":"Surveybell","acd":"CheckDomain","aco":"AR Lens","acp":"BonusLink","acq":"Suntec ","aeb":"GoPayz","aei":"Tanoti","afb":"Maybank","afm":"Myboost","agx":"MeiQFashion","ahf":"Fugeelah","aig":"K11","aiv":"Striving in the Lion City","agj":"Marktplaats","aiq":"Prime Opinion","abt":"ArenaPlus","adt":"Willhaben","ahd":"OpenPhone","adu":"Seznam","afw":"Packeta","aga":"Publi24","agl":"Betano","ahw":"Zasilkovna","abu":"BPJSTK","adf":"BCA Syariah","ael":"Cloud Manager","aem":"AstraPay","aen":"Redigame","aeo":"Allofresh","aep":"ONBUKA","aeq":"Godrej","aet":"Greywoods","aeu":"TheFork","aex":"Neon","afc":"Bunda","afd":"Astra Otoshop","afx":"Gamesofa","agn":"Flik","agz":"Jiva Petani","ahb":"Ubisoft","aho":"UangMe","ahp":"PizzaHut","ahq":"SEEDS","aip":"AfreecaTV","air":"TipTip","ais":"Schibsted","ait":"FeetFinder","acc":" LuckyLand Slots","ahi":"Daki","agy":"Baihe","ahr":"This Fate","agi":"Njuškalo","abb":"Coca-Cola","abx":"Kaching","aby":"Couponscom","acb":"Spark Driver","acl":"Tiv","acm":"Razer","adn":"Zach Bryan","ado":"SmartyPig","ahy":"Fliff","ain":"SpaceWeb","aiy":"Nloto","aiz":"Brevo","ajl":"Av100pro","akf":"Ollis","ajd":"Bankera","aja":"G2A","aje":"CupidMedia","ajf":"IPanelOnline","ajg":"Fortumo","ajh":"WAUG","ajj":"Rebtel","ajm":"Gener8","ajn":"Gopuff","bak":"Gurmanika","ake":"DIKIDI","ale":"Lydia","alm":"Muzz","alg":"Ankama","alo":"Profee","ald":"Nice88","akc":"Paybis","alh":"Lion Parcel","ala":"GetResponse","aln":"Remotasks","alv":"TIER","als":"Greggs ","wmpl":"Womply","pcp":"Pcipay","gr_nd":"Battlestate Games","hrnjie":"华人街","amf":"Acko","amg":"SBI Card","ama":"WooPlus","amb":"Vercel","ame":"Discover Hong Kong","amd":"Smart","alt":"Segari","alu":"BC Game","alw":"Vida","alx":"NutriClub","aly":"Bebeclub","amm":"Punjab citizen","ami":"TEAMORU","amk":"GORDAN","amh":"MitID","amt":"Moneyview","aez":"Shein","ane":"Supercell","anc":"VARUS","cf_id":"CoinFantasy","ppl":"PYYPL","mgrs":"Migros","aml":"Xbox","ylww":"Yellow","satu_kz":"Satu","ob_uz":"OpenBudjet","snl":"Sonol","yudafr":"Yuda","gmsg":"Google Messenger","fst":"Fastwin","meex":"Media express","avz":"Getsbet","ars":"Bingoplus","brnc":"Branch","Prcl":"Poker Circle","ayk":"Radquest","aoa":"Hicard","ldps":"ludoplus","ctkt":"ConfirmTkt","axr":"match.com","vrst":"Verasight","ggms":"Goa games","btnn":"BETININ","avb":"Tealive","busq":"Busqo","nuum":"Nuum.ru","mua":"meta.ua","qcx":"Narendra modi","nmcr":"Namaskar","tjrm":"Taj Rummy","hpnc":"Happypancake","keet":"Keeta","hdfc":"HDFC Egro","tmro":"Tomoro Coffee","fvss":"fivesurveys","bdx":"Benjamin","ding":"ding","aprnt  ":"theAsianparent","tnst":"Tune studio","ani":"Talabat","qim":"HPGas","aos":"Loloo","talk":"Talkatone","etsy":"Etsy","git":"GitHub","sls":"Streamlabs","uns":"Unstop","stn":"Stan","swl":"Swarail","ade":"Magicpin","boc":"51exch","bbm":"Truemoney","qjp":"Innopay","hyp":"Hypermart","vsn":"Vision11","qiy":"Saathi","apr":"Capital One","bva":"Bingo101","brh":"Efsane","bgf":"Rapido","qbs":"Sixer","qhy":"Omnicard","qcb":"Shopsy","cgp":"College Pulse","bqz":"Credit Karma","gnt":"Gaintplay","trc":"TrapCall","kds":"Kudos","rsy":"Resy","blbk":"Blastbucks","tmw":"Timewall","apl":"Sideline","jno":"Juno","bhi":"Chase","dtc":"Dutch Bros","ctr":"CenturyLink","auw":"3Fun","ibt":"Ibotta","cim":"Acima","aptn":"Aspiration","ari":"Ring4","tmi":"Taimi","plg":"Pelago","tum":"Tumblr","aud":"Audible","rap":"RapidApi","ser":"SerpApi","bol":"Bosslike","fmc":"FMCPay","qbn":"RummyYes","awv":"Wallapop","mml":"MMLive","bnl":"Reddit","qks":"Winclash","auz":"Outlier","ctd":"Courtyard","tbn":"TurboTenant","my":"BridgeMoney","zlw":"Zillow","sgk":"SeatGeek","dav":"Dave","ghe":"GetHoldings","xgu":"RedNote / Xiaohongshu","blr":"DocuSign","bnu":"Qpon","sre":"Starexch","pkr":"Playkaro247","qkt":"SpinWinner","awq":"Atlas Earth","nst":"Instamatch","qld":"Ludo11","qdx":"Truemeds","hj":"Nykaa","qrr":"Roz Rummy","pzr":"Paisabazaar","bou":"汇旺 Huione Pay","skls":"Skills","crsr":"Cursor","aws":"Aws","qiv":"Goldsbet","qjm":"Cricbuzz","qit":"Royaljeet","avk":"Quoka","fpx":"500px","aqj":"BigBasket","ght":"Google Chat","bwb":"Winmatch","cpt":"Chipotle","wfargo":"Wells Fargo","qkz":"Govinda365","qly":"Woohoo","qbk":"First Games","kch":"KickCash","hra":"Aadhar","qjw":"Shriram One","pon":"Pokemon","aog":"Naukri","qjb":"Okwin","sht":"ShareChat","qmf":"Dream Money","kny":"Konvy","bsw":"Milanuncios","kiq":"Kliq","jau":"Jiagu360","bex":"Whatnot","bhl":"Ati.su","qcz":"Creditmantri","qaf":"Cred","qql":"QQLive","clg":"Clubgg","pla":"PolloAI","tln":"Toluna","kck":"Kick","blb":"foundit","bzb":"Big Cash","esz":"Ez777","dps":"FDJ Parions Sport","eve":"Enilive","ble":"NEXON","qml":"Ranglive","uta":"BEUTEA","qgh":"Indiapolls","qff":"Aditya birla","hep":"HeyPiggy","bbf":"Neosurf","tui":"Tutti","bdp":"Kredito","sli":"Sponline","brg":"Letgo","ido":"Idee Opinioni","awg":"Natura Avon","opd":"Poe","guv":"Guvi","qmq":"QuickTv","klb":"Kolotibablo","mlk":"Mackolik","zmx":"Zenmux","jwc":"Jalwa Game","apa":"Exness","qmp":"Tata Motors","rch":"Research 360","lid":"Ludo Winner","meb":"MBMBet","log":"Long Chau","tit":"TIM IT","wmb":"Wamba","byh":"Adobe","dah":"DahaDaha","aof":"Guzman y Gomez","guc":"SwagBucks","odl":"Ricardo","lmd":"Ashley Madison","otk":"51game","otr":"Story TV","tme":"OurTime","els":"Nielsen","tnx":"Telnyx","grk":"Grok","tis":"WinMate","asj":"T-Online","qhb":"Dot and Key","tod":"TheDermaCo","kir":"Predik","yab":"Brevistay","usp":"Australia Post","qhp":"CheQ","ioy":"Rupiyo","dgo":"DigitalOcean","idr":"FDA","awz":"PlayTime","bmj":"Betflag","bmi":"Sisal","bqe":"Lottomatica","gal":"Goldbet","brt":"Netwin","bqy":"SNAI","bhz":"Eurobet","nne":"OneOne","bcq":"Kopi Kenangan","baq":"Redbubble","ttn":"Textnow","amp":"Timepass","oji":"Ajio","gor":"Redrob Signal","gun":"Hungry Panda","fog":"Flamingo","yto":"Anna Lottery","saj":"Raja Games","edo":"RusDate","hug":"Driv&","omx":"Angi","pev":"WPlace","kon":"Monkey","gah":"Pazarama","gyt":"BetExc","wfo":"Ownly","max":"MAX","bfl":"Black Forest Labs","wnd":"Windsurf","cwg":"CWG","ccv":"Triumph","oxh":"Oxinchain","wku":"WorkUA","daz":"LODA"};
+const COUNTRIES_DICT = {"31":"South Africa","22":"India","66":"Pakistan","60":"Bangladesh","147":"Zambia","138":"Namibia","79":"Papua new gvineya","58":"Algeria","71":"Ethiopia","80":"Mozambique","76":"Angola","1":"Ukraine","21":"Egypt","73":"Brazil","26":"Haiti","57":"Iran","65":"Peru ","10":"Viet nam","96":"Zimbabwe","81":"Nepal","40":"Uzbekistan","19":"Nigeria","106":"Swaziland","18":"Congo (Dem. Republic)","78":"France","123":"Botswana","0":"Russian Federation","54":"Mexico","9":"Tanzania","64":"Sri Lanka","88":"Honduras","39":"Argentinas","5":"Myanmar","89":"Tunisia","91":"Timor-Leste","136":"Lesotho","105":"Ecuador","101":"El Salvador","37":"Morocco","75":"Uganda","137":"Malawi","38":"Ghana","8":"Kenya","112":"Panama","103":"Jamaica","70":"Venezuela","2 Worship":"Kazakhstan","2":"Kazakhstan","33":"Colombia","87":"Paraguay","62":"Turkey","11":"Kyrgyzstan","116":"Jordan","41":"Cameroon","13":"Israel","27":"Cote d`Ivoire Ivory Coast","51":"Belarus","83":"Bulgaria","102":"Libya","157":"Mauritius","161":"Turkmenistan","35":"Azerbaijan","69":"Mali","140":"Rwanda","154":"Gabon","1010":"Sudan","56":"Spain","90":"Nicaragua","85":"Moldova, Republic of","187":"United States","53":"Saudi Arabia","52":"Thailand","120":"Benin","93":"Costa Rica","152":"Burkina Faso","111":"Qatar","82":"Belgium","16":"United Kingdom","146":"Reunion","107":"Oman","150":"Congo","30":"Yemen","156":"Uruguay","47":"Iraq","61":"Senegal","43":"Germany","25":"Lao People`s","15":"Poland","99":"Togo","139":"Niger","1333":"Syrian Arab Republic","84":"Hungary","158":"Bhutan","119":"Burundi","7":"Malaysia","48":"Netherlands","167":"Equatorial Guinea","95":"United Arab Emirates","104":"Trinidad and Tobago","24":"Cambodia","177":"South Sudan","114":"Mauritania","4":"Philippines","3":"China","100":"Kuwait","130":"Guinea-Bissau","159":"Maldives","117":"Portugal","108":"Bosnia and Herzegovina","149":"Somalia","118":"Barbados","1011":"Martinique","109":"Dominican Republic","28":"Gambia","74":"Afghanistan","148":"Armenia","":"Faroe Islands","131":"Guyana","42":"Chad","173":"Switzerland","97":"Puerto Rico","23":"Ireland","29":"Serbia","34":"Estonia","145":"Bahrain","63":"Czech Republic","160":"Guadeloupe","174":"Norway","86":"Italy","32":"Romania","77":"Cyprus","165":"Luxembourg","142":"Suriname","94":"Guatemala","17":"Madagascar","6":"Indonesia","46":"Sweden","169":"Antigua and Barbuda","168":"Djibouti","163":"Finland","162":"French Guiana","164":"Saint Lucia","171":"Montenegro","36":"Canada","113":"Cuba","129":"Greece","151":"Chile","128":"Georgia","115":"Sierra Leone","122":"Bahamas","92":"Bolivia","127":"Grenada","49":"Latvia","143":"Tajikistan","121":"Brunei Darussalam","170":"Cayman islands","166":"Saint Vincent","155":"Albania","59":"Slovenia","14":"Hong Kong","134":"Saint Kitts and Nevis","55":"Taiwan","44":"Lithuania","125":"Central African Republic","135":"Liberia","1001":"Japan","68":"Guinea","179":"Aruba","133":"Comoros","199":"Malta","196":"Singapore","141":"Slovakia","181":"Anguilla","178":"Sao Tome and Principe","189":"Fiji","188":"Palestine","45":"Croatia","186":"Cape Verde","144":"Monaco","183":"Macedonia","124":"Belize","185":"New Caledonia","67":"New Zealand","72":"Mongolia","153":"Lebanon","172":"Denmark","50":"Austria","184":"Seychelles","175":"Australia","180":"Montserrat","126":"Dominica","1002":"Korea","20":"Macau","132":"Iceland","176":"Eritrea","1003":"Bermuda","1004":"Kosovo","1005":"Liechtenstein","1006":"Sint Maarten","1007":"Vanuatu","1008":"Greenland","12":"United States (virtual)","201":"Gibraltar","204":"Niue"};
+
+let currentId = "", baseURL = "", apiKey = "", currentLink = "";
+let otpCodes = ["","","","","","","","",""]; 
+let checkInterval = null;
+let price = "";
+let cloudFavorites = []; 
+let localPhonesCache = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+  const savedCache = localStorage.getItem("otp_local_phones_cache");
+  if(savedCache) {
+    localPhonesCache = JSON.parse(savedCache);
+    renderRecentPhones();
+  }
+
+  const localBackup = localStorage.getItem("otp_cloud_struct_backup");
+  if(localBackup) {
+    cloudFavorites = JSON.parse(localBackup);
+    renderFavoritesList();
+  }
+  fetchCloudData();
+
+  const cachedLink = localStorage.getItem("otp_cached_api_link");
+  if (cachedLink) {
+    document.getElementById("apiLink").value = cachedLink;
+    currentLink = cachedLink;
+  }
+
+  const savedState = localStorage.getItem("otp_current_active_state");
+  if (savedState) {
+    const state = JSON.parse(savedState);
+    currentId = state.currentId;
+    baseURL = state.baseURL;
+    apiKey = state.apiKey;
+    price = state.price;
+    currentLink = state.currentLink;
+    otpCodes = state.otpCodes || ["","","","","","","","",""];
+
+    document.getElementById("number").value = state.number;
+    document.getElementById("phoneSection").style.display = "block";
+    document.getElementById("otpSection").style.display = "block";
+    document.getElementById("cancelBtn").style.display = "inline-block";
+
+    if (price) {
+      document.getElementById("priceBadge").textContent = "Giá: " + price;
+      document.getElementById("priceBadge").style.display = "inline-block";
+    }
+
+    let nextLoadingIndex = -1;
+    for (let i = 1; i <= 9; i++) {
+      const codeVal = otpCodes[i - 1];
+      if (codeVal) {
+        document.getElementById("otp" + i).innerText = codeVal;
+        document.getElementById("otp" + i + "-loading").style.display = "none";
+      } else {
+        document.getElementById("otp" + i).innerText = "___";
+        if (nextLoadingIndex === -1) nextLoadingIndex = i;
+        document.getElementById("otp" + i + "-loading").style.display = "none";
+      }
+    }
+    
+    if (nextLoadingIndex !== -1 && currentId) {
+      document.getElementById("otp" + nextLoadingIndex + "-loading").style.display = "inline";
+    }
+  }
+  
+  // Khởi động trình quét liên tục cho mọi số trong lịch sử
+  startOTPCheck();
+});
+
+function cacheApiLink() {
+  const link = document.getElementById("apiLink").value.trim();
+  localStorage.setItem("otp_cached_api_link", link);
+}
+
+function saveCurrentActiveStateToCache(number) {
+  const state = {
+    currentId, baseURL, apiKey, price, currentLink, number, otpCodes
+  };
+  localStorage.setItem("otp_current_active_state", JSON.stringify(state));
+}
+
+async function fetchCloudData() {
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+      method: "GET", headers: { "X-Master-Key": JSONBIN_KEY }
+    });
+    const data = await res.json();
+    let records = data.record ? data.record : data;
+    
+    if (Array.isArray(records)) {
+      cloudFavorites = records.map(item => {
+        if (typeof item === 'string') return { url: item, successCount: 0, cancelCount: 0 };
+        return { url: item.url, successCount: item.successCount || 0, cancelCount: item.cancelCount || 0 };
+      });
+    } else { cloudFavorites = []; }
+    
+    localStorage.setItem("otp_cloud_struct_backup", JSON.stringify(cloudFavorites));
+    renderFavoritesList();
+    document.getElementById("syncStatus").innerText = "Đồng bộ Đám mây Online thành công! ✔️";
+    document.getElementById("syncStatus").style.color = "green";
+  } catch (e) {
+    document.getElementById("syncStatus").innerText = "Lỗi nạp Cloud trực tuyến";
+    document.getElementById("syncStatus").style.color = "red";
+  }
+}
+
+async function saveCloudData() {
+  document.getElementById("syncStatus").innerText = "Đang đồng bộ Cloud... ⏳";
+  localStorage.setItem("otp_cloud_struct_backup", JSON.stringify(cloudFavorites));
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "X-Master-Key": JSONBIN_KEY },
+      body: JSON.stringify(cloudFavorites)
+    });
+    if(res.ok) {
+      document.getElementById("syncStatus").innerText = "Đã lưu đám mây! ✔️";
+      document.getElementById("syncStatus").style.color = "green";
+    }
+  } catch (e) {
+    document.getElementById("syncStatus").innerText = "Lưu cục bộ thành công! Lỗi Cloud.";
+    document.getElementById("syncStatus").style.color = "orange";
+  }
+}
+
+async function updateLinkStatsForUrl(url, isSuccess) {
+  if (!url) return;
+  
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+      method: "GET", headers: { "X-Master-Key": JSONBIN_KEY }
+    });
+    const data = await res.json();
+    let records = data.record ? data.record : data;
+    if (Array.isArray(records)) {
+      cloudFavorites = records.map(item => typeof item === 'string' ? {url:item, successCount:0, cancelCount:0} : item);
+    }
+  } catch(e) {}
+
+  let target = cloudFavorites.find(item => item.url === url);
+  
+  if (target) {
+    if (isSuccess) target.successCount = (target.successCount || 0) + 1;
+    else target.cancelCount = (target.cancelCount || 0) + 1;
+  } else {
+    if (isSuccess) {
+      cloudFavorites.push({ url: url, successCount: 1, cancelCount: 0 });
+      showPopup("Phát hiện link hiệu quả! Đã tự động lưu lên Đám mây.");
+    } else {
+      return;
+    }
+  }
+  
+  renderFavoritesList();
+  await saveCloudData();
+}
+
+async function updateLinkStats(isSuccess) {
+  await updateLinkStatsForUrl(currentLink, isSuccess);
+}
+
+function clearAPI() { 
+  document.getElementById("apiLink").value = ""; 
+  localStorage.removeItem("otp_cached_api_link");
+}
+
+function showPopup(msg) {
+  const popup = document.getElementById("popup");
+  popup.innerText = msg; popup.style.display = "block";
+  setTimeout(() => popup.style.display = "none", 2500);
+}
+
+function copyText(id) {
+  const input = document.getElementById(id);
+  input.select(); document.execCommand("copy");
+  showPopup("Đã sao chép số!");
+}
+
+async function getNumber() {
+  document.getElementById("loading").style.display = "inline";
+  const link = document.getElementById("apiLink").value.trim();
+  if (!link.includes("getNumber") && !link.includes("action=")) {
+    document.getElementById("loading").style.display = "none";
+    return alert("Link không đúng cấu trúc API.");
+  }
+  resetAll();
+  currentLink = link; 
+  cacheApiLink();
+  
+  try {
+    const parsed = new URL(link);
+    baseURL = parsed.origin + parsed.pathname;
+    apiKey = parsed.searchParams.get("api_key") || parsed.searchParams.get("apikey") || parsed.searchParams.get("token");
+  } catch(e) {
+    document.getElementById("loading").style.display = "none";
+    return alert("Đường dẫn link bị lỗi định dạng.");
+  }
+
+  try {
+    const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(link));
+    const text = await res.text();
+    let id = "", number = ""; price = "";
+    const raw = text.trim();
+
+    if (raw.startsWith("ACCESS_NUMBER") || raw.startsWith("ACCESS_READY")) {
+      const parts = raw.split(":");
+      id = parts[1] || ""; number = parts[2] || "";
+      if (parts[3]) price = parts[3];
+    }
+
+    if (id && number) {
+      currentId = id;
+      document.getElementById("number").value = number;
+      document.getElementById("phoneSection").style.display = "block";
+      document.getElementById("otpSection").style.display = "block";
+      document.getElementById("cancelBtn").style.display = "inline-block";
+      document.getElementById("otp1-loading").style.display = "inline";
+
+      if (price) {
+        document.getElementById("priceBadge").textContent = "Giá: " + price;
+        document.getElementById("priceBadge").style.display = "inline-block";
+      }
+      
+      if(navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(number).then(() => showPopup("Đã tự động sao chép số!"));
+      }
+      saveCurrentActiveStateToCache(number);
+      updateRecentPhonesCache(number, id, baseURL, apiKey, price, currentLink, ["","","","","","","","",""]);
+    } else { 
+      alert("Không lấy được số.\n" + text); 
+      await updateLinkStats(false);
+    }
+  } catch (e) { alert("Lỗi: " + e.message); }
+  document.getElementById("loading").style.display = "none";
+}
+
+// Hàm quét OTP chạy ngầm đồng thời cho TẤT CẢ các số trong lịch sử
+async function checkAllOTPs() {
+  if (localPhonesCache.length === 0) return;
+  
+  for (let item of localPhonesCache) {
+    if (!item.id) continue;
+    
+    // Áp dụng bộ lọc hạn chế cho các số trong lịch sử (không phải số đang chọn)
+    if (currentId !== item.id) {
+      // Giới hạn thời gian quét tối đa là 25 phút kể từ lúc lấy số
+      if (item.timestamp && (Date.now() - item.timestamp > 25 * 60 * 1000)) {
+        continue;
+      }
+      // Hạn chế tần suất chỉ quét mã khoảng 30 giây 1 lần
+      if (item.lastChecked && (Date.now() - item.lastChecked < 30000)) {
+        continue;
+      }
+      item.lastChecked = Date.now();
+    }
+
+    const url = `${item.bUrl}?api_key=${item.aKey}&action=getStatus&id=${item.id}&nocache=${Math.random()}`;
+    try {
+      const res = await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
+      const text = await res.text();
+
+      if (text.startsWith("STATUS_OK")) {
+        const code = text.split(":")[1];
+        if (!item.historyOtps) item.historyOtps = ["","","","","","","","",""];
+        
+        let idx = item.historyOtps.findIndex(v => !v);
+        if (idx === -1) continue;
+        if (idx > 0 && code === item.historyOtps[idx - 1]) {
+          const urlNext = `${item.bUrl}?api_key=${item.aKey}&action=setStatus&id=${item.id}&status=3`;
+          await fetch(PROXY_URL + "?url=" + encodeURIComponent(urlNext));
+          continue;
+        }
+        
+        if (idx === 0) {
+          await updateLinkStatsForUrl(item.lnk, true);
+        }
+
+        item.historyOtps[idx] = code;
+        
+        // CHỈ nhấp nháy nếu số này KHÔNG PHẢI là số đang dùng hiện tại
+        if (currentId !== item.id) {
+          item.isBlinking = true;
+        }
+        
+        localStorage.setItem("otp_local_phones_cache", JSON.stringify(localPhonesCache));
+        
+        // Nếu số nhận được mã trùng với số đang kích hoạt trên màn hình, cập nhật UI chính
+        if (currentId === item.id) {
+          otpCodes = [...item.historyOtps];
+          document.getElementById("otp" + (idx + 1)).innerText = code;
+          document.getElementById("otp" + (idx + 1) + "-loading").style.display = "none";
+          
+          if (idx < 8) {
+            document.getElementById("otp" + (idx + 2) + "-loading").style.display = "inline";
+          }
+          saveCurrentActiveStateToCache(document.getElementById("number").value);
+        }
+        
+        renderRecentPhones();
+        
+        if (idx < 8) {
+          const urlNext = `${item.bUrl}?api_key=${item.aKey}&action=setStatus&id=${item.id}&status=3`;
+          await fetch(PROXY_URL + "?url=" + encodeURIComponent(urlNext));
+        }
+      } else if (text === "STATUS_CANCELED") {
+        if (currentId === item.id) {
+          showPopup("Số hiện tại đã bị hệ thống hủy!");
+          resetAll();
+        }
+      }
+    } catch (e) { console.error(e); }
+  }
+}
+
+function startOTPCheck() {
+  clearInterval(checkInterval);
+  checkInterval = setInterval(checkAllOTPs, 5000);
+}
+
+async function cancelOrder() {
+  const url = `${baseURL}?api_key=${apiKey}&action=setStatus&id=${currentId}&status=8`;
+  await fetch(PROXY_URL + "?url=" + encodeURIComponent(url));
+  showPopup("Đã hủy số!"); 
+  await updateLinkStats(false); 
+  resetAll();
+}
+
+function resetAll() {
+  otpCodes = ["","","","","","","","",""]; currentId = ""; baseURL = ""; apiKey = ""; price = "";
+  localStorage.removeItem("otp_current_active_state");
+  document.getElementById("number").value = "";
+  for (let i = 1; i <= 9; i++) {
+    document.getElementById("otp" + i).innerText = "___";
+    document.getElementById("otp" + i + "-loading").style.display = "none";
+  }
+  document.getElementById("priceBadge").style.display = "none";
+  document.getElementById("phoneSection").style.display = "none";
+  document.getElementById("otpSection").style.display = "none";
+  document.getElementById("cancelBtn").style.display = "none";
+}
+
+function saveToFavorites() {
+  const urlInput = document.getElementById("favUrlInput").value.trim();
+  if (!urlInput) return alert("Vui lòng nhập hoặc dán link trước!");
+  if (!cloudFavorites.some(item => item.url === urlInput)) {
+    cloudFavorites.push({ url: urlInput, successCount: 0, cancelCount: 0 });
+    renderFavoritesList(); saveCloudData();
+  }
+  document.getElementById("favUrlInput").value = "";
+}
+
+function removeFavoriteItem(e, targetLink) {
+  e.stopPropagation();
+  if(!confirm("Xóa link này khỏi danh sách trực tuyến?")) return;
+  cloudFavorites = cloudFavorites.filter(item => item.url !== targetLink);
+  renderFavoritesList(); saveCloudData();
+}
+
+function parseApiDetails(link) {
+  let domain = "Unknown Web", serviceName = "Mặc định", countryName = "Mặc định", providerOrOperator = "Tự động";
+  try {
+    const urlObj = new URL(link);
+    domain = urlObj.hostname.replace("www.", ""); 
+    
+    let s = urlObj.searchParams.get("service") || urlObj.searchParams.get("name") || urlObj.searchParams.get("service_id");
+    if(s) {
+      let sKey = s.toLowerCase().trim();
+      serviceName = SERVICES_DICT[sKey] ? `${SERVICES_DICT[sKey]} (${s.toUpperCase()})` : s.toUpperCase();
+    }
+    let c = urlObj.searchParams.get("country") || urlObj.searchParams.get("country_id") || urlObj.searchParams.get("nation");
+    if(c) {
+      let cKey = String(c).trim();
+      countryName = COUNTRIES_DICT[cKey] ? `${COUNTRIES_DICT[cKey]}` : `Mã ${c}`;
+    }
+    let op = urlObj.searchParams.get("operator") || urlObj.searchParams.get("provider") || urlObj.searchParams.get("provider_id") || urlObj.searchParams.get("providerIds");
+    if(op) providerOrOperator = op;
+  } catch(e) { domain = "API Link"; }
+  return { domain, serviceName, countryName, providerOrOperator };
+}
+
+function renderFavoritesList() {
+  const listContainer = document.getElementById("favUrlsList");
+  listContainer.innerHTML = "";
+
+  // Thay đổi cách sắp xếp: Sắp xếp theo TỔNG SỐ LẦN LẤY nhiều nhất lên đầu
+  cloudFavorites.sort((a, b) => {
+    let totalA = (a.successCount || 0) + (a.cancelCount || 0);
+    let totalB = (b.successCount || 0) + (b.cancelCount || 0);
+    return totalB - totalA;
+  });
+
+  cloudFavorites.forEach((item, idx) => {
+    const link = item.url;
+    const sCount = item.successCount || 0;
+    const cCount = item.cancelCount || 0;
+    const total = sCount + cCount;
+    let sRate = total > 0 ? Math.round((sCount / total) * 100) : 0;
+    let cRate = total > 0 ? Math.round((cCount / total) * 100) : 0;
+
+    const row = document.createElement("div"); row.className = "fav-row-item";
+    const details = parseApiDetails(link);
+    const webBadge = document.createElement("div"); webBadge.className = "fav-web-name"; webBadge.innerText = details.domain;
+    
+    const infoDiv = document.createElement("div"); infoDiv.className = "fav-link-info";
+    infoDiv.innerHTML = `${idx + 1}. Service: <span>${details.serviceName}</span> | Country: <span>${details.countryName}</span> | Net: <span>${details.providerOrOperator}</span>`;
+    
+    const statsBar = document.createElement("div"); statsBar.className = "fav-stats-bar";
+    statsBar.innerHTML = `
+      <span class="stat-success">✓ Về: ${sRate}% (${sCount} lần)</span>
+      <span class="stat-cancel">✕ Hủy: ${cRate}% (${cCount} lần)</span>
+      <span class="stat-total">Tổng: ${total}</span>
+    `;
+
+    row.onclick = () => {
+      document.getElementById("apiLink").value = link;
+      currentLink = link;
+      cacheApiLink();
+      showPopup("Đã chọn: " + details.domain + " [" + details.serviceName + "]");
+    };
+    const delBtn = document.createElement("span"); delBtn.className = "fav-row-del"; delBtn.innerText = "×";
+    delBtn.onclick = (e) => removeFavoriteItem(e, link);
+    
+    row.appendChild(webBadge); row.appendChild(infoDiv); row.appendChild(statsBar); row.appendChild(delBtn);
+    listContainer.appendChild(row);
+  });
+}
+
+function updateRecentPhonesCache(number, id, bUrl, aKey, prc, lnk, historyOtps) {
+  localPhonesCache = localPhonesCache.filter(item => item.number !== number);
+  localPhonesCache.unshift({ number, id, bUrl, aKey, prc, lnk, historyOtps: historyOtps || ["","","","","","","","",""], isBlinking: false, timestamp: Date.now() });
+  // Tăng giới hạn bộ nhớ đệm lưu trữ từ 12 số lên thành 15 số gần nhất
+  if (localPhonesCache.length > 15) localPhonesCache.pop();
+  localStorage.setItem("otp_local_phones_cache", JSON.stringify(localPhonesCache));
+  renderRecentPhones();
+}
+
+function renderRecentPhones() {
+  const boxContainer = document.getElementById("recentPhonesBox");
+  const listContainer = document.getElementById("recentPhonesList");
+  listContainer.innerHTML = "";
+  if (localPhonesCache.length === 0) { boxContainer.style.display = "none"; return; }
+  boxContainer.style.display = "block";
+  
+  localPhonesCache.forEach(item => {
+    const btn = document.createElement("div"); 
+    btn.className = "history-number-btn"; 
+    
+    // Đếm số lần mã về để gán màu sắc góc nhỏ gọn gàng
+    let codeCount = item.historyOtps ? item.historyOtps.filter(v => v).length : 0;
+    let badgeColor = codeCount === 0 ? "#dc3545" : "#28a745"; // 0 mã về: Đỏ, có mã về: Xanh lá
+    
+    // Khi đã lấy đủ từ 6 mã trở lên -> Bôi xanh cố định luôn, không nhấp nháy nữa
+    if (codeCount >= 6) {
+      btn.classList.add("green-solid");
+    } else if (item.isBlinking && item.id !== currentId) {
+      // Áp dụng nhấp nháy nếu có mã mới chạy ngầm VÀ không phải số đang kích hoạt
+      btn.classList.add("blink-active");
+    }
+
+    btn.innerHTML = `${item.number}<span style="position:absolute; top:-6px; right:-6px; background:${badgeColor}; color:#fff; border-radius:50%; width:15px; height:15px; font-size:9px; display:flex; align-items:center; justify-content:center; font-weight:bold; border:1px solid #fff; box-shadow:0 1px 2px rgba(0,0,0,0.2);">${codeCount}</span>`;
+    
+    btn.onclick = () => {
+      // Khi nhấn vào xem lại số, tắt chế độ nhấp nháy cho số đó
+      item.isBlinking = false;
+      localStorage.setItem("otp_local_phones_cache", JSON.stringify(localPhonesCache));
+      btn.classList.remove("blink-active");
+
+      currentId = item.id; baseURL = item.bUrl; apiKey = item.aKey; price = item.prc; currentLink = item.lnk;
+      document.getElementById("number").value = item.number;
+      document.getElementById("phoneSection").style.display = "block";
+      document.getElementById("otpSection").style.display = "block";
+      document.getElementById("cancelBtn").style.display = "inline-block";
+      if (price) {
+        document.getElementById("priceBadge").textContent = "Giá: " + price;
+        document.getElementById("priceBadge").style.display = "inline-block";
+      } else { document.getElementById("priceBadge").style.display = "none"; }
+      
+      otpCodes = item.historyOtps && item.historyOtps.length === 9 ? [...item.historyOtps] : ["","","","","","","","",""];
+      
+      let nextLoadingIndex = -1;
+      for (let i = 1; i <= 9; i++) {
+        const codeVal = otpCodes[i - 1];
+        if (codeVal) {
+          document.getElementById("otp" + i).innerText = codeVal;
+          document.getElementById("otp" + i + "-loading").style.display = "none";
+        } else {
+          document.getElementById("otp" + i).innerText = "___";
+          if (nextLoadingIndex === -1) nextLoadingIndex = i;
+          document.getElementById("otp" + i + "-loading").style.display = "none";
+        }
+      }
+      
+      if (nextLoadingIndex !== -1 && currentId) {
+        document.getElementById("otp" + nextLoadingIndex + "-loading").style.display = "inline";
+      }
+
+      saveCurrentActiveStateToCache(item.number);
+      // Khi chuyển sang số này làm số đang dùng, cập nhật lại để tắt nháy tức thì
+      renderRecentPhones();
+      showPopup("Đã mở lại số & lịch sử OTP: " + item.number);
+    };
+    listContainer.appendChild(btn);
+  });
+}
+</script>
+</body>
+</html>
+
+<!-- fixed -->
